@@ -1,26 +1,152 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════════════════
+   Hartman Venture Advisors — "Citadel for Hartman" rebuild.
+   Navy + gold + ivory, refined serif display. Fonts are PLACEHOLDER system
+   stacks (offline, zero-dependency); real brand fonts swap in later. All
+   text/accent pairings AA-verified: on light — ink 14.2:1, muted 6.68:1,
+   gold-deep 5.73:1; on navy — parchment 11.1:1, parchment-dim 8.37:1,
+   gold-text 6.11:1.
+   ════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Grounds */
+  --navy: #182339;
+  --navy-deep: #0f1626;
+  --navy-800: #1e2b45;
+  --ivory: #f6f3ec;
+  --white: #ffffff;
+
+  /* Accent (gold) — light-safe vs dark-safe variants */
+  --gold: #af8239; /* brand gold — large/decorative */
+  --gold-deep: #7a5a1e; /* gold text on light — 5.73:1 */
+  --gold-text: #c79a52; /* gold text on navy — 6.11:1 */
+
+  /* Text on light */
+  --ink: #182339; /* 14.2:1 on ivory/white */
+  --muted: #4d5666; /* 6.68:1 */
+  /* Text on navy */
+  --parchment: #dfd9ca; /* 11.1:1 on navy */
+  --parchment-dim: #c4bdaa; /* 8.37:1 */
+
+  /* Hairlines / borders */
+  --hairline-on-light: rgba(24, 35, 57, 0.14);
+  --border-on-light: rgba(24, 35, 57, 0.55); /* 3.5:1 UI boundary */
+  --hairline-on-dark: rgba(223, 217, 202, 0.16);
+  --border-on-dark: rgba(223, 217, 202, 0.45); /* 3.4:1 UI boundary */
+
+  /* Focus ring pair (light default; .on-dark overrides) */
+  --fr-inner: var(--navy);
+  --fr-outer: var(--gold-deep);
+
+  /* Fonts — PLACEHOLDER stacks (swap to brand fonts later) */
+  --font-serif: Georgia, "Times New Roman", "Times", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+
+  /* Layout */
+  --nav-height: 4.5rem;
+  --container: 1440px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-800: var(--navy-800);
+  --color-ivory: var(--ivory);
+  --color-white: var(--white);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-text: var(--gold-text);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-parchment: var(--parchment);
+  --color-parchment-dim: var(--parchment-dim);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-height);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+[id] {
+  scroll-margin-top: var(--nav-height);
+}
+
+/* Two-color focus ring — light default (navy inner + gold outer). Dark bands
+   opt into a light ring via .on-dark; both clear 3:1 on their ground. */
+:focus-visible {
+  outline: 2px solid var(--fr-inner);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--fr-outer);
+  border-radius: 2px;
+}
+.on-dark {
+  --fr-inner: var(--white);
+  --fr-outer: var(--navy);
+}
+.on-light {
+  --fr-inner: var(--navy);
+  --fr-outer: var(--gold-deep);
+}
+
+/* Skip link — first focusable, over the sticky nav. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  padding: 0.625rem 1rem;
+  background: var(--ivory);
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 3px;
+  transition: transform 180ms var(--ease);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
