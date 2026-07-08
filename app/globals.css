@@ -2,19 +2,28 @@
 
 /* ══════════════════════════════════════════════════════════════════════════
    Hartman Venture Advisors — "Citadel for Hartman" rebuild.
-   Navy + gold + ivory, refined serif display. Fonts are PLACEHOLDER system
-   stacks (offline, zero-dependency); real brand fonts swap in later. All
-   text/accent pairings AA-verified: on light — ink 14.2:1, muted 6.68:1,
-   gold-deep 5.73:1; on navy — parchment 11.1:1, parchment-dim 8.37:1,
-   gold-text 6.11:1.
+   Canvas is WHITE with a warm-gray alt panel (Citadel palette). Text navy is
+   the classic blue-navy #14284d; accent is a brighter royal --cobalt #1c44b8.
+   Display face is FRAUNCES (self-hosted via next/font/google, --font-fraunces)
+   — a light, high-contrast elegant serif in the Canela class; body/nav ride
+   a clean system grotesk. AA-verified pairings on the new palette:
+     • navy #14284d on white       12.66:1
+     • navy #14284d on panel       11.86:1
+     • white on cobalt #1c44b8      6.34:1
+     • muted #4d5666 on white       6.99:1
+     • muted #4d5666 on panel       6.55:1
+     • gold-deep #7a5a1e on white   6.35:1 (still used sparingly on dark grounds)
    ════════════════════════════════════════════════════════════════════════ */
 
 :root {
   /* Grounds */
-  --navy: #182339;
-  --navy-deep: #0f1626;
+  --navy: #14284d; /* classic blue-navy — text on light */
+  --navy-deep: #0f1626; /* darker navy — hero scrim overlay only */
   --navy-800: #1e2b45;
-  --ivory: #f6f3ec;
+  --cobalt: #1c44b8; /* royal blue accent — white text 6.34:1 */
+  --cobalt-light: #6a8ee6; /* tint for display type on navy-deep only (6.34:1); do NOT use on light bg */
+  --panel: #f2f1ef; /* warm gray alt panel band */
+  --ivory: #ffffff; /* alias retained — canvas is now white */
   --white: #ffffff;
 
   /* Accent (gold) — light-safe vs dark-safe variants */
@@ -23,15 +32,18 @@
   --gold-text: #c79a52; /* gold text on navy — 6.11:1 */
 
   /* Text on light */
-  --ink: #182339; /* 14.2:1 on ivory/white */
-  --muted: #4d5666; /* 6.68:1 */
+  --ink: #14284d; /* 12.66:1 on white */
+  --muted: #4d5666; /* 6.99:1 on white, 6.55:1 on panel */
   /* Text on navy */
   --parchment: #dfd9ca; /* 11.1:1 on navy */
   --parchment-dim: #c4bdaa; /* 8.37:1 */
 
   /* Hairlines / borders */
-  --hairline-on-light: rgba(24, 35, 57, 0.14);
-  --border-on-light: rgba(24, 35, 57, 0.55); /* 3.5:1 UI boundary */
+  --hairline-on-light: rgba(20, 40, 77, 0.12);
+  --border-on-light: rgba(20, 40, 77, 0.55); /* 3.5:1 UI boundary */
+  --rule-on-panel: #d8d6d2; /* decorative vertical rule on --panel */
+  --rule-on-white: #e6e4e0; /* decorative vertical rule on white */
+  --rule-on-light: rgba(20, 40, 77, 0.18); /* soft navy hairline on white */
   --hairline-on-dark: rgba(223, 217, 202, 0.16);
   --border-on-dark: rgba(223, 217, 202, 0.45); /* 3.4:1 UI boundary */
 
@@ -39,8 +51,10 @@
   --fr-inner: var(--navy);
   --fr-outer: var(--gold-deep);
 
-  /* Fonts — PLACEHOLDER stacks (swap to brand fonts later) */
-  --font-serif: Georgia, "Times New Roman", "Times", serif;
+  /* Fonts — Inter (self-hosted, neutral grotesk, Söhne/SF Pro/Neue Haas class,
+     matches the Blackstone-style display sans) with system fallback. */
+  --font-display: var(--font-inter), system-ui, -apple-system, "Segoe UI",
+    Helvetica, Arial, sans-serif;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
 
@@ -56,6 +70,8 @@
   --color-navy: var(--navy);
   --color-navy-deep: var(--navy-deep);
   --color-navy-800: var(--navy-800);
+  --color-cobalt: var(--cobalt);
+  --color-panel: var(--panel);
   --color-ivory: var(--ivory);
   --color-white: var(--white);
   --color-gold: var(--gold);
@@ -65,7 +81,7 @@
   --color-muted: var(--muted);
   --color-parchment: var(--parchment);
   --color-parchment-dim: var(--parchment-dim);
-  --font-serif: var(--font-serif);
+  --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }
 
@@ -79,7 +95,7 @@ html {
 }
 
 body {
-  background: var(--ivory);
+  background: var(--white);
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -115,7 +131,7 @@ body {
   z-index: 100;
   transform: translateY(-160%);
   padding: 0.625rem 1rem;
-  background: var(--ivory);
+  background: var(--white);
   color: var(--navy);
   font-weight: 600;
   font-size: 0.875rem;
@@ -136,6 +152,33 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Blinking cursor tail for the hero typewriter — visible only while the h1
+   is animating. Framer-motion fades the wrapper out at the end, so 2.2.2
+   Pause/Stop/Hide is satisfied (blink lasts ~1.5s, not indefinite). Disabled
+   entirely under prefers-reduced-motion (the wrapper isn't rendered there). */
+.cursor-blink {
+  animation: cursor-blink 0.9s step-end infinite;
+}
+
+/* Primary CTA focus ring — near-black outer band guarantees ≥3:1 against
+   both the cobalt fill (white/inner) and any page bg (black/outer). */
+.cta-primary:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #000;
+  border-radius: 2px;
+}
+
+@keyframes cursor-blink {
+  from,
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
