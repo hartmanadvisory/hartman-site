@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { JudgmentEvent } from "@/sanity/queries";
 
 /**
@@ -127,8 +127,12 @@ export default function JudgmentCarousel({
       }}
       className="relative h-full w-full"
     >
-      {/* Slides */}
-      <div className="absolute inset-0">
+      {/* Slides + entry curtain — both scoped to the same overflow-hidden
+          image box so the curtain covers ONLY the photograph plane, never the
+          caption (z-10) or controls (z-20) which are siblings outside this
+          wrapper. Guarantees SC 2.4.11 Focus Not Obscured: a keyboard user
+          who tabs into the controls mid-wipe still sees their focus ring. */}
+      <div className="absolute inset-0 overflow-hidden">
         {events.map((ev, i) => {
           const isActive = i === active;
           const label = `${i + 1} of ${total}: ${ev.title}${
@@ -157,6 +161,21 @@ export default function JudgmentCarousel({
             </div>
           );
         })}
+        {/* White curtain — rises from covering the image (y:0%) up and off
+            (y:-100%) on scroll-into-view. Reduced motion → starts already
+            off-screen so it never animates. Decorative, aria-hidden. */}
+        <motion.div
+          aria-hidden="true"
+          initial={reduce ? { y: "-100%" } : { y: "0%" }}
+          whileInView={{ y: "-100%" }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{
+            duration: reduce ? 0 : 1,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="pointer-events-none absolute inset-0 bg-[color:var(--white)]"
+          style={{ willChange: "transform" }}
+        />
       </div>
 
       {/* Visible caption — duplicate of the active slide's aria-label, so

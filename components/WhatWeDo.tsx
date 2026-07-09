@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import JudgmentCarousel from "./JudgmentCarousel";
 import type { JudgmentEvent } from "@/sanity/queries";
@@ -29,23 +28,28 @@ import type { JudgmentEvent } from "@/sanity/queries";
  */
 export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
   const reduce = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
 
-  const variants: Variants = {
-    hidden: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 24 },
-    show: { opacity: 1, y: 0 },
+  const leftIn: Variants = {
+    hidden: { opacity: reduce ? 1 : 0, x: reduce ? 0 : -48 },
+    show: { opacity: 1, x: 0 },
   };
-  const reveal = (delay = 0) => ({
+  const rightIn: Variants = {
+    hidden: { opacity: reduce ? 1 : 0, x: reduce ? 0 : 48 },
+    show: { opacity: 1, x: 0 },
+  };
+  const directional = (variants: Variants, delay = 0) => ({
     variants,
-    initial: mounted && !reduce ? ("hidden" as const) : false,
+    // NOTE: unlike the mount-gated helper elsewhere, use "hidden" directly.
+    // Framer-motion only reads `initial` on FIRST render — a mount gate would
+    // leave `initial=false` at that moment and the hidden state would never
+    // apply, so the reveal would never fire. Under reduced motion the variants
+    // themselves collapse hidden→show (no opacity/x deltas), so opacity:0 is
+    // never baked into SSR for reduced-motion users.
+    initial: "hidden" as const,
     whileInView: "show" as const,
-    viewport: { once: true, amount: 0.25 },
+    viewport: { once: true, amount: 0.3 },
     transition: {
-      duration: reduce ? 0 : 0.7,
+      duration: reduce ? 0 : 0.75,
       delay: reduce ? 0 : delay,
       ease: [0.22, 1, 0.36, 1] as const,
     },
@@ -55,7 +59,7 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
     <section
       id="what-we-do"
       aria-labelledby="what-h2"
-      className="relative text-[color:var(--parchment)]"
+      className="relative overflow-x-clip text-[color:var(--parchment)]"
     >
       {/* Dark navy background band — sized to cover the text + only the UPPER
           portion of the photo. The photo extends past this band into white. */}
@@ -64,11 +68,12 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
         className="absolute inset-x-0 top-0 bottom-16 bg-[color:var(--navy-deep)] sm:bottom-24 lg:bottom-32"
       />
 
-      {/* Text band — headline left, paragraph + CTA right */}
+      {/* Text band — headline enters LEFT→RIGHT, right column enters
+          RIGHT→LEFT so the two meet in the middle as the section arrives. */}
       <div className="relative z-10 mx-auto w-full max-w-[var(--container)] px-6 pt-24 pb-16 sm:px-10 sm:pt-32 sm:pb-24 lg:px-14">
         <div className="grid grid-cols-12 gap-x-6 gap-y-10 sm:gap-x-10">
           <motion.h2
-            {...reveal()}
+            {...directional(leftIn)}
             id="what-h2"
             className="col-span-12 font-[family-name:var(--font-display)] text-[clamp(2.6rem,5.6vw,4.8rem)] font-bold leading-[1.02] tracking-[-0.03em] md:col-span-7"
           >
@@ -81,7 +86,7 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
           </motion.h2>
 
           <motion.div
-            {...reveal(0.08)}
+            {...directional(rightIn, 0.08)}
             className="col-span-12 flex flex-col justify-end md:col-span-5"
           >
             <p className="max-w-md text-lg leading-relaxed text-[color:var(--parchment)]">

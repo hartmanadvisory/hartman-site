@@ -73,14 +73,32 @@ export default function ClosingCTA() {
               Confidential intake. The fastest path to a working call with the
               founder.
             </p>
-            <div className="mt-10">
+            {/* Subtle zoom-in on scroll-into-view. Wrapper is a plain block
+                <div>, keeps <Link> as the only focusable element with its
+                existing .cta-primary focus ring intact. Reduced motion → no
+                transform, immediate final state (per accessibility-lead:
+                gate via useReducedMotion, not CSS media query). */}
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.4 }}
+              variants={{
+                hidden: { opacity: reduce ? 1 : 0, scale: reduce ? 1 : 0.92 },
+                show: { opacity: 1, scale: 1 },
+              }}
+              transition={{
+                duration: reduce ? 0 : 0.7,
+                ease: [0.22, 1, 0.36, 1] as const,
+              }}
+              className="mt-10 block"
+            >
               <Link
                 href="/contact"
                 className="cta-primary on-dark inline-flex w-full items-center justify-center bg-[color:var(--cobalt)] px-10 py-8 text-[clamp(1.25rem,2.2vw,1.75rem)] font-semibold tracking-[0.01em] text-[color:var(--white)] shadow-[0_18px_44px_-14px_rgba(28,68,184,0.7)] transition-colors hover:bg-[#163a9e] focus-visible:bg-[#163a9e]"
               >
                 Start a Conversation
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Wayfinding arrow — animates once when this section enters view,

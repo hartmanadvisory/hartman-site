@@ -214,29 +214,44 @@ export default function WhoWeAre() {
               </motion.p>
             </div>
 
-            {/* Right area — vertical rule + serif statement + button */}
-            <motion.div
-              {...reveal(0.05)}
-              className="col-span-12 md:col-span-9 md:border-l md:border-[color:var(--rule-on-panel)] md:pl-10"
-            >
-              <h2
+            {/* Right area — vertical rule + serif statement (top-down) +
+                button (bottom-up). Two separate motion wrappers so the h2
+                and CTA can enter from different directions; DOM order
+                unchanged so tab/reading order is preserved. */}
+            <div className="col-span-12 md:col-span-9 md:border-l md:border-[color:var(--rule-on-panel)] md:pl-10">
+              <motion.h2
                 id="who-h2"
+                variants={{
+                  hidden: { opacity: reduce ? 1 : 0, y: reduce ? 0 : -24 },
+                  show: { opacity: 1, y: 0 },
+                }}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{
+                  duration: reduce ? 0 : 0.7,
+                  delay: reduce ? 0 : 0.05,
+                  ease: [0.16, 1, 0.3, 1] as const,
+                }}
                 className="font-[family-name:var(--font-display)] text-[clamp(2.1rem,3.6vw,3.4rem)] font-bold leading-[1.1] tracking-[-0.02em] text-[color:var(--ink)]"
               >
                 Our practice is built to guide venture&rsquo;s most consequential
                 transactions — financings, fund formation, secondaries, and exits
                 — with the judgment that defining moments demand.
-              </h2>
+              </motion.h2>
 
-              <div className="mt-10">
+              <motion.div
+                {...reveal(0.18)}
+                className="mt-10"
+              >
                 <Link
                   href="/about"
                   className="inline-flex min-h-[3rem] items-center justify-center bg-[color:var(--cobalt)] px-7 text-[15px] font-medium tracking-[0.01em] text-[color:var(--white)] transition-colors hover:bg-[#163a9e]"
                 >
                   About the Firm
                 </Link>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </div>
         </div>
       </div>
