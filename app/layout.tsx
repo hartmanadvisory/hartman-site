@@ -18,7 +18,7 @@ const display = Inter({
 export const metadata: Metadata = {
   title: "Precision Counsel for Venture's Defining Deals — Hartman Venture Advisors",
   description:
-    "A boutique New York practice for late-stage venture transactions — financings, fund formation, secondaries, and exits.",
+    "A boutique New York practice for late-stage venture transactions.",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${display.variable} h-full`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <a href="#main" className="skip-link">
           Skip to content
         </a>

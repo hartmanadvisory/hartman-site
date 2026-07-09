@@ -293,10 +293,9 @@ export default function Hero() {
         style={{ bottom: "-4rem" }}
       >
         <div className="px-6 py-10 sm:px-10 sm:py-12 lg:px-14">
-          <p className="max-w-2xl text-lg leading-relaxed text-[color:var(--white)]">
+          <p className="max-w-2xl text-[1.25rem] leading-relaxed text-[color:var(--white)] sm:text-[1.35rem]">
             A boutique New York practice guiding venture funds, founders, and
-            dealmakers through their most consequential transactions —
-            financings, fund formation, secondaries, and exits.
+            dealmakers through their most consequential transactions.
           </p>
         </div>
       </motion.div>

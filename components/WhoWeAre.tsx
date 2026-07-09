@@ -31,7 +31,7 @@ import {
  *    contrast because layout separation carries the meaning.
  *  - Stats stay a <dl>: DOM order dt(label) → dd(value); CSS reverses the
  *    visual order (justify-between + column) so the value sits on top.
- *  - "$5B+" is aria-hidden with an .sr-only "5 billion dollars or more" so
+ *  - "$6B+" is aria-hidden with an .sr-only "6 billion dollars or more" so
  *    screen readers never voice "dollar five B plus".
  *  - Reveal never bakes opacity:0 into SSR: `initial` stays false until mounted
  *    (rAF-deferred), so content is visible without JS or on hydration failure;
@@ -53,24 +53,24 @@ type Stat = {
 const STATS: Stat[] = [
   {
     label: "Aggregate transaction value",
-    to: 5,
+    to: 6,
     format: (n) => `$${n}B+`,
-    sr: "5 billion dollars or more",
+    sr: "6 billion dollars or more",
     info: "Value of transactions on which the firm has served as principal counsel to founders, funds, or LPs.",
   },
   {
-    label: "Category-defining companies advised",
-    to: 23,
-    format: (n) => String(n),
-    sr: "twenty-three",
-    info: "Including Anthropic, OpenAI, SpaceX, Anduril, Meta, Ramp, Notion, and Scale — among others.",
+    label: "Financings, secondaries & M&A advised",
+    to: 100,
+    format: (n) => `${n}+`,
+    sr: "one hundred or more",
+    info: "Across seed to growth stage — priced rounds, structured secondaries, and strategic exits.",
   },
   {
-    label: "Core disciplines",
-    to: 4,
+    label: "Marquee venture funds represented",
+    to: 10,
     format: (n) => String(n),
-    sr: "four",
-    info: "Financings, fund formation, secondaries, and exits — handled end-to-end by the founder himself.",
+    sr: "ten",
+    info: "Including a16z, Tiger, Insight, Altimeter, Dragoneer, Thrive, and Addition.",
   },
 ];
 
@@ -235,9 +235,9 @@ export default function WhoWeAre() {
                 }}
                 className="font-[family-name:var(--font-display)] text-[clamp(2.1rem,3.6vw,3.4rem)] font-bold leading-[1.1] tracking-[-0.02em] text-[color:var(--ink)]"
               >
-                Our practice is built to guide venture&rsquo;s most consequential
-                transactions — financings, fund formation, secondaries, and exits
-                — with the judgment that defining moments demand.
+                Our practice is built to guide venture transactions including
+                financings, fund formation, secondaries, exits, strategy and
+                more with the judgment that defining moments demand.
               </motion.h2>
 
               <motion.div
