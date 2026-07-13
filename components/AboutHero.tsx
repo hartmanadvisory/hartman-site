@@ -1,32 +1,28 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
- * AboutHero — full-bleed hero for /about. Same visual language as the
- * homepage hero (typewriter <h1>, cobalt caption band bleeding under) but
- * simpler: single real photograph of Mordechai speaking at a panel, no
- * carousel, no play/pause control.
+ * AboutHero — magazine-style profile hero. Small "Profile" eyebrow, huge
+ * name h1, short two-sentence intro, portrait on the right. Replaces the
+ * previous cinematic typewriter hero. Modeled on peer-firm sites.
  *
  * a11y (accessibility-lead signed off):
- *  - Full h1 string sits in an .sr-only span — SR announces "heading level
- *    1, Counsel that carries the weight." once, regardless of visual reveal.
- *  - Character-by-character animation is inside an aria-hidden layer so
- *    SR never voices letters individually.
- *  - Photo is decorative (h1 carries meaning) → alt="".
- *  - Left scrim α=0.55 → 0 across 0–58% of the frame guarantees ≥ 4.5:1
- *    white text on the worst-case pixel behind the headline zone.
- *  - Under prefers-reduced-motion the h1 renders statically (no char stagger).
+ *  - <section aria-labelledby="about-hero-h1">
+ *  - Single <h1> on the page carries the founder's name (identity of the
+ *    /about page).
+ *  - Eyebrow is aria-hidden (h1 carries the section identity; announcing
+ *    "profile, heading level 1, Mordechai Hartman" is redundant).
+ *  - Portrait is DECORATIVE — alt="" — because the adjacent h1 conveys the
+ *    same identity. WCAG H67 (avoid redundant text alternatives) — SR would
+ *    otherwise announce "image, Mordechai Hartman" then "heading level 1,
+ *    Mordechai Hartman."
+ *  - Motion: fade+rise on the left column, respects useReducedMotion.
  */
 
-const HEADLINE_LINES = ["Built for the", "next generation", "of venture"] as const;
-const HEADLINE_SR = "Built for the next generation of venture";
-const HEADLINE_CHAR_COUNT = HEADLINE_LINES.reduce(
-  (n, line) => n + [...line].length,
-  0,
-);
-const HEADLINE_DURATION_S = HEADLINE_CHAR_COUNT * 0.028 + 0.25;
-const EASE = [0.16, 1, 0.3, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function AboutHero() {
   const reduce = useReducedMotion();
@@ -34,114 +30,105 @@ export default function AboutHero() {
   return (
     <section
       aria-labelledby="about-hero-h1"
-      className="relative bg-[color:var(--white)]"
+      className="bg-[color:var(--white)]"
     >
-      {/* Media — LEFT-inset gutter, right edge flush, matches homepage hero. */}
-      <div className="on-dark relative ml-6 h-[clamp(30rem,72vh,46rem)] overflow-hidden bg-[color:var(--navy)] sm:ml-10 lg:ml-14">
-        {/* Real photo of Mordechai speaking at a night panel — dark night
-            tones behind the headline zone carry the AA contrast; the scrim
-            below is belt-and-suspenders. */}
-        <div
-          aria-hidden="true"
-          data-a11y-contrast-critical="upper-left"
-          className="absolute inset-0"
-          style={{
-            backgroundImage: 'url("/hero/hero-event-speaker.png")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-
-        {/* Load-bearing left scrim — 0.55 across 0–48%, decays to 0 by 66%. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 z-[1]"
-          style={{
-            background:
-              "linear-gradient(to right, rgba(15,22,38,0.55) 0%, rgba(15,22,38,0.55) 48%, rgba(15,22,38,0.30) 58%, rgba(15,22,38,0) 66%)",
-          }}
-        />
-
-        {/* Headline — top-left, monochrome white, character reveal. */}
-        <div className="absolute inset-x-0 top-0 z-10 px-6 pt-16 sm:px-10 sm:pt-20 lg:px-14">
-          <h1
-            id="about-hero-h1"
-            className="max-w-[46rem] font-[family-name:var(--font-display)] text-[clamp(2.6rem,6.4vw,5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-24 pb-24 sm:px-10 sm:pt-32 sm:pb-32 lg:px-14">
+        <div className="grid grid-cols-12 items-center gap-x-6 gap-y-14 sm:gap-x-10 md:gap-y-0">
+          {/* LEFT — eyebrow + name + intro */}
+          <motion.div
+            initial={reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduce ? 0 : 0.8, ease: EASE }}
+            className="col-span-12 md:col-span-7"
           >
-            <span className="sr-only">{HEADLINE_SR}</span>
-            <motion.span
+            <p
               aria-hidden="true"
-              initial={reduce ? "show" : "hidden"}
-              animate="show"
-              variants={{
-                hidden: {},
-                show: {
-                  transition: { staggerChildren: reduce ? 0 : 0.028 },
-                },
-              }}
-              className="block"
+              className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]"
             >
-              {HEADLINE_LINES.map((line, li) => (
-                <span key={li} className="block">
-                  {[...line].map((ch, ci) => (
-                    <motion.span
-                      key={`${li}-${ci}`}
-                      variants={{
-                        hidden: { opacity: 0, y: 6 },
-                        show: {
-                          opacity: 1,
-                          y: 0,
-                          transition: {
-                            duration: reduce ? 0 : 0.22,
-                            ease: EASE,
-                          },
-                        },
-                      }}
-                      className="inline-block"
-                    >
-                      {ch === " " ? " " : ch}
-                    </motion.span>
-                  ))}
-                </span>
-              ))}
-            </motion.span>
-          </h1>
+              Profile
+            </p>
+            <h1
+              id="about-hero-h1"
+              className="mt-6 font-[family-name:var(--font-display)] text-[clamp(3rem,7.4vw,6rem)] font-bold leading-[1.02] tracking-[-0.03em] text-[color:var(--ink)]"
+            >
+              Mordechai Hartman
+            </h1>
+            <p className="mt-8 max-w-xl text-[17px] leading-relaxed text-[color:var(--muted)] sm:text-[18px]">
+              Founder and Principal of Hartman Venture Advisors PLLC. More
+              than a decade advising venture funds, founders, and dealmakers
+              — formerly at Gunderson Dettmer and Lowenstein Sandler.
+            </p>
+
+            {/* Primary CTA. mailto rather than a stubbed `#` target per
+                a11y-lead — SC 2.4.4 rejects broken links. Reuses the
+                site's existing cobalt filled-button pattern (matches the
+                homepage ClosingCTA styling). */}
+            <div className="mt-10">
+              <Link
+                href="/contact"
+                className="group inline-flex min-h-[3rem] items-center justify-center gap-2 bg-[color:var(--cobalt)] px-7 text-[15px] font-medium tracking-[0.01em] text-[color:var(--white)] transition-colors hover:bg-[#163a9e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--white)]"
+              >
+                Start a Conversation
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-[3px]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m13 6 6 6-6 6" />
+                </svg>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* RIGHT — portrait (decorative alt="") */}
+          <motion.div
+            initial={reduce ? { opacity: 1, x: 0 } : { opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: reduce ? 0 : 0.9,
+              delay: reduce ? 0 : 0.1,
+              ease: EASE,
+            }}
+            className="col-span-12 md:col-span-5"
+          >
+            <div
+              className="relative aspect-[4/5] w-full overflow-hidden bg-[color:var(--navy-deep)]"
+              style={{ boxShadow: "0 30px 80px -20px rgba(15, 22, 38, 0.35)" }}
+            >
+              <Image
+                src="/media/mordechai-hartman-portrait.png"
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 42vw"
+                className="object-cover object-center"
+              />
+            </div>
+
+            {/* Peer-firm-style caption below the portrait. aria-hidden —
+                the h1 above already announces "Mordechai Hartman" to AT
+                and the intro paragraph carries the role. Making this a
+                visible-only decoration avoids a third redundant utterance
+                per H67. */}
+            <div
+              aria-hidden="true"
+              className="mt-4 text-[14px] text-[color:var(--ink)]"
+            >
+              <span className="font-semibold">Mordechai Hartman</span>
+              <span className="text-[color:var(--muted)]">
+                , Founder &amp; Principal
+              </span>
+            </div>
+          </motion.div>
         </div>
       </div>
-
-      {/* Cobalt caption band — same overlap pattern as homepage: left-inset
-          matches media gutter; extends DOWN past the image into the Founder
-          section below so the two blend into one continuous canvas. */}
-      <motion.div
-        initial={reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: reduce ? 0 : 0.7,
-          delay: reduce ? 0 : HEADLINE_DURATION_S + 0.15,
-          ease: EASE,
-        }}
-        className="absolute left-6 right-16 z-30 bg-[color:var(--cobalt)] sm:left-10 sm:right-24 lg:left-14 lg:right-40"
-        style={{ bottom: "-4rem" }}
-      >
-        {/* Two paragraphs side-by-side on md+ with a decorative "|" divider
-            between them; stacks vertically below md. Divider is an aria-
-            hidden CSS element (border-l) so SR never voices "vertical bar". */}
-        <div className="flex flex-col gap-8 px-6 py-10 sm:px-10 sm:py-12 md:flex-row md:items-start md:gap-10 lg:px-14">
-          <p className="text-[1.25rem] leading-relaxed text-[color:var(--white)] sm:text-[1.35rem] md:flex-1">
-            Hartman Venture Advisors was built for investors, founders, and
-            dealmakers who operate at a high level and expect the same from
-            their counsel.
-          </p>
-          <span
-            aria-hidden="true"
-            className="hidden self-stretch border-l border-white/40 md:block"
-          />
-          <p className="text-[1.25rem] leading-relaxed text-[color:var(--white)] sm:text-[1.35rem] md:flex-1">
-            We deliver sophisticated venture representation through a boutique
-            model that prioritizes judgment, precision, and alignment.
-          </p>
-        </div>
-      </motion.div>
     </section>
   );
 }

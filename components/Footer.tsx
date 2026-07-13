@@ -28,16 +28,37 @@ export default function Footer() {
       <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-20 pb-10 sm:px-10 sm:pt-24 lg:px-14">
         {/* Top row — lockup + footer nav */}
         <div className="grid grid-cols-12 gap-x-6 gap-y-10 sm:gap-x-10">
-          <Link
-            href="/"
-            aria-label="Hartman Venture Advisors — home"
-            className="col-span-12 flex items-center gap-4 text-[color:var(--white)] md:col-span-6"
-          >
-            <HHMark className="h-11 w-auto" />
-            <span className="font-[family-name:var(--font-display)] text-[1.05rem] font-semibold uppercase tracking-[0.14em] sm:text-[1.15rem]">
-              Hartman Venture Advisors
-            </span>
-          </Link>
+          <div className="col-span-12 flex flex-col gap-5 md:col-span-6">
+            <Link
+              href="/"
+              aria-label="Hartman Venture Advisors — home"
+              className="inline-flex items-center gap-4 text-[color:var(--white)]"
+            >
+              <HHMark className="h-11 w-auto" />
+              <span className="font-[family-name:var(--font-display)] text-[1.05rem] font-semibold uppercase tracking-[0.14em] sm:text-[1.15rem]">
+                Hartman Venture Advisors
+              </span>
+            </Link>
+
+            {/* Owner contact info — <address> is exact per HTML semantics
+                (page-owner contact). Not a <nav> because email/phone are
+                direct actions, not site navigation. Stacked <a>s, not a
+                <ul>. */}
+            <address className="not-italic flex flex-col gap-1 text-[14px] text-[color:var(--parchment-dim)]">
+              <a
+                href="mailto:mhartman@hartmanadvisory.com"
+                className="transition-colors hover:text-[color:var(--white)]"
+              >
+                mhartman@hartmanadvisory.com
+              </a>
+              <a
+                href="tel:+16179871512"
+                className="transition-colors hover:text-[color:var(--white)]"
+              >
+                +1 (617) 987-1512
+              </a>
+            </address>
+          </div>
 
           <nav
             aria-label="Footer"

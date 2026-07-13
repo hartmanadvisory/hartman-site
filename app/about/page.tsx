@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import AboutHero from "@/components/AboutHero";
-import FounderStatement from "@/components/FounderStatement";
 import AboutTimeline from "@/components/AboutTimeline";
 import AboutPrinciples from "@/components/AboutPrinciples";
-import AboutGallery from "@/components/AboutGallery";
 import AboutPortfolio from "@/components/AboutPortfolio";
 import ClosingCTA from "@/components/ClosingCTA";
 
@@ -25,10 +23,8 @@ export default function AboutPage() {
   return (
     <>
       <AboutHero />
-      <FounderStatement />
       <AboutTimeline />
       <AboutPrinciples />
-      <AboutGallery />
       <AboutPortfolio />
       <ClosingCTA />
     </>

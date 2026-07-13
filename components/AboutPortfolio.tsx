@@ -36,7 +36,6 @@ const COMPANIES: Company[] = [
   { name: "Circle", file: "circle.svg" },
   { name: "Groq", file: "groq.svg" },
   { name: "Scale AI", file: "scale.svg" },
-  { name: "Shield AI", file: "shield-ai.svg" },
   { name: "Addepar", file: "addepar.svg" },
   { name: "Glean", file: "glean.svg" },
   { name: "Gecko Robotics", file: "gecko-robotics.svg" },
@@ -121,6 +120,33 @@ export default function AboutPortfolio() {
               />
             </motion.li>
           ))}
+
+          {/* Final "and more" cell — signals the list is representative,
+              not exhaustive. Kept inside the same <ul role="list"> per
+              a11y-lead: SR reads "list, 20 items" and this row as the
+              honest tail of the set. */}
+          <motion.li
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.15 }}
+            variants={{
+              hidden: { opacity: reduce ? 1 : 0, y: reduce ? 0 : 16 },
+              show: { opacity: 1, y: 0 },
+            }}
+            transition={{
+              duration: reduce ? 0 : 0.5,
+              delay: reduce ? 0 : (COMPANIES.length % 5) * 0.05,
+              ease: [0.22, 1, 0.36, 1] as const,
+            }}
+            className="relative flex aspect-[3/2] items-center justify-center bg-[color:var(--white)] p-6 sm:p-8"
+          >
+            {/* Sentence case in DOM + CSS uppercase — SR reads "and more"
+                naturally (some SRs spell DOM-level ALL CAPS letter by
+                letter). Matches the site's eyebrow pattern. */}
+            <span className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+              &amp; more
+            </span>
+          </motion.li>
         </ul>
       </div>
     </section>

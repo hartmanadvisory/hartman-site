@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
-const CONTACT_EMAIL = "info@hartmanventureadvisors.com";
+const CONTACT_EMAIL = "mhartman@hartmanadvisory.com";
+const CONTACT_PHONE_DISPLAY = "+1 (617) 987-1512";
+const CONTACT_PHONE_TEL = "+16179871512";
 
 const inquiryTypes = [
   "Financing",
@@ -142,12 +144,23 @@ export default function ContactPage() {
           </div>
 
           <div className="flex flex-col gap-5 md:col-span-2 md:flex-row md:items-center md:justify-between">
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="text-sm font-medium text-[color:var(--muted)] underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
-            >
-              {CONTACT_EMAIL}
-            </a>
+            {/* Direct contact fallbacks — owner contact info, wrapped in
+                <address> per a11y-lead. Two stacked <a>s (email + phone),
+                not a <ul>: it's contact metadata, not a list of peers. */}
+            <address className="not-italic flex flex-col gap-1 text-sm font-medium text-[color:var(--muted)]">
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
+              >
+                {CONTACT_EMAIL}
+              </a>
+              <a
+                href={`tel:${CONTACT_PHONE_TEL}`}
+                className="underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
+              >
+                {CONTACT_PHONE_DISPLAY}
+              </a>
+            </address>
             <button
               type="submit"
               className="cta-primary inline-flex min-h-[3.5rem] shrink-0 items-center justify-center bg-[color:var(--cobalt)] px-8 text-[15px] font-semibold tracking-[0.02em] text-[color:var(--white)] transition-colors hover:bg-[#163a9e] focus-visible:bg-[#163a9e]"
