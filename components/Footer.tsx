@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 /**
@@ -34,11 +33,14 @@ export default function Footer() {
               aria-label="Hartman Venture Advisors — home"
               className="inline-flex items-center transition-opacity hover:opacity-80"
             >
-              {/* Official gold lockup on --navy-deep. SVG paths carry the
-                  wordmark visually; Link aria-label carries the accessible
-                  name so image is alt="" per WCAG H67. */}
-              <Image
-                src="/brand/hva-lockup-gold.svg"
+              {/* Official white lockup on --navy-deep — ~18.9:1 contrast.
+                  Plain <img> to bulletproof against next/image + SVG
+                  quirks. Decorative alt="" — Link aria-label carries
+                  the accessible name. Explicit width/height to prevent
+                  CLS. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/hva-lockup-white.svg"
                 alt=""
                 width={317}
                 height={48}
@@ -66,29 +68,44 @@ export default function Footer() {
             </address>
           </div>
 
-          <nav
-            aria-label="Footer"
-            className="col-span-12 md:col-span-6 md:justify-self-end"
-          >
-            <ul className="flex flex-col gap-4 text-[15px] font-medium md:text-right">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-[color:var(--white)] transition-opacity hover:opacity-80"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-[color:var(--white)] transition-opacity hover:opacity-80"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </nav>
+          <div className="col-span-12 flex flex-col gap-8 md:col-span-6 md:items-end">
+            <nav aria-label="Footer">
+              <ul className="flex flex-col gap-4 text-[15px] font-medium md:text-right">
+                <li>
+                  <Link
+                    href="/about"
+                    className="text-[color:var(--white)] transition-opacity hover:opacity-80"
+                  >
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="text-[color:var(--white)] transition-opacity hover:opacity-80"
+                  >
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            {/* NY Rule 7.1 attorney advertising disclosures — persistent
+                on every page. Plain <p>s inside the existing <footer>
+                contentinfo landmark per a11y-lead (no extra <aside>).
+                "Attorney Advertising" is sentence-case in DOM + CSS
+                uppercase so SR reads it as words, not letters. Prior-
+                results disclaimer is required because the site cites
+                past-performance figures ($6B+ transacted, 100+ deals). */}
+            <div className="space-y-1 text-[13px] leading-relaxed text-[color:var(--parchment-dim)] md:text-right">
+              <p className="font-semibold uppercase tracking-[0.14em]">
+                Attorney Advertising.
+              </p>
+              <p>
+                Prior results do not guarantee a similar outcome.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Divider — decorative hairline. */}
@@ -96,22 +113,6 @@ export default function Footer() {
           aria-hidden="true"
           className="my-12 border-0 h-px bg-[color:var(--parchment-dim)] opacity-25 sm:my-16"
         />
-
-        {/* NY Rule 7.1 attorney advertising disclosures — persistent on
-            every page. Plain <p>s inside the existing <footer>
-            contentinfo landmark per a11y-lead (no extra <aside>
-            landmark). "Attorney Advertising" is sentence-case in DOM +
-            CSS uppercase so SR reads it as words, not letters. Prior-
-            results disclaimer is required because the site cites past-
-            performance figures ($6B+ transacted, 100+ deals). */}
-        <div className="mb-8 space-y-1 text-[13px] leading-relaxed text-[color:var(--parchment-dim)] sm:mb-10">
-          <p className="font-semibold uppercase tracking-[0.14em]">
-            Attorney Advertising.
-          </p>
-          <p>
-            Prior results do not guarantee a similar outcome.
-          </p>
-        </div>
 
         {/* Bottom row — legal · copyright · social */}
         <div className="flex flex-col items-start justify-between gap-6 text-[color:var(--parchment-dim)] md:flex-row md:items-center">

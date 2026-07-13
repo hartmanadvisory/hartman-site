@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 /**
@@ -19,15 +18,29 @@ export default function Nav() {
         <Link
           href="/"
           aria-label="Hartman Venture Advisors — home"
-          className="flex min-w-0 items-center transition-opacity hover:opacity-80"
+          className="group flex min-w-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--white)]"
         >
-          <Image
+          {/* Two lockups stacked: navy at rest, gold on hover OR keyboard
+              focus-visible. Plain <img>s to bulletproof against
+              next/image + SVG rendering quirks. Both alt="" — Link's
+              aria-label is the accessible name. `group-focus-visible:`
+              added per a11y-lead so keyboard users get the same visual
+              feedback as pointer hover (SC 2.4.7). */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src="/brand/hva-lockup-navy.svg"
             alt=""
             width={254}
             height={39}
-            priority
-            className="h-8 w-auto sm:h-9"
+            className="h-8 w-auto sm:h-9 group-hover:hidden group-focus-visible:hidden"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/hva-lockup-gold.svg"
+            alt=""
+            width={254}
+            height={39}
+            className="hidden h-8 w-auto sm:h-9 group-hover:block group-focus-visible:block"
           />
         </Link>
 
