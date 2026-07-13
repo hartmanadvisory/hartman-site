@@ -45,12 +45,26 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <form
-          action={`mailto:${CONTACT_EMAIL}`}
-          method="post"
-          encType="text/plain"
-          className="col-span-12 grid min-w-0 content-center gap-x-8 gap-y-7 md:col-span-7 md:grid-cols-2"
-        >
+        {/* Right column — disclaimer + form share ONE grid cell so CSS
+            grid doesn't place them in separate auto-rows (which was
+            causing a huge vertical gap between them). Disclaimer stays
+            visually and semantically BEFORE the form per a11y-lead so
+            SC 3.3.2 is satisfied natively. */}
+        <div className="col-span-12 flex min-w-0 flex-col md:col-span-7">
+          <p className="mb-8 border-l-2 border-[color:var(--rule-on-light)] pl-4 text-[13.5px] leading-relaxed text-[color:var(--muted)]">
+            Submitting this form does not create an attorney-client
+            relationship. Please do not include confidential or
+            time-sensitive information. An attorney-client relationship
+            is established only upon execution of a written engagement
+            letter.
+          </p>
+
+          <form
+            action={`mailto:${CONTACT_EMAIL}`}
+            method="post"
+            encType="text/plain"
+            className="grid min-w-0 gap-x-8 gap-y-7 md:grid-cols-2"
+          >
           <div>
             <label
               htmlFor="name"
@@ -168,7 +182,8 @@ export default function ContactPage() {
               Send Inquiry
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </section>
   );

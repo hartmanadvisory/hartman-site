@@ -1,5 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-import HHMark from "./HHMark";
 
 /**
  * Site footer — Citadel-modeled: full-bleed dark navy band, HH monogram +
@@ -32,12 +32,18 @@ export default function Footer() {
             <Link
               href="/"
               aria-label="Hartman Venture Advisors — home"
-              className="inline-flex items-center gap-4 text-[color:var(--white)]"
+              className="inline-flex items-center transition-opacity hover:opacity-80"
             >
-              <HHMark className="h-11 w-auto" />
-              <span className="font-[family-name:var(--font-display)] text-[1.05rem] font-semibold uppercase tracking-[0.14em] sm:text-[1.15rem]">
-                Hartman Venture Advisors
-              </span>
+              {/* Official gold lockup on --navy-deep. SVG paths carry the
+                  wordmark visually; Link aria-label carries the accessible
+                  name so image is alt="" per WCAG H67. */}
+              <Image
+                src="/brand/hva-lockup-gold.svg"
+                alt=""
+                width={317}
+                height={48}
+                className="h-10 w-auto sm:h-12"
+              />
             </Link>
 
             {/* Owner contact info — <address> is exact per HTML semantics
@@ -90,6 +96,22 @@ export default function Footer() {
           aria-hidden="true"
           className="my-12 border-0 h-px bg-[color:var(--parchment-dim)] opacity-25 sm:my-16"
         />
+
+        {/* NY Rule 7.1 attorney advertising disclosures — persistent on
+            every page. Plain <p>s inside the existing <footer>
+            contentinfo landmark per a11y-lead (no extra <aside>
+            landmark). "Attorney Advertising" is sentence-case in DOM +
+            CSS uppercase so SR reads it as words, not letters. Prior-
+            results disclaimer is required because the site cites past-
+            performance figures ($6B+ transacted, 100+ deals). */}
+        <div className="mb-8 space-y-1 text-[13px] leading-relaxed text-[color:var(--parchment-dim)] sm:mb-10">
+          <p className="font-semibold uppercase tracking-[0.14em]">
+            Attorney Advertising.
+          </p>
+          <p>
+            Prior results do not guarantee a similar outcome.
+          </p>
+        </div>
 
         {/* Bottom row — legal · copyright · social */}
         <div className="flex flex-col items-start justify-between gap-6 text-[color:var(--parchment-dim)] md:flex-row md:items-center">

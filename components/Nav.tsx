@@ -1,11 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
-import HHMark from "./HHMark";
 
 /**
- * Primary navigation — restrained institutional lockup with an explicit
- * contact action. The HH mark remains decorative; the home link is labeled
- * for screen readers so the responsive wordmark can change without changing
- * the accessible name.
+ * Primary navigation — the official HVA secondary-logo lockup (HH monogram
+ * + "HARTMAN VENTURE ADVISORS" wordmark) as a single navy SVG. The wordmark
+ * lives INSIDE the SVG paths, so no separate <span> text is needed. The
+ * home link's aria-label carries the accessible name; the image itself is
+ * decorative (alt="") per WCAG H67 (avoid redundant text alternatives when
+ * an adjacent programmatic label carries the same meaning).
  */
 export default function Nav() {
   return (
@@ -17,23 +19,16 @@ export default function Nav() {
         <Link
           href="/"
           aria-label="Hartman Venture Advisors — home"
-          className="group flex min-w-0 items-center gap-3 text-[color:var(--cobalt)]"
+          className="flex min-w-0 items-center transition-opacity hover:opacity-80"
         >
-          <span className="grid h-11 w-11 shrink-0 place-items-center text-[color:var(--cobalt)] transition-colors group-hover:text-[color:var(--gold-deep)]">
-            <HHMark className="h-7 w-auto" />
-          </span>
-          <span
-            aria-hidden="true"
-            className="hidden min-w-0 font-[family-name:var(--font-display)] text-[0.95rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--cobalt)] sm:block lg:text-[1.02rem]"
-          >
-            Hartman Venture Advisors
-          </span>
-          <span
-            aria-hidden="true"
-            className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--cobalt)] sm:hidden"
-          >
-            HVA
-          </span>
+          <Image
+            src="/brand/hva-lockup-navy.svg"
+            alt=""
+            width={254}
+            height={39}
+            priority
+            className="h-8 w-auto sm:h-9"
+          />
         </Link>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">

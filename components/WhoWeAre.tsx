@@ -63,7 +63,7 @@ const STATS: Stat[] = [
     to: 100,
     format: (n) => `${n}+`,
     sr: "one hundred or more",
-    info: "Across seed to growth stage — priced rounds, structured secondaries, and strategic exits.",
+    info: "Across seed to growth stage: priced rounds, structured secondaries, and strategic exits.",
   },
   {
     label: "Marquee venture funds represented",
