@@ -114,7 +114,9 @@ export default function Footer() {
           className="my-12 border-0 h-px bg-[color:var(--parchment-dim)] opacity-25 sm:my-16"
         />
 
-        {/* Bottom row — legal · copyright · social */}
+        {/* Bottom row — legal · copyright · social. Legal links point to
+            /legal/{slug} routes (Sanity-backed with fallback copy so they
+            work pre-CMS). */}
         <div className="flex flex-col items-start justify-between gap-6 text-[color:var(--parchment-dim)] md:flex-row md:items-center">
           <ul
             aria-label="Legal"
@@ -122,7 +124,7 @@ export default function Footer() {
           >
             <li>
               <Link
-                href="/privacy"
+                href="/legal/privacy"
                 className="transition-colors hover:text-[color:var(--white)]"
               >
                 Privacy
@@ -130,7 +132,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href="/terms"
+                href="/legal/terms"
                 className="transition-colors hover:text-[color:var(--white)]"
               >
                 Terms
@@ -138,7 +140,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href="/disclosures"
+                href="/legal/disclosures"
                 className="transition-colors hover:text-[color:var(--white)]"
               >
                 Disclosures

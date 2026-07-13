@@ -15,10 +15,32 @@ const display = Inter({
   fallback: ["system-ui", "-apple-system", "Segoe UI", "sans-serif"],
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://hartman-site.vercel.app";
+const SITE_TITLE =
+  "Precision Counsel for Venture's Defining Deals — Hartman Venture Advisors";
+const SITE_DESCRIPTION =
+  "A boutique New York practice for late-stage venture transactions.";
+
 export const metadata: Metadata = {
-  title: "Precision Counsel for Venture's Defining Deals — Hartman Venture Advisors",
-  description:
-    "A boutique New York practice for late-stage venture transactions.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    // Image is served from app/opengraph-image.tsx via file convention.
+    // Fields below become <meta property="og:*">.
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Hartman Venture Advisors",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
