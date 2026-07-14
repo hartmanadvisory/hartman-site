@@ -24,7 +24,12 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="on-dark relative bg-[color:var(--navy-deep)] text-[color:var(--white)]">
-      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-20 pb-10 sm:px-10 sm:pt-24 lg:px-14">
+      {/* Mobile audit MEDIUM: pb uses a max() of 2.5rem and the bottom
+          safe-area inset env var — keeps the existing 40px floor and
+          grows only on notched iPhones in standalone/PWA mode so the
+          copyright row doesn't hide under the home indicator. Regular
+          mobile Safari sees no change. */}
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-20 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-24 lg:px-14">
         {/* Top row — lockup + footer nav */}
         <div className="grid grid-cols-12 gap-x-6 gap-y-10 sm:gap-x-10">
           <div className="col-span-12 flex flex-col gap-5 md:col-span-6">
@@ -39,12 +44,15 @@ export default function Footer() {
                   the accessible name. Explicit width/height to prevent
                   CLS. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* Mobile audit COSMETIC: h-10 (40px) was 4px below AAA
+                  44×44. Bumped to h-11 (44px) — meets AAA on mobile,
+                  visual change negligible. */}
               <img
                 src="/brand/hva-lockup-white.svg"
                 alt=""
                 width={317}
                 height={48}
-                className="h-10 w-auto sm:h-12"
+                className="h-11 w-auto sm:h-12"
               />
             </Link>
 

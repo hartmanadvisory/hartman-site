@@ -117,10 +117,15 @@ export default async function LegalPageRoute(
   if (!isLegalSlug(slug)) notFound();
   const page = await getLegalPage(slug);
   const iso = page.lastUpdated;
-  const formatted = new Date(iso).toLocaleDateString("en-US", {
+  // Mobile audit MEDIUM: `new Date('YYYY-MM-DD')` parses as UTC midnight,
+  // which is the previous day in every Western Hemisphere timezone. Force
+  // noon UTC + explicit `timeZone: 'UTC'` so the formatted string always
+  // matches the ISO date regardless of the server's or client's timezone.
+  const formatted = new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   });
 
   return (

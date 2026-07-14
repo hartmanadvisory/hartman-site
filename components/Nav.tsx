@@ -9,8 +9,12 @@ import Link from "next/link";
  * an adjacent programmatic label carries the same meaning).
  */
 export default function Nav() {
+  // Mobile audit MEDIUM: viewportFit=cover exposes the safe-area-inset
+  // env vars. On notched iPhones in standalone/PWA mode, safe-area top
+  // padding on the sticky header pushes content clear of the notch. No
+  // visible change in normal mobile Safari (env resolves to 0).
   return (
-    <header className="on-light sticky top-0 z-50 bg-[rgba(255,255,255,0.96)] backdrop-blur-md">
+    <header className="on-light sticky top-0 z-50 bg-[rgba(255,255,255,0.96)] backdrop-blur-md pt-[env(safe-area-inset-top)]">
       <nav
         aria-label="Primary"
         className="mx-auto flex h-[var(--nav-height)] max-w-[var(--container)] items-center justify-between gap-6 px-6 sm:px-10 lg:px-14"

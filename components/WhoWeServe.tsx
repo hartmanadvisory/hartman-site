@@ -277,7 +277,12 @@ export default function WhoWeServe() {
                 ease: [0.22, 1, 0.36, 1],
               }}
               id="serve-h2"
-              className="mt-10 max-w-[38rem] self-end text-right font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.4vw,3.8rem)] font-bold leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)]"
+              // Mobile audit MEDIUM: was `text-right` — on mobile the
+              // sticky column is hidden, so a right-aligned h2 read as
+              // disconnected from the left-aligned eyebrow above it.
+              // Left-align on phone, right-align at md+ where it opposes
+              // the sticky column as originally designed.
+              className="mt-10 max-w-[38rem] self-end text-left font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.4vw,3.8rem)] font-bold leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)] md:text-right"
             >
               Funds, Founders, and LPs shaping venture.
             </motion.h2>

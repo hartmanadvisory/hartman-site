@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
@@ -21,6 +21,22 @@ const SITE_TITLE =
   "Precision Counsel for Venture's Defining Deals — Hartman Venture Advisors";
 const SITE_DESCRIPTION =
   "A boutique New York practice for late-stage venture transactions.";
+
+export const viewport: Viewport = {
+  // width=device-width, initial-scale=1 is the Next 16 default; adding
+  // viewportFit: 'cover' opts iPhone-with-notch pages into the safe-area
+  // model so env(safe-area-inset-*) resolves properly on standalone /
+  // Home-Screen-installed instances.
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  // Mobile audit MEDIUM: iOS Safari address bar tint follows this;
+  // navy-deep matches the site's darkest brand surface.
+  themeColor: "#0f1626",
+  // Mobile audit MEDIUM: prevents iOS from tinting form <select> and
+  // date-picker chrome under system dark mode. Site is light-only.
+  colorScheme: "light",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
