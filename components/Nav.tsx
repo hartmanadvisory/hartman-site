@@ -18,7 +18,12 @@ export default function Nav() {
         <Link
           href="/"
           aria-label="Hartman Venture Advisors — home"
-          className="group flex min-w-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--white)]"
+          // Mobile audit HIGH: lockup imgs are 32px (h-8) — Link's clickable
+          // rect was 32×105, below the 44×44 AAA tap-target target. `py-2
+          // -my-2` expands the hit rect to 48px vertically without shifting
+          // the visual lockup or the header layout. Header has ~72px of
+          // vertical room, so no overlap risk.
+          className="group flex min-w-0 items-center py-2 -my-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--white)]"
         >
           {/* Two lockups stacked: navy at rest, gold on hover OR keyboard
               focus-visible. Plain <img>s to bulletproof against

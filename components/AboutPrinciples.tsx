@@ -157,11 +157,15 @@ export default function AboutPrinciples() {
           />
         </motion.div>
 
-        {/* Three cards — horizontal from sm+ (640px), stacked full-width
-            on narrow mobile only. Belt-and-suspenders: dropped from md
-            (768px) to sm (640px) after a prior stale-build state where
-            md:grid-cols-3 didn't take effect on the user's browser. */}
-        <div className="mt-16 grid grid-cols-1 items-stretch gap-6 sm:mt-20 sm:grid-cols-3 sm:gap-8">
+        {/* Three cards — horizontal from md+ (768px), single column below.
+            Mobile audit HIGH finding: at sm=640–767 (large phone landscape /
+            small tablet portrait) three cards render at ~165px wide, so
+            15.5px body text gets 12–14 chars/line. Bumped horizontal
+            breakpoint back to md so phones stay single-column full-width
+            and only real tablets/desktops go 3-across. Belt-and-suspenders
+            check for the earlier stale-build md:grid-cols-3 issue is no
+            longer relevant. */}
+        <div className="mt-16 grid grid-cols-1 items-stretch gap-6 sm:mt-20 md:grid-cols-3 md:gap-8">
           {PRINCIPLES.map((p, i) => {
             const { Icon } = p;
             return (

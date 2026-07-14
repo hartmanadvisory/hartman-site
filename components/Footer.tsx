@@ -52,16 +52,22 @@ export default function Footer() {
                 (page-owner contact). Not a <nav> because email/phone are
                 direct actions, not site navigation. Stacked <a>s, not a
                 <ul>. */}
-            <address className="not-italic flex flex-col gap-1 text-[14px] text-[color:var(--parchment-dim)]">
+            {/* Mobile audit HIGH: inline <a>s were 20-21px tall — below
+                AAA 44×44 tap target. `inline-block py-2 -my-2` expands
+                the hit rect to 36px+ while the visual density stays.
+                Parent `gap-6` (24px) ≥ my expansion (12px per side), so
+                hit rects sit exactly touching but never overlap. Anchor
+                rendered height ≈ 45px — passes AAA 44×44 tap target. */}
+            <address className="not-italic flex flex-col gap-6 text-[14px] text-[color:var(--parchment-dim)]">
               <a
                 href="mailto:mhartman@hartmanadvisory.com"
-                className="transition-colors hover:text-[color:var(--white)]"
+                className="inline-block py-3 -my-3 transition-colors hover:text-[color:var(--white)]"
               >
                 mhartman@hartmanadvisory.com
               </a>
               <a
                 href="tel:+16179871512"
-                className="transition-colors hover:text-[color:var(--white)]"
+                className="inline-block py-3 -my-3 transition-colors hover:text-[color:var(--white)]"
               >
                 +1 (617) 987-1512
               </a>
@@ -118,14 +124,18 @@ export default function Footer() {
             /legal/{slug} routes (Sanity-backed with fallback copy so they
             work pre-CMS). */}
         <div className="flex flex-col items-start justify-between gap-6 text-[color:var(--parchment-dim)] md:flex-row md:items-center">
+          {/* Mobile audit HIGH: inline anchors were 17px tall — a11y-lead
+              spec calls for explicit min-h-11 items-center on these
+              (they read as nav chips, so honest sizing beats negative-
+              margin trickery). */}
           <ul
             aria-label="Legal"
-            className="flex flex-wrap items-center gap-x-8 gap-y-2 text-[14px]"
+            className="flex flex-wrap items-center gap-x-8 gap-y-1 text-[14px]"
           >
             <li>
               <Link
                 href="/legal/privacy"
-                className="transition-colors hover:text-[color:var(--white)]"
+                className="inline-flex min-h-11 items-center transition-colors hover:text-[color:var(--white)]"
               >
                 Privacy
               </Link>
@@ -133,7 +143,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/legal/terms"
-                className="transition-colors hover:text-[color:var(--white)]"
+                className="inline-flex min-h-11 items-center transition-colors hover:text-[color:var(--white)]"
               >
                 Terms
               </Link>
@@ -141,7 +151,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/legal/disclosures"
-                className="transition-colors hover:text-[color:var(--white)]"
+                className="inline-flex min-h-11 items-center transition-colors hover:text-[color:var(--white)]"
               >
                 Disclosures
               </Link>
