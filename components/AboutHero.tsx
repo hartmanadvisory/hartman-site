@@ -55,9 +55,25 @@ export default function AboutHero() {
             </h1>
             <p className="mt-8 max-w-xl text-[17px] leading-relaxed text-[color:var(--muted)] sm:text-[18px]">
               Founder and Principal of Hartman Venture Advisors PLLC. More
-              than a decade advising venture funds, founders, and dealmakers,
-              formerly at Gunderson Dettmer and Lowenstein Sandler.
+              than a decade advising venture funds, founders, and dealmakers.
             </p>
+
+            {/* Credential chips — two non-interactive labels rendered as
+                small outlined pills. <ul role="list"> defended against
+                Safari dropping list semantics when list-style is none;
+                <li>s stay non-focusable. Purely informational (no href),
+                so no SC 2.4.4 concern. Text 10.5:1 on --white. */}
+            <ul
+              role="list"
+              className="mt-6 flex flex-wrap gap-2"
+            >
+              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]">
+                Formerly at Gunderson Dettmer &amp; Lowenstein Sandler
+              </li>
+              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]">
+                Harvard Law JD
+              </li>
+            </ul>
 
             {/* Primary CTA. mailto rather than a stubbed `#` target per
                 a11y-lead — SC 2.4.4 rejects broken links. Reuses the

@@ -59,7 +59,21 @@ const STATS: Stat[] = [
   },
 ];
 
-const RULE_MT = ["mt-0", "mt-4", "mt-8"] as const;
+/**
+ * Z-frame geometry for the section-level decorative rules.
+ *
+ * Both SVGs are drawn in a 100×STEP_HEIGHT viewBox stretched to fill
+ * the section width via preserveAspectRatio="none". x is expressed as
+ * a percentage of the container (0 → left edge, 100 → right edge); y
+ * runs 0 → STEP_HEIGHT in raw pixels since the viewBox y-scale is
+ * locked to `height` on the SVG element.
+ *
+ * TOP: solid across 0 → TOP_STEP_X at y=0, step down, solid TOP_STEP_X → 100 at y=STEP_HEIGHT.
+ * BOTTOM (visually mirrored): solid 0 → BOTTOM_STEP_X at y=STEP_HEIGHT, step up, solid BOTTOM_STEP_X → 100 at y=0.
+ */
+const STEP_HEIGHT = 24;
+const TOP_STEP_X = 60;
+const BOTTOM_STEP_X = 40;
 
 function StatBlock({
   stat,
@@ -114,16 +128,8 @@ function StatBlock({
         index === 0 ? "md:col-start-1" : "md:pl-10",
       ].join(" ")}
     >
-      {/* Decorative top hairline — staggered vertical offset per cell
-          creates a subtle stair-step rhythm across the row. Purely
-          visual (WCAG 1.4.11 note exempts decorative components), so
-          aria-hidden. */}
-      <span
-        aria-hidden="true"
-        className={`block h-px w-12 bg-[color:var(--cobalt-light)] ${RULE_MT[index]}`}
-      />
       <dd
-        className="mt-6 font-[family-name:var(--font-display)] text-[clamp(3rem,6.8vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[color:var(--white)]"
+        className="font-[family-name:var(--font-display)] text-[clamp(3rem,6.8vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[color:var(--white)]"
         style={{ fontFeatureSettings: "'tnum' 1, 'cv11' 1" }}
       >
         <span aria-hidden="true">{display}</span>
@@ -155,12 +161,47 @@ export default function AboutStats() {
     <section
       id="about-stats"
       aria-labelledby="about-stats-eyebrow"
-      className="bg-[color:var(--navy-deep)]"
+      className="relative bg-[color:var(--navy-deep)]"
     >
-      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-24 sm:px-10 sm:pt-10 sm:pb-32 lg:px-14">
+      {/* Decorative Z-half frame — top edge. Solid across, single step
+          down at TOP_STEP_X, solid to the right edge. aria-hidden +
+          role="presentation" — purely visual, out of the AT tree
+          (WCAG 1.4.11 note exempts decorative components). */}
+      <svg
+        aria-hidden="true"
+        role="presentation"
+        viewBox={`0 0 100 ${STEP_HEIGHT}`}
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-x-0 top-0 h-6 w-full"
+      >
+        <polyline
+          points={`0,0 ${TOP_STEP_X},0 ${TOP_STEP_X},${STEP_HEIGHT} 100,${STEP_HEIGHT}`}
+          fill="none"
+          stroke="var(--cobalt-light)"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      {/* Decorative Z-half frame — bottom edge (mirrored). */}
+      <svg
+        aria-hidden="true"
+        role="presentation"
+        viewBox={`0 0 100 ${STEP_HEIGHT}`}
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-6 w-full"
+      >
+        <polyline
+          points={`0,${STEP_HEIGHT} ${BOTTOM_STEP_X},${STEP_HEIGHT} ${BOTTOM_STEP_X},0 100,0`}
+          fill="none"
+          stroke="var(--cobalt-light)"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-16 pb-24 sm:px-10 sm:pt-20 sm:pb-32 lg:px-14">
         <p
           id="about-stats-eyebrow"
-          className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]"
+          className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt-light)]"
         >
           By the Numbers
         </p>
