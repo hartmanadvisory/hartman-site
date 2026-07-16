@@ -72,6 +72,12 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
+  // Stop iOS Safari from auto-linking phone numbers, email addresses,
+  // and street addresses in decorative body text. Real <a href="tel:…">
+  // and <a href="mailto:…">  anchors remain interactive; only the
+  // implicit auto-styling of raw text is suppressed. Fixes the
+  // "Mordechai Hartman" caption reading as a blue underlined entity.
+  formatDetection: { telephone: false, email: false, address: false },
 };
 
 export default function RootLayout({

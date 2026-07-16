@@ -252,7 +252,7 @@ export default function WhoWeServe() {
                 duration: reduce ? 0 : 0.9,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="flex items-center justify-end gap-6 text-[color:var(--ink)]"
+              className="flex items-center justify-start gap-6 text-[color:var(--ink)] md:justify-end"
             >
               <span
                 aria-hidden="true"
@@ -300,7 +300,12 @@ export default function WhoWeServe() {
                       body text contrast stays untouched at composite ~12.6:1). */}
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute -left-4 top-2 select-none font-[family-name:var(--font-display)] text-[clamp(8rem,14vw,14rem)] font-bold leading-none text-[color:var(--ink)] opacity-[0.06] md:-left-2"
+                    // Mobile-2 audit: was `-left-4` which pushed ~half the
+                    // number past the viewport left edge at 375–414 (also
+                    // triggered horizontal scroll). Flush-left on mobile
+                    // (no negative offset); restore the -left-2 pull at
+                    // md+ where the sticky column absorbs the overflow.
+                    className="pointer-events-none absolute left-0 top-2 select-none font-[family-name:var(--font-display)] text-[clamp(5rem,14vw,14rem)] font-bold leading-none text-[color:var(--ink)] opacity-[0.06] md:-left-2"
                   >
                     {String(i + 1).padStart(2, "0")}
                   </span>

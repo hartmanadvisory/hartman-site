@@ -185,6 +185,14 @@ body {
   border-radius: 2px;
 }
 
+/* Mobile-nav overlay entrance — fast fade. Consumed via Tailwind
+   arbitrary animation: `animate-[fadeIn_180ms_ease-out]`. Reduced-
+   motion respect is handled globally at the bottom of this file. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes cursor-blink {
   from,
   to {
