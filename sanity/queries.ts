@@ -10,32 +10,6 @@ export type JudgmentEvent = {
   imageAlt?: string;
 };
 
-/**
- * Hardcoded fallback used when Sanity isn't configured (local dev without
- * credentials, or pre-launch preview). Ships an event so the section always
- * has content on screen; real events replace this once the CMS is populated.
- */
-const FALLBACK_EVENTS: JudgmentEvent[] = [
-  {
-    id: "fallback-1",
-    title: "Tech Week NYC · Fireside",
-    date: "2025-06-01",
-    imageUrl: "/media/event-speaker-panel.jpg",
-  },
-  {
-    id: "fallback-2",
-    title: "LP Roundtable · Manhattan",
-    date: "2025-04-15",
-    imageUrl: "/media/event-conversation.jpg",
-  },
-  {
-    id: "fallback-3",
-    title: "Founder Dinner · Downtown",
-    date: "2025-02-11",
-    imageUrl: "/media/event-portrait.jpg",
-  },
-];
-
 type RawEvent = {
   _id: string;
   title: string;
@@ -53,12 +27,13 @@ const JUDGMENT_QUERY = `*[_type == "judgmentEvent"] | order(order asc, date desc
 }`;
 
 /**
- * Fetch published judgment events. Runs on the server (RSC or server action);
- * cached with a 5-minute revalidation window and tagged so Sanity webhook
- * revalidation can bust it on publish.
+ * Fetch published judgment events. Returns an empty array when Sanity is
+ * unconfigured or returns no records — the carousel component hides
+ * itself when the array is empty so the site never ships placeholder
+ * events (they read as "under construction" to visitors).
  */
 export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
-  if (!sanityConfigured || !sanityClient) return FALLBACK_EVENTS;
+  if (!sanityConfigured || !sanityClient) return [];
 
   try {
     const rows = await sanityClient.fetch<RawEvent[]>(
@@ -66,7 +41,7 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
       {},
       { next: { revalidate: 300, tags: ["judgmentEvent"] } },
     );
-    if (!rows?.length) return FALLBACK_EVENTS;
+    if (!rows?.length) return [];
 
     return rows.map((row) => ({
       id: row._id,
@@ -76,7 +51,7 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
       imageUrl: row.image ? urlFor(row.image) : "",
     }));
   } catch {
-    return FALLBACK_EVENTS;
+    return [];
   }
 }
 
