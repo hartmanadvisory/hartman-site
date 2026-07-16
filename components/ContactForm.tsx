@@ -40,6 +40,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorAttempt, setErrorAttempt] = useState(0);
+  const [errorCode, setErrorCode] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [firm, setFirm] = useState("");
@@ -76,9 +77,23 @@ export default function ContactForm() {
         setStatus("success");
         return;
       }
+      // Read the server's error code so we can say something useful.
+      // Previously this was never parsed, so a 400 (bad input) and a 429
+      // (rate limited) both surfaced as one generic "something went
+      // wrong" — which is exactly how a too-short message got reported
+      // as a server failure.
+      let code = "";
+      try {
+        const body = await res.json();
+        code = typeof body?.error === "string" ? body.error : "";
+      } catch {
+        /* non-JSON response — fall through to the generic message */
+      }
+      setErrorCode(code);
       setStatus("error");
       setErrorAttempt((n) => n + 1);
     } catch {
+      setErrorCode("network");
       setStatus("error");
       setErrorAttempt((n) => n + 1);
     }
@@ -109,9 +124,7 @@ export default function ContactForm() {
     <form
       onSubmit={onSubmit}
       aria-busy={isSubmitting}
-      aria-describedby="contact-disclaimer"
       className="grid min-w-0 gap-x-8 gap-y-7 md:grid-cols-2"
-      noValidate
     >
       {/* Honeypot — invisible to real users and to AT, visible to bots
           that parse raw HTML. */}
@@ -226,9 +239,27 @@ export default function ContactForm() {
           maxLength={4000}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          // Field-level describedby. aria-describedby on the <form> does
+          // NOT inherit down to its controls, and a <form> without an
+          // accessible name isn't exposed as a landmark — so the
+          // disclaimer previously reached no one. Wire it here, on the
+          // field where "don't send anything confidential" actually
+          // matters, together with the length hint.
+          aria-describedby="message-hint contact-disclaimer"
           placeholder="Transaction type, timing, parties, and any conflicts we should clear."
           className="mt-3 w-full resize-y border-0 border-b border-[color:var(--rule-on-light)] bg-transparent px-0 py-3 text-lg leading-relaxed text-[color:var(--ink)] outline-none transition-colors placeholder:text-[color:var(--muted)] focus:border-[color:var(--cobalt)]"
         />
+        {/* Visible constraint hint (SC 3.3.2). The 10-character minimum
+            was previously invisible until it failed — a user typing a
+            short note got a generic server error with no explanation.
+            Placeholders vanish on input, so this is a persistent
+            sibling rather than placeholder text. */}
+        <p
+          id="message-hint"
+          className="mt-3 text-[13px] leading-relaxed text-[color:var(--muted)]"
+        >
+          A sentence or two is plenty &mdash; 10 characters minimum.
+        </p>
       </div>
 
       <div className="flex md:col-span-2 md:justify-end">
@@ -241,10 +272,15 @@ export default function ContactForm() {
         </button>
       </div>
 
-      {/* Disclaimer — SC 3.3.2 (Labels or Instructions). Visually
-          below the form now (per PR #10) but programmatically
-          associated with the <form> via aria-describedby, so SR
-          announces it whenever any field receives focus. */}
+      {/* Disclaimer — SC 3.3.2 (Labels or Instructions). Sits visually
+          below the form (per PR #10). It used to be wired via
+          aria-describedby on the <form> element, with a comment here
+          claiming that made SR announce it on field focus. That was
+          simply wrong: aria-describedby does not inherit from a <form>
+          down to its controls, and a <form> with no accessible name
+          isn't exposed as a landmark either — so this text reached no
+          one. It's now referenced directly from the textarea's
+          aria-describedby, the field where it actually matters. */}
       <p
         id="contact-disclaimer"
         className="md:col-span-2 border-l-2 border-[color:var(--rule-on-light)] pl-4 text-[13.5px] leading-relaxed text-[color:var(--muted)]"
@@ -256,21 +292,33 @@ export default function ContactForm() {
       </p>
 
       {/* Error region — keyed by attempt count so React remounts on
-          each failure, guaranteeing role="alert" fires. */}
+          each failure, guaranteeing role="alert" fires. The message is
+          now derived from the server's error code; previously every
+          failure mode collapsed into one generic string, so a
+          too-short message read as a server outage. */}
       {showError && (
         <div
           key={errorAttempt}
           role="alert"
           className="md:col-span-2 border-l-2 border-[color:var(--cobalt)] bg-[rgba(28,68,184,0.04)] px-4 py-3 text-[14.5px] leading-relaxed text-[color:var(--ink)]"
         >
-          Something went wrong. Please try again in a moment, or reach{" "}
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="underline decoration-[color:var(--cobalt)] underline-offset-4"
-          >
-            {CONTACT_EMAIL}
-          </a>{" "}
-          directly.
+          {errorCode === "rate_limited" ? (
+            "Too many attempts in a row. Please wait a minute, then try again."
+          ) : errorCode === "validation" || errorCode === "invalid_json" ? (
+            "Something in the form didn't pass our checks — please confirm every required field is filled in and your message is at least a sentence."
+          ) : (
+            <>
+              Something went wrong on our end. Please try again in a moment,
+              or reach{" "}
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="underline decoration-[color:var(--cobalt)] underline-offset-4"
+              >
+                {CONTACT_EMAIL}
+              </a>{" "}
+              directly.
+            </>
+          )}
         </div>
       )}
     </form>
