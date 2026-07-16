@@ -55,31 +55,6 @@ export default function Footer() {
                 className="h-11 w-auto sm:h-12"
               />
             </Link>
-
-            {/* Owner contact info — <address> is exact per HTML semantics
-                (page-owner contact). Not a <nav> because email/phone are
-                direct actions, not site navigation. Stacked <a>s, not a
-                <ul>. */}
-            {/* Mobile audit HIGH: inline <a>s were 20-21px tall — below
-                AAA 44×44 tap target. `inline-block py-2 -my-2` expands
-                the hit rect to 36px+ while the visual density stays.
-                Parent `gap-6` (24px) ≥ my expansion (12px per side), so
-                hit rects sit exactly touching but never overlap. Anchor
-                rendered height ≈ 45px — passes AAA 44×44 tap target. */}
-            <address className="not-italic flex flex-col gap-6 text-[14px] text-[color:var(--parchment-dim)]">
-              <a
-                href="mailto:mhartman@hartmanadvisory.com"
-                className="inline-block py-3 -my-3 transition-colors hover:text-[color:var(--white)]"
-              >
-                mhartman@hartmanadvisory.com
-              </a>
-              <a
-                href="tel:+16179871512"
-                className="inline-block py-3 -my-3 transition-colors hover:text-[color:var(--white)]"
-              >
-                +1 (617) 987-1512
-              </a>
-            </address>
           </div>
 
           <div className="col-span-12 flex flex-col gap-8 md:col-span-6 md:items-end">

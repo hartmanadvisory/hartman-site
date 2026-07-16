@@ -4,20 +4,24 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
- * AboutPortfolio — logo wall of ~20 companies Mordechai has advised or
- * transacted on across his career. Static brand marks, no links.
+ * HomePortfolio — logo wall of 19 companies Mordechai has advised or
+ * transacted on across his career, plus an "& more" cell signalling
+ * the list is representative rather than exhaustive. Ships on the
+ * homepage between WhatWeDo and WhoWeServe (moved from /about per
+ * final-pass direction).
  *
  * a11y (accessibility-lead signed off):
  *  - <section aria-labelledby="portfolio-heading"> region.
  *  - Eyebrow aria-hidden — the h2 carries semantic identity.
- *  - Lede paragraph clarifies "partial list, some engagements confidential"
- *    so users understand scope.
- *  - <ul role="list"> wrapper — 20 discrete facts, list semantics preserved.
+ *  - <ul role="list"> wrapper — discrete facts, list semantics preserved.
  *  - Each logo is an <Image> with alt="{Company name}" — per WCAG 1.1.1
  *    every logo is a distinct piece of information, not decoration.
  *  - No tabindex — logos are not interactive; empty tab stops are worse
  *    than none.
  *  - Contrast: black marks on --white background pass trivially (21:1).
+ *  - Final "& more" cell stays inside the same <ul> as an honest tail
+ *    (sentence-case DOM + CSS uppercase so SR reads the words, not
+ *    letter-by-letter).
  */
 
 type Company = { name: string; file: string };
@@ -44,7 +48,7 @@ const COMPANIES: Company[] = [
   { name: "Saronic", file: "saronic.svg" },
 ];
 
-export default function AboutPortfolio() {
+export default function HomePortfolio() {
   const reduce = useReducedMotion();
 
   return (
@@ -121,10 +125,6 @@ export default function AboutPortfolio() {
             </motion.li>
           ))}
 
-          {/* Final "and more" cell — signals the list is representative,
-              not exhaustive. Kept inside the same <ul role="list"> per
-              a11y-lead: SR reads "list, 20 items" and this row as the
-              honest tail of the set. */}
           <motion.li
             initial="hidden"
             whileInView="show"
@@ -140,9 +140,6 @@ export default function AboutPortfolio() {
             }}
             className="relative flex aspect-[3/2] items-center justify-center bg-[color:var(--white)] p-6 sm:p-8"
           >
-            {/* Sentence case in DOM + CSS uppercase — SR reads "and more"
-                naturally (some SRs spell DOM-level ALL CAPS letter by
-                letter). Matches the site's eyebrow pattern. */}
             <span className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
               &amp; more
             </span>

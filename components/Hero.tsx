@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
@@ -34,16 +34,31 @@ import { motion, useReducedMotion } from "framer-motion";
  */
 
 const HEADLINE_LINES = [
-  "Precision Counsel",
-  "for Venture’s",
+  "Precision legal Counsel",
+  "for Venture Capital’s",
   "Defining Deals",
 ] as const;
+const HEADLINE_FULL = HEADLINE_LINES.join(" ");
 const HEADLINE_CHAR_COUNT = HEADLINE_LINES.reduce(
   (n, line) => n + [...line].length,
   0,
 );
-// Total h1 animation length used to schedule the cobalt caption after it.
-const HEADLINE_DURATION_S = HEADLINE_CHAR_COUNT * 0.028 + 0.25;
+// Scramble/decode animation total duration (also used to schedule the
+// cobalt caption reveal after the h1 resolves).
+const SCRAMBLE_DURATION_S = 1.6;
+const HEADLINE_DURATION_S = SCRAMBLE_DURATION_S + 0.25;
+
+// Glyph pool for the scramble effect. ASCII-only, no combining marks or
+// RTL characters — some SRs speak those; even though this layer is
+// aria-hidden, we keep the visible glyphs boring so nothing weird flashes
+// through (e.g., diacritics that would render outside their box).
+const SCRAMBLE_GLYPHS =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!<>-_/=+*#";
+function pickGlyph() {
+  return SCRAMBLE_GLYPHS.charAt(
+    Math.floor((performance.now() * 9301 + 49297) % SCRAMBLE_GLYPHS.length),
+  );
+}
 
 /**
  * Hero slide catalogue. Every entry is a REAL Hartman photograph. Some have
@@ -59,6 +74,110 @@ const HEADLINE_DURATION_S = HEADLINE_CHAR_COUNT * 0.028 + 0.25;
  * A base scrim α=0.20 sits under ALL slides at all times (deterministic
  * floor); additive layer stacks on top for the two bright slides.
  */
+/**
+ * ScrambleHeadline — the visible, aria-hidden headline layer. Each
+ * character shuffles through random glyphs then locks in the target;
+ * positions resolve staggered from left→right so the effect reads as a
+ * "decode." The parent h1 already carries the sr-only full text so screen
+ * readers announce the heading exactly once (no per-character noise, no
+ * live-region announcements).
+ *
+ * Under `reduce`, no scramble runs — final text is what SSR emitted, no
+ * cursor, no glyph churn. This matches SC 2.3.3 (Animation from
+ * Interactions) with the reduce-motion opt-out and keeps SC 2.3.1 safe
+ * (no flashes, monochrome text-only churn).
+ */
+function ScrambleHeadline({ reduce }: { reduce: boolean }) {
+  // State is the per-line array of currently-displayed chars. SSR
+  // renders the target text (matches sr-only, matches hydration). On
+  // client mount (and only when motion is allowed), useLayoutEffect
+  // synchronously replaces to random glyphs before first paint, then
+  // a rAF loop resolves each position on its scheduled tick.
+  const [lines, setLines] = useState<readonly string[]>(HEADLINE_LINES);
+
+  useLayoutEffect(() => {
+    if (reduce) return;
+    // Reset to fully-scrambled synchronously so users don't see a target
+    // flash on mount before the rAF loop kicks in.
+    const scrambled = HEADLINE_LINES.map((line) =>
+      [...line]
+        .map((ch) =>
+          ch === " "
+            ? " "
+            : SCRAMBLE_GLYPHS.charAt(
+                Math.floor(Math.random() * SCRAMBLE_GLYPHS.length),
+              ),
+        )
+        .join(""),
+    );
+    setLines(scrambled);
+  }, [reduce]);
+
+  useEffect(() => {
+    if (reduce) return;
+    const start = performance.now();
+    // Pre-compute resolve times per (line, char). Space characters skip
+    // scrambling entirely so word gaps are stable throughout.
+    const resolvePlan = HEADLINE_LINES.map((line, li) => {
+      const chars = [...line];
+      const perChar = chars.map((ch, ci) => {
+        if (ch === " ") return { target: " ", resolveAt: 0 };
+        // Global position across the whole headline so lines stagger.
+        const before = HEADLINE_LINES.slice(0, li).join(" ").length;
+        const globalIdx = before + ci;
+        const t = HEADLINE_CHAR_COUNT > 1 ? globalIdx / (HEADLINE_CHAR_COUNT - 1) : 0;
+        const resolveAt = (0.4 + t * 0.6) * SCRAMBLE_DURATION_S;
+        return { target: ch, resolveAt };
+      });
+      return perChar;
+    });
+
+    let raf = 0;
+    const tick = () => {
+      const elapsed = (performance.now() - start) / 1000;
+      const next = resolvePlan.map((chars) =>
+        chars
+          .map(({ target, resolveAt }) =>
+            elapsed >= resolveAt
+              ? target
+              : target === " "
+                ? " "
+                : SCRAMBLE_GLYPHS.charAt(
+                    Math.floor(Math.random() * SCRAMBLE_GLYPHS.length),
+                  ),
+          )
+          .join(""),
+      );
+      setLines(next);
+      if (elapsed < SCRAMBLE_DURATION_S) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        // Lock in the final string exactly.
+        setLines(HEADLINE_LINES.map((l) => l));
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [reduce]);
+
+  return (
+    <span aria-hidden="true" className="block">
+      {lines.map((line, li) => (
+        <span key={li} className="block whitespace-pre">
+          {line}
+          {li === lines.length - 1 && !reduce && (
+            <span
+              aria-hidden="true"
+              className="cursor-blink ml-1 inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--white)] align-baseline"
+              style={{ animationDelay: `${SCRAMBLE_DURATION_S}s` }}
+            />
+          )}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 type HeroSlide = {
   src: string;
   needsScrim: boolean;
@@ -171,67 +290,18 @@ export default function Hero() {
           ) : null,
         )}
 
-        {/* Headline — top-left, character-by-character reveal (optimalcounsel-
-            style). Full string is in the DOM once as an sr-only span so screen
-            readers hear the heading exactly ONCE and never per-character. The
-            visible layer is aria-hidden and each char animates in with a
-            staggered opacity. A blinking cursor rides the last character and
-            fades after the animation completes; under reduced motion the
-            whole line renders at rest with no cursor. */}
+        {/* Headline — text scramble/decode effect. Full string sits once
+            in an sr-only span so screen readers hear the h1 exactly once;
+            visible layer is aria-hidden and shuffles glyphs before
+            resolving. Under reduced motion, the visible layer renders the
+            final text at rest with no cursor. */}
         <div className="absolute inset-x-0 top-0 z-10 px-6 pt-16 sm:px-10 sm:pt-20 lg:px-14">
           <h1
             id="hero-h1"
             className="max-w-[46rem] font-[family-name:var(--font-display)] text-[clamp(2.6rem,6.4vw,5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
           >
-            <span className="sr-only">
-              Precision Counsel for Venture&rsquo;s Defining Deals
-            </span>
-            <motion.span
-              aria-hidden="true"
-              initial={reduce ? "show" : "hidden"}
-              animate="show"
-              variants={{
-                hidden: {},
-                show: { transition: { staggerChildren: reduce ? 0 : 0.028 } },
-              }}
-              className="block"
-            >
-              {HEADLINE_LINES.map((line, li) => (
-                <span key={li} className="block">
-                  {[...line].map((ch, ci) => (
-                    <motion.span
-                      key={`${li}-${ci}`}
-                      variants={{
-                        hidden: { opacity: 0, y: 6 },
-                        show: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: reduce ? 0 : 0.22, ease },
-                        },
-                      }}
-                      className="inline-block"
-                    >
-                      {ch === " " ? " " : ch}
-                    </motion.span>
-                  ))}
-                  {li === HEADLINE_LINES.length - 1 && !reduce && (
-                    <motion.span
-                      aria-hidden="true"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0, 1, 1, 0] }}
-                      transition={{
-                        duration: 1.6,
-                        times: [0, 0.05, 0.85, 1],
-                        delay: HEADLINE_CHAR_COUNT * 0.028,
-                      }}
-                      className="ml-1 inline-block align-baseline"
-                    >
-                      <span className="cursor-blink inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--white)]" />
-                    </motion.span>
-                  )}
-                </span>
-              ))}
-            </motion.span>
+            <span className="sr-only">{HEADLINE_FULL}</span>
+            <ScrambleHeadline reduce={!!reduce} />
           </h1>
         </div>
 
@@ -294,7 +364,7 @@ export default function Hero() {
       >
         <div className="px-6 py-10 sm:px-10 sm:py-12 lg:px-14">
           <p className="max-w-2xl text-[1.25rem] leading-relaxed text-[color:var(--white)] sm:text-[1.35rem]">
-            A boutique New York practice guiding venture funds, founders, and
+            A boutique New York law firm guiding venture funds, founders, and
             dealmakers through their most consequential transactions.
           </p>
         </div>

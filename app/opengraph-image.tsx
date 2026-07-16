@@ -12,7 +12,7 @@ import { ImageResponse } from "next/og";
  */
 
 export const runtime = "edge";
-export const alt = "Hartman Venture Advisors — Precision Counsel for Venture's Defining Deals";
+export const alt = "Hartman Venture Advisors — Precision legal Counsel for Venture Capital's Defining Deals";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -72,9 +72,9 @@ export default async function Image() {
             flexDirection: "column",
           }}
         >
-          <span>Precision counsel for</span>
+          <span>Precision legal counsel for</span>
           <span style={{ color: COBALT_LIGHT }}>
-            venture&rsquo;s defining deals.
+            venture capital&rsquo;s defining deals.
           </span>
         </div>
 

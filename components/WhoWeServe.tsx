@@ -122,9 +122,9 @@ const SEGMENTS: Segment[] = [
   },
   {
     id: "lps",
-    h3: "Institutional LPs",
+    h3: "Institutional LPs & Family Offices",
     body:
-      "Institutional limited partners on the buy side of the private markets: side letters, direct investment vehicles, secondary purchases, and the diligence that decides where the next allocation goes.",
+      "Institutional limited partners and family offices on the buy side of the private markets: side letters, direct investment vehicles, secondary purchases, and the diligence that decides where the next allocation goes.",
     image: "/media/event-clients.jpg",
   },
 ];

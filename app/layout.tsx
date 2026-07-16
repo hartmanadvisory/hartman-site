@@ -18,7 +18,7 @@ const display = Inter({
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://hartman-site.vercel.app";
 const SITE_TITLE =
-  "Precision Counsel for Venture's Defining Deals — Hartman Venture Advisors";
+  "Precision legal Counsel for Venture Capital's Defining Deals — Hartman Venture Advisors";
 const SITE_DESCRIPTION =
   "A boutique New York practice for late-stage venture transactions.";
 

@@ -41,7 +41,7 @@ export default function Nav() {
             alt=""
             width={254}
             height={39}
-            className="h-8 w-auto sm:h-9 group-hover:hidden group-focus-visible:hidden"
+            className="h-11 w-auto sm:h-14 group-hover:hidden group-focus-visible:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -49,7 +49,7 @@ export default function Nav() {
             alt=""
             width={254}
             height={39}
-            className="hidden h-8 w-auto sm:h-9 group-hover:block group-focus-visible:block"
+            className="hidden h-11 w-auto sm:h-14 group-hover:block group-focus-visible:block"
           />
         </Link>
 
