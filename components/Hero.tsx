@@ -54,9 +54,8 @@ const REVEAL_DURATION_S = 1.6;
  *  - hero-3.jpg               dark suits,  no scrim needed        ~10.8:1
  *  - hero-event-speaker.png   night pane,  no scrim needed        ~14:1
  *  - hero-event-conversation  midtones,    +additive scrim α=0.35 ~5.2:1
- *  - hero-hartman-desk.png    bright wall, +additive scrim α=0.45 ~4.8:1
  * A base scrim α=0.20 sits under ALL slides at all times (deterministic
- * floor); additive layer stacks on top for the two bright slides.
+ * floor); additive layer stacks on top for the bright slide.
  */
 /**
  * TypewriterHeadline — visible, aria-hidden headline layer. Chars
@@ -194,7 +193,6 @@ const HERO_SLIDES: readonly HeroSlide[] = [
   { src: "/hero/hero-3.jpg", needsScrim: false },
   { src: "/hero/hero-event-speaker.png", needsScrim: false },
   { src: "/hero/hero-event-conversation.png", needsScrim: true },
-  { src: "/hero/hero-hartman-desk.png", needsScrim: true },
 ];
 const AUTOROTATE_MS = 8000;
 
