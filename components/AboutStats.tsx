@@ -59,22 +59,6 @@ const STATS: Stat[] = [
   },
 ];
 
-/**
- * Z-frame geometry for the section-level decorative rules.
- *
- * Both SVGs are drawn in a 100×STEP_HEIGHT viewBox stretched to fill
- * the section width via preserveAspectRatio="none". x is expressed as
- * a percentage of the container (0 → left edge, 100 → right edge); y
- * runs 0 → STEP_HEIGHT in raw pixels since the viewBox y-scale is
- * locked to `height` on the SVG element.
- *
- * TOP: solid across 0 → TOP_STEP_X at y=0, step down, solid TOP_STEP_X → 100 at y=STEP_HEIGHT.
- * BOTTOM (visually mirrored): solid 0 → BOTTOM_STEP_X at y=STEP_HEIGHT, step up, solid BOTTOM_STEP_X → 100 at y=0.
- */
-const STEP_HEIGHT = 24;
-const TOP_STEP_X = 60;
-const BOTTOM_STEP_X = 40;
-
 function StatBlock({
   stat,
   index,
@@ -161,44 +145,9 @@ export default function AboutStats() {
     <section
       id="about-stats"
       aria-labelledby="about-stats-eyebrow"
-      className="relative bg-[color:var(--navy-deep)]"
+      className="bg-[color:var(--navy-deep)]"
     >
-      {/* Decorative Z-half frame — top edge. Solid across, single step
-          down at TOP_STEP_X, solid to the right edge. aria-hidden +
-          role="presentation" — purely visual, out of the AT tree
-          (WCAG 1.4.11 note exempts decorative components). */}
-      <svg
-        aria-hidden="true"
-        role="presentation"
-        viewBox={`0 0 100 ${STEP_HEIGHT}`}
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-0 h-6 w-full"
-      >
-        <polyline
-          points={`0,0 ${TOP_STEP_X},0 ${TOP_STEP_X},${STEP_HEIGHT} 100,${STEP_HEIGHT}`}
-          fill="none"
-          stroke="var(--cobalt-light)"
-          strokeWidth="1"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-      {/* Decorative Z-half frame — bottom edge (mirrored). */}
-      <svg
-        aria-hidden="true"
-        role="presentation"
-        viewBox={`0 0 100 ${STEP_HEIGHT}`}
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-6 w-full"
-      >
-        <polyline
-          points={`0,${STEP_HEIGHT} ${BOTTOM_STEP_X},${STEP_HEIGHT} ${BOTTOM_STEP_X},0 100,0`}
-          fill="none"
-          stroke="var(--cobalt-light)"
-          strokeWidth="1"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-16 pb-24 sm:px-10 sm:pt-20 sm:pb-32 lg:px-14">
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-24 sm:px-10 sm:pt-10 sm:pb-32 lg:px-14">
         <p
           id="about-stats-eyebrow"
           className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt-light)]"
