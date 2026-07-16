@@ -41,6 +41,7 @@ export default function Nav() {
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const secondLinkRef = useRef<HTMLAnchorElement>(null);
   const returnFocusRef = useRef(true);
+  const restoreScrollRef = useRef(true);
   const savedScrollY = useRef(0);
 
   // Hide-on-scroll (unchanged from prior), but skip when the menu is open.
@@ -77,7 +78,14 @@ export default function Nav() {
       body.style.left = "";
       body.style.right = "";
       body.style.width = "";
-      window.scrollTo(0, savedScrollY.current);
+      // Only restore the saved scrollY if the close is NOT a
+      // link-tap navigation. On navigation, the new page should
+      // land at scrollTop=0 (ScrollToTop handles this), not the
+      // OLD page's saved scroll position.
+      if (restoreScrollRef.current) {
+        window.scrollTo(0, savedScrollY.current);
+      }
+      restoreScrollRef.current = true;
       main?.removeAttribute("inert");
     };
   }, [menuOpen]);
@@ -148,6 +156,7 @@ export default function Nav() {
 
   const closeSilently = () => {
     returnFocusRef.current = false;
+    restoreScrollRef.current = false;
     setMenuOpen(false);
   };
 
@@ -167,6 +176,11 @@ export default function Nav() {
         <Link
           href="/"
           aria-label="Hartman Venture Advisors — home"
+          // Tapping the HH logo while the mobile menu is open closes
+          // the panel (roll-up animation) alongside the navigation.
+          // On desktop or when menu is already closed, this is a no-op
+          // beyond the normal Link click.
+          onClick={menuOpen ? closeSilently : undefined}
           className="group flex min-w-0 items-center py-2 -my-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--white)]"
         >
           {/* MOBILE-ONLY: compact HH monogram. */}

@@ -139,14 +139,40 @@ export async function POST(req: NextRequest) {
 
   try {
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
-      from,
-      to: [to],
-      replyTo: email,
-      subject,
-      text: textBody,
-      html: htmlBody,
-    });
+    const send = (fromAddr: string) =>
+      resend.emails.send({
+        from: fromAddr,
+        to: [to],
+        replyTo: email,
+        subject,
+        text: textBody,
+        html: htmlBody,
+      });
+
+    let { error } = await send(from);
+
+    // Zero-touch domain cutover: RESEND_FROM_EMAIL is already set to
+    // the branded contact@hartmanadvisory.com address. Until that
+    // domain is verified in Resend (DNS records pending at
+    // Cloudflare), sends from it are rejected — so retry once with
+    // Resend's sandbox sender. The moment domain verification
+    // completes, the primary send starts succeeding and this branch
+    // stops firing. No env or code changes needed at cutover.
+    if (error && from !== FROM_FALLBACK) {
+      const msg = `${error.name ?? ""} ${error.message ?? ""}`.toLowerCase();
+      const domainNotReady =
+        msg.includes("domain") || msg.includes("verify") ||
+        msg.includes("not allowed") || msg.includes("forbidden") ||
+        msg.includes("validation");
+      if (domainNotReady) {
+        console.warn(
+          "[contact] branded FROM rejected (domain likely unverified); retrying with sandbox sender",
+          error,
+        );
+        ({ error } = await send(FROM_FALLBACK));
+      }
+    }
+
     if (error) {
       console.error("[contact] resend error", error);
       return NextResponse.json(

@@ -6,9 +6,9 @@ import WhoWeServe from "@/components/WhoWeServe";
 import ClosingCTA from "@/components/ClosingCTA";
 import { getJudgmentEvents } from "@/sanity/queries";
 
-// "Citadel for Hartman" — final composition after content pass:
-// Hero → WhoWeAre → WhatWeDo → HomePortfolio (logo wall) → WhoWeServe →
-// ClosingCTA → Footer (rendered globally in layout).
+// Homepage composition:
+// Hero → WhoWeAre → WhatWeDo (accordion + JudgmentCarousel) →
+// HomePortfolio → WhoWeServe → ClosingCTA → Footer (global in layout).
 export default async function Home() {
   const judgmentEvents = await getJudgmentEvents();
   return (

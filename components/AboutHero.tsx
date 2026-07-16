@@ -47,6 +47,27 @@ export default function AboutHero() {
             >
               Profile
             </p>
+
+            {/* MOBILE-ONLY portrait between the eyebrow and the h1.
+                Hidden at md+ where the right-column portrait shows.
+                Duplicate <Image> is intentional per PR #10 — next/image
+                dedupes the request; the second copy never loads on
+                desktop viewports. Both alt="" + aria-hidden per H67
+                (photo is decorative alongside the h1 name). */}
+            <div
+              aria-hidden="true"
+              className="relative mt-6 aspect-[4/5] w-full max-w-[22rem] overflow-hidden bg-[color:var(--navy-deep)] md:hidden"
+              style={{ boxShadow: "0 20px 60px -20px rgba(15, 22, 38, 0.30)" }}
+            >
+              <Image
+                src="/media/mordechai-hartman-portrait.jpg"
+                alt=""
+                fill
+                sizes="(max-width: 768px) 100vw, 1px"
+                className="object-cover object-center"
+              />
+            </div>
+
             <h1
               id="about-hero-h1"
               className="mt-6 font-[family-name:var(--font-display)] text-[clamp(3rem,7.4vw,6rem)] font-bold leading-[1.02] tracking-[-0.03em] text-[color:var(--ink)]"
@@ -103,7 +124,8 @@ export default function AboutHero() {
             </div>
           </motion.div>
 
-          {/* RIGHT — portrait (decorative alt="") */}
+          {/* RIGHT — portrait (decorative alt="") — desktop only.
+              Mobile copy is rendered above between eyebrow and h1. */}
           <motion.div
             initial={reduce ? { opacity: 1, x: 0 } : { opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
@@ -112,14 +134,14 @@ export default function AboutHero() {
               delay: reduce ? 0 : 0.1,
               ease: EASE,
             }}
-            className="col-span-12 md:col-span-5"
+            className="col-span-12 hidden md:col-span-5 md:block"
           >
             <div
               className="relative aspect-[4/5] w-full overflow-hidden bg-[color:var(--navy-deep)]"
               style={{ boxShadow: "0 30px 80px -20px rgba(15, 22, 38, 0.35)" }}
             >
               <Image
-                src="/media/mordechai-hartman-portrait.png"
+                src="/media/mordechai-hartman-portrait.jpg"
                 alt=""
                 fill
                 priority

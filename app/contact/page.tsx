@@ -33,20 +33,11 @@ export default function ContactPage() {
           </p>
         </div>
 
-        {/* Right column — disclaimer + form share ONE grid cell so CSS
-            grid doesn't place them in separate auto-rows (which was
-            causing a huge vertical gap between them). Disclaimer stays
-            visually and semantically BEFORE the form per a11y-lead so
-            SC 3.3.2 is satisfied natively. */}
+        {/* Right column — form only. Disclaimer moved INTO ContactForm
+            (below the submit button) per PR #10; SC 3.3.2 is preserved
+            via aria-describedby on the <form> pointing at the
+            disclaimer's id. */}
         <div className="col-span-12 flex min-w-0 flex-col md:col-span-7">
-          <p className="mb-8 border-l-2 border-[color:var(--rule-on-light)] pl-4 text-[13.5px] leading-relaxed text-[color:var(--muted)]">
-            Submitting this form does not create an attorney-client
-            relationship. Please do not include confidential or
-            time-sensitive information. An attorney-client relationship
-            is established only upon execution of a written engagement
-            letter.
-          </p>
-
           <ContactForm />
         </div>
       </div>
