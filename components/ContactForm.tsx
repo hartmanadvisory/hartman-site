@@ -23,9 +23,8 @@ import { useEffect, useRef, useState } from "react";
  *  - Values persist on error (SC 3.3.7); no CAPTCHA (SC 3.3.9).
  */
 
+// mailto fallback still used on the success panel + error alert.
 const CONTACT_EMAIL = "mhartman@hartmanadvisory.com";
-const CONTACT_PHONE_DISPLAY = "+1 (617) 987-1512";
-const CONTACT_PHONE_TEL = "+16179871512";
 
 const inquiryTypes = [
   "Financing",
@@ -97,14 +96,7 @@ export default function ContactForm() {
         </h2>
         <p className="mt-6 max-w-md text-base leading-relaxed text-[color:var(--muted)]">
           Your inquiry is with Mordechai. Expect a reply within one to two
-          business days. For anything time-sensitive, call{" "}
-          <a
-            href={`tel:${CONTACT_PHONE_TEL}`}
-            className="underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)]"
-          >
-            {CONTACT_PHONE_DISPLAY}
-          </a>
-          .
+          business days.
         </p>
       </div>
     );
@@ -117,6 +109,7 @@ export default function ContactForm() {
     <form
       onSubmit={onSubmit}
       aria-busy={isSubmitting}
+      aria-describedby="contact-disclaimer"
       className="grid min-w-0 gap-x-8 gap-y-7 md:grid-cols-2"
       noValidate
     >
@@ -238,22 +231,7 @@ export default function ContactForm() {
         />
       </div>
 
-      <div className="flex flex-col gap-5 md:col-span-2 md:flex-row md:items-center md:justify-between">
-        {/* Direct contact fallbacks — same tap-target treatment as before. */}
-        <address className="not-italic flex flex-col gap-6 text-sm font-medium text-[color:var(--muted)]">
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="inline-block py-3 -my-3 underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
-          >
-            {CONTACT_EMAIL}
-          </a>
-          <a
-            href={`tel:${CONTACT_PHONE_TEL}`}
-            className="inline-block py-3 -my-3 underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
-          >
-            {CONTACT_PHONE_DISPLAY}
-          </a>
-        </address>
+      <div className="flex md:col-span-2 md:justify-end">
         <button
           type="submit"
           disabled={isSubmitting}
@@ -262,6 +240,20 @@ export default function ContactForm() {
           {isSubmitting ? "Sending…" : "Send Inquiry"}
         </button>
       </div>
+
+      {/* Disclaimer — SC 3.3.2 (Labels or Instructions). Visually
+          below the form now (per PR #10) but programmatically
+          associated with the <form> via aria-describedby, so SR
+          announces it whenever any field receives focus. */}
+      <p
+        id="contact-disclaimer"
+        className="md:col-span-2 border-l-2 border-[color:var(--rule-on-light)] pl-4 text-[13.5px] leading-relaxed text-[color:var(--muted)]"
+      >
+        Submitting this form does not create an attorney-client
+        relationship. Please do not include confidential or
+        time-sensitive information. An attorney-client relationship is
+        established only upon execution of a written engagement letter.
+      </p>
 
       {/* Error region — keyed by attempt count so React remounts on
           each failure, guaranteeing role="alert" fires. */}

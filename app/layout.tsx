@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Inter — humanist neutral grotesk, body copy. Aliased as --font-inter
 // and consumed inside globals.css.
@@ -93,6 +94,7 @@ export default function RootLayout({
         <a href="#main" className="skip-link">
           Skip to content
         </a>
+        <ScrollToTop />
         <Nav />
         <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
           {children}

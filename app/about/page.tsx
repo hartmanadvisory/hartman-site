@@ -2,16 +2,15 @@ import type { Metadata } from "next";
 import AboutHero from "@/components/AboutHero";
 import AboutStats from "@/components/AboutStats";
 import AboutTimeline from "@/components/AboutTimeline";
-import AboutPrinciples from "@/components/AboutPrinciples";
 
 /**
- * /about — the firm's origin story. Same design DNA as the homepage.
+ * /about — the firm's origin story. PR #10 restructure:
  *
- *   AboutHero → AboutStats → Background (Timeline) → Principles
+ *   AboutHero → AboutStats → Background (Timeline)
  *
- * ClosingCTA lives on the homepage only — About ends on the Principles
- * band. Portfolio (logo wall) moved to the homepage between WhatWeDo
- * and WhoWeServe per the final-pass direction.
+ * The "What Sets Us Apart" cards were removed site-wide. Judgment
+ * carousel stays on the homepage inside WhatWeDo. ClosingCTA remains
+ * on the homepage only.
  */
 export const metadata: Metadata = {
   title: "About — Hartman Venture Advisors",
@@ -25,7 +24,6 @@ export default function AboutPage() {
       <AboutHero />
       <AboutStats />
       <AboutTimeline />
-      <AboutPrinciples />
     </>
   );
 }
