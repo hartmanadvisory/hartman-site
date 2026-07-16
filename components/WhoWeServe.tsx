@@ -110,21 +110,21 @@ const SEGMENTS: Segment[] = [
     id: "venture-funds",
     h3: "Venture Funds",
     body:
-      "General partners at the fund level — from first-time formations to complex spin-outs, GP-led secondaries, and the LP negotiations that decide a fund's economics. We advise the funds shaping the next generation of institutional venture.",
+      "General partners at the fund level: from first-time formations to complex spin-outs, GP-led secondaries, and the LP negotiations that decide a fund's economics. We advise the funds shaping the next generation of institutional venture.",
     image: "/media/event-portrait.jpg",
   },
   {
     id: "founders",
     h3: "Founders & Category-Definers",
     body:
-      "Repeat founders in the transactions that decide a company's trajectory — priced rounds, tender offers and secondaries, cofounder disputes, strategic sales, and IPOs. Counsel that matches the stakes.",
+      "Repeat founders in the transactions that decide a company's trajectory: priced rounds, tender offers and secondaries, cofounder disputes, strategic sales, and IPOs. Counsel that matches the stakes.",
     image: "/media/event-conversation.jpg",
   },
   {
     id: "lps",
-    h3: "Institutional LPs",
+    h3: "Institutional LPs & Family Offices",
     body:
-      "Institutional limited partners on the buy side of the private markets — side letters, direct investment vehicles, secondary purchases, and the diligence that decides where the next allocation goes.",
+      "Institutional limited partners and family offices on the buy side of the private markets: side letters, direct investment vehicles, secondary purchases, and the diligence that decides where the next allocation goes.",
     image: "/media/event-clients.jpg",
   },
 ];
@@ -277,10 +277,14 @@ export default function WhoWeServe() {
                 ease: [0.22, 1, 0.36, 1],
               }}
               id="serve-h2"
-              className="mt-10 max-w-[38rem] self-end text-right font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.4vw,3.8rem)] font-bold leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)]"
+              // Mobile audit MEDIUM: was `text-right` — on mobile the
+              // sticky column is hidden, so a right-aligned h2 read as
+              // disconnected from the left-aligned eyebrow above it.
+              // Left-align on phone, right-align at md+ where it opposes
+              // the sticky column as originally designed.
+              className="mt-10 max-w-[38rem] self-end text-left font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.4vw,3.8rem)] font-bold leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)] md:text-right"
             >
-              For the funds, founders, and LPs shaping venture&rsquo;s next
-              chapter.
+              Funds, Founders, and LPs shaping venture.
             </motion.h2>
 
             <div className="mt-16 flex flex-col md:mt-24">

@@ -45,12 +45,26 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <form
-          action={`mailto:${CONTACT_EMAIL}`}
-          method="post"
-          encType="text/plain"
-          className="col-span-12 grid min-w-0 content-center gap-x-8 gap-y-7 md:col-span-7 md:grid-cols-2"
-        >
+        {/* Right column — disclaimer + form share ONE grid cell so CSS
+            grid doesn't place them in separate auto-rows (which was
+            causing a huge vertical gap between them). Disclaimer stays
+            visually and semantically BEFORE the form per a11y-lead so
+            SC 3.3.2 is satisfied natively. */}
+        <div className="col-span-12 flex min-w-0 flex-col md:col-span-7">
+          <p className="mb-8 border-l-2 border-[color:var(--rule-on-light)] pl-4 text-[13.5px] leading-relaxed text-[color:var(--muted)]">
+            Submitting this form does not create an attorney-client
+            relationship. Please do not include confidential or
+            time-sensitive information. An attorney-client relationship
+            is established only upon execution of a written engagement
+            letter.
+          </p>
+
+          <form
+            action={`mailto:${CONTACT_EMAIL}`}
+            method="post"
+            encType="text/plain"
+            className="grid min-w-0 gap-x-8 gap-y-7 md:grid-cols-2"
+          >
           <div>
             <label
               htmlFor="name"
@@ -146,17 +160,22 @@ export default function ContactPage() {
           <div className="flex flex-col gap-5 md:col-span-2 md:flex-row md:items-center md:justify-between">
             {/* Direct contact fallbacks — owner contact info, wrapped in
                 <address> per a11y-lead. Two stacked <a>s (email + phone),
-                not a <ul>: it's contact metadata, not a list of peers. */}
-            <address className="not-italic flex flex-col gap-1 text-sm font-medium text-[color:var(--muted)]">
+                not a <ul>: it's contact metadata, not a list of peers.
+                Mobile audit HIGH: inline anchors were 20px tall — same
+                pattern as Footer. `py-3 -my-3` + parent `gap-6`
+                (24px) expands hit rects to ~45px (AAA 44×44) while
+                keeping visual density tight; hit rects touch but never
+                overlap. */}
+            <address className="not-italic flex flex-col gap-6 text-sm font-medium text-[color:var(--muted)]">
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
+                className="inline-block py-3 -my-3 underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
               >
                 {CONTACT_EMAIL}
               </a>
               <a
                 href={`tel:${CONTACT_PHONE_TEL}`}
-                className="underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
+                className="inline-block py-3 -my-3 underline decoration-[color:var(--border-on-light)] underline-offset-4 transition-colors hover:text-[color:var(--gold-deep)] hover:decoration-[color:var(--gold-deep)]"
               >
                 {CONTACT_PHONE_DISPLAY}
               </a>
@@ -168,7 +187,8 @@ export default function ContactPage() {
               Send Inquiry
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { judgmentEvent } from "./sanity/schemas/judgmentEvent";
+import { legalPage } from "./sanity/schemas/legalPage";
 import { apiVersion, dataset, projectId } from "./sanity/env";
 
 /**
@@ -17,6 +18,6 @@ export default defineConfig({
   dataset,
   plugins: [structureTool(), visionTool({ defaultApiVersion: apiVersion })],
   schema: {
-    types: [judgmentEvent],
+    types: [judgmentEvent, legalPage],
   },
 });

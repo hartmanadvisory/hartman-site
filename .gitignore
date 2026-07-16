@@ -40,6 +40,9 @@ yarn-error.log*
 # local assistant tooling
 .claude/
 
+# Internal audit findings — not shipped
+MOBILE_AUDIT.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

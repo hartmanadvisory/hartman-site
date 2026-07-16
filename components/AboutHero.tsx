@@ -55,8 +55,8 @@ export default function AboutHero() {
             </h1>
             <p className="mt-8 max-w-xl text-[17px] leading-relaxed text-[color:var(--muted)] sm:text-[18px]">
               Founder and Principal of Hartman Venture Advisors PLLC. More
-              than a decade advising venture funds, founders, and dealmakers
-              — formerly at Gunderson Dettmer and Lowenstein Sandler.
+              than a decade advising venture funds, founders, and dealmakers,
+              formerly at Gunderson Dettmer and Lowenstein Sandler.
             </p>
 
             {/* Primary CTA. mailto rather than a stubbed `#` target per

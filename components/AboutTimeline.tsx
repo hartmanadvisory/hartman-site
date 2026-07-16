@@ -86,7 +86,7 @@ export default function AboutTimeline() {
             />
             <p className="mt-6 max-w-sm text-[17px] leading-relaxed text-[color:var(--muted)]">
               A continuous record across seed-through-growth venture
-              transactions — at two of the country&rsquo;s leading venture
+              transactions, at two of the country&rsquo;s leading venture
               practices before founding HVA.
             </p>
           </motion.div>

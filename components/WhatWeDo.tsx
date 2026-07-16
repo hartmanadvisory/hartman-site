@@ -65,7 +65,7 @@ function IconFund() {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="h-5 w-5 shrink-0 text-[color:var(--cobalt-light)]"
+      className="h-8 w-8 shrink-0 text-[color:var(--cobalt-light)]"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -87,7 +87,7 @@ function IconFinancings() {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="h-5 w-5 shrink-0 text-[color:var(--cobalt-light)]"
+      className="h-8 w-8 shrink-0 text-[color:var(--cobalt-light)]"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -107,7 +107,7 @@ function IconSecondaries() {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="h-5 w-5 shrink-0 text-[color:var(--cobalt-light)]"
+      className="h-8 w-8 shrink-0 text-[color:var(--cobalt-light)]"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -125,7 +125,7 @@ function IconRestructurings() {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 24 24"
-      className="h-5 w-5 shrink-0 text-[color:var(--cobalt-light)]"
+      className="h-8 w-8 shrink-0 text-[color:var(--cobalt-light)]"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -160,17 +160,17 @@ const SERVICES: Service[] = [
   {
     id: "secondaries",
     title: "Secondaries",
-    subtitle: "GP-led and direct.",
+    subtitle: "GP-led, LP, and direct.",
     detail:
-      "GP-led and direct secondary transactions, tender offers, and continuation vehicles. We handle transfer mechanics, ROFRs, and pricing dynamics so both sides move with confidence.",
+      "GP-led, LP-led, and direct secondary transactions, tender offers, and continuation vehicles. We handle transfer mechanics, ROFRs, and pricing dynamics so both sides move with confidence.",
     Icon: IconSecondaries,
   },
   {
-    id: "restructurings",
-    title: "Restructurings",
-    subtitle: "Recaps and workouts.",
+    id: "restructurings-exits",
+    title: "Restructurings & Exits",
+    subtitle: "Recaps, workouts, and exits.",
     detail:
-      "Recapitalizations, down rounds, and workouts when a company needs to reset. We navigate preferred conversions, bridge financings, and stakeholder negotiations to find a path forward.",
+      "Recapitalizations, down rounds, and workouts when a company needs to reset — plus exit transactions: strategic sales, secondary sales, continuation vehicles, and IPO-track work. We navigate preferred conversions, bridge financings, and stakeholder negotiations from restructuring through exit.",
     Icon: IconRestructurings,
   },
 ];
@@ -226,10 +226,10 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
               className="mt-5 font-[family-name:var(--font-display)] text-[clamp(2.6rem,5.6vw,4.6rem)] font-bold leading-[1.02] tracking-[-0.03em]"
             >
               <span className="text-[color:var(--white)]">
-                Counsel for the deals that{" "}
+                Counsel for{" "}
               </span>
               <span className="text-[color:var(--cobalt-light)]">
-                define a venture.
+                everything venture.
               </span>
             </h2>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-[color:var(--parchment)]">
@@ -390,7 +390,7 @@ function ServiceAccordion({
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => toggle(svc.id)}
-                className="group flex w-full items-start gap-4 py-6 text-left transition-colors hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--navy-deep)]"
+                className="group flex w-full items-start gap-4 py-6 text-left transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt-light)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--navy-deep)]"
               >
                 <span className="mt-[6px]">
                   <Icon />

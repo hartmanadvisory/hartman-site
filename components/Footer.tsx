@@ -1,5 +1,4 @@
 import Link from "next/link";
-import HHMark from "./HHMark";
 
 /**
  * Site footer — Citadel-modeled: full-bleed dark navy band, HH monogram +
@@ -25,64 +24,77 @@ import HHMark from "./HHMark";
 export default function Footer() {
   return (
     <footer className="on-dark relative bg-[color:var(--navy-deep)] text-[color:var(--white)]">
-      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-20 pb-10 sm:px-10 sm:pt-24 lg:px-14">
+      {/* Mobile audit MEDIUM: pb uses a max() of 2.5rem and the bottom
+          safe-area inset env var — keeps the existing 40px floor and
+          grows only on notched iPhones in standalone/PWA mode so the
+          copyright row doesn't hide under the home indicator. Regular
+          mobile Safari sees no change. */}
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-20 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-10 sm:pt-24 lg:px-14">
         {/* Top row — lockup + footer nav */}
         <div className="grid grid-cols-12 gap-x-6 gap-y-10 sm:gap-x-10">
           <div className="col-span-12 flex flex-col gap-5 md:col-span-6">
             <Link
               href="/"
               aria-label="Hartman Venture Advisors — home"
-              className="inline-flex items-center gap-4 text-[color:var(--white)]"
+              className="inline-flex items-center transition-opacity hover:opacity-80"
             >
-              <HHMark className="h-11 w-auto" />
-              <span className="font-[family-name:var(--font-display)] text-[1.05rem] font-semibold uppercase tracking-[0.14em] sm:text-[1.15rem]">
-                Hartman Venture Advisors
-              </span>
+              {/* Official white lockup on --navy-deep — ~18.9:1 contrast.
+                  Plain <img> to bulletproof against next/image + SVG
+                  quirks. Decorative alt="" — Link aria-label carries
+                  the accessible name. Explicit width/height to prevent
+                  CLS. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* Mobile audit COSMETIC: h-10 (40px) was 4px below AAA
+                  44×44. Bumped to h-11 (44px) — meets AAA on mobile,
+                  visual change negligible. */}
+              <img
+                src="/brand/hva-lockup-white.svg"
+                alt=""
+                width={317}
+                height={48}
+                className="h-11 w-auto sm:h-12"
+              />
             </Link>
-
-            {/* Owner contact info — <address> is exact per HTML semantics
-                (page-owner contact). Not a <nav> because email/phone are
-                direct actions, not site navigation. Stacked <a>s, not a
-                <ul>. */}
-            <address className="not-italic flex flex-col gap-1 text-[14px] text-[color:var(--parchment-dim)]">
-              <a
-                href="mailto:mhartman@hartmanadvisory.com"
-                className="transition-colors hover:text-[color:var(--white)]"
-              >
-                mhartman@hartmanadvisory.com
-              </a>
-              <a
-                href="tel:+16179871512"
-                className="transition-colors hover:text-[color:var(--white)]"
-              >
-                +1 (617) 987-1512
-              </a>
-            </address>
           </div>
 
-          <nav
-            aria-label="Footer"
-            className="col-span-12 md:col-span-6 md:justify-self-end"
-          >
-            <ul className="flex flex-col gap-4 text-[15px] font-medium md:text-right">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-[color:var(--white)] transition-opacity hover:opacity-80"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-[color:var(--white)] transition-opacity hover:opacity-80"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </nav>
+          <div className="col-span-12 flex flex-col gap-8 md:col-span-6 md:items-end">
+            <nav aria-label="Footer">
+              <ul className="flex flex-col gap-4 text-[15px] font-medium md:text-right">
+                <li>
+                  <Link
+                    href="/about"
+                    className="text-[color:var(--white)] transition-opacity hover:opacity-80"
+                  >
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="text-[color:var(--white)] transition-opacity hover:opacity-80"
+                  >
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            {/* NY Rule 7.1 attorney advertising disclosures — persistent
+                on every page. Plain <p>s inside the existing <footer>
+                contentinfo landmark per a11y-lead (no extra <aside>).
+                "Attorney Advertising" is sentence-case in DOM + CSS
+                uppercase so SR reads it as words, not letters. Prior-
+                results disclaimer is required because the site cites
+                past-performance figures ($6B+ transacted, 100+ deals). */}
+            <div className="space-y-1 text-[13px] leading-relaxed text-[color:var(--parchment-dim)] md:text-right">
+              <p className="font-semibold uppercase tracking-[0.14em]">
+                Attorney Advertising.
+              </p>
+              <p>
+                Prior results do not guarantee a similar outcome.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Divider — decorative hairline. */}
@@ -91,32 +103,38 @@ export default function Footer() {
           className="my-12 border-0 h-px bg-[color:var(--parchment-dim)] opacity-25 sm:my-16"
         />
 
-        {/* Bottom row — legal · copyright · social */}
+        {/* Bottom row — legal · copyright · social. Legal links point to
+            /legal/{slug} routes (Sanity-backed with fallback copy so they
+            work pre-CMS). */}
         <div className="flex flex-col items-start justify-between gap-6 text-[color:var(--parchment-dim)] md:flex-row md:items-center">
+          {/* Mobile audit HIGH: inline anchors were 17px tall — a11y-lead
+              spec calls for explicit min-h-11 items-center on these
+              (they read as nav chips, so honest sizing beats negative-
+              margin trickery). */}
           <ul
             aria-label="Legal"
-            className="flex flex-wrap items-center gap-x-8 gap-y-2 text-[14px]"
+            className="flex flex-wrap items-center gap-x-8 gap-y-1 text-[14px]"
           >
             <li>
               <Link
-                href="/privacy"
-                className="transition-colors hover:text-[color:var(--white)]"
+                href="/legal/privacy"
+                className="inline-flex min-h-11 items-center transition-colors hover:text-[color:var(--white)]"
               >
                 Privacy
               </Link>
             </li>
             <li>
               <Link
-                href="/terms"
-                className="transition-colors hover:text-[color:var(--white)]"
+                href="/legal/terms"
+                className="inline-flex min-h-11 items-center transition-colors hover:text-[color:var(--white)]"
               >
                 Terms
               </Link>
             </li>
             <li>
               <Link
-                href="/disclosures"
-                className="transition-colors hover:text-[color:var(--white)]"
+                href="/legal/disclosures"
+                className="inline-flex min-h-11 items-center transition-colors hover:text-[color:var(--white)]"
               >
                 Disclosures
               </Link>

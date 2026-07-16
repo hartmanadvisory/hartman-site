@@ -59,7 +59,11 @@
     sans-serif;
 
   /* Layout */
-  --nav-height: 4.5rem;
+  /* Was 4.5rem (72px); bumped to 5.5rem (88px) to fit the larger
+     official secondary lockup on Nav. scroll-padding-top and
+     scroll-margin-top below both consume this var so section anchors
+     stay clear of the sticky header automatically. */
+  --nav-height: 5.5rem;
   --container: 1440px;
 
   /* Motion */

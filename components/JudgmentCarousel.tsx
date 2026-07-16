@@ -155,7 +155,7 @@ export default function JudgmentCarousel({
                   sizes="(max-width: 1440px) 100vw, 1440px"
                   priority={i === 0}
                   loading={i === 0 ? "eager" : "lazy"}
-                  className="object-cover object-center"
+                  className="object-cover object-top"
                 />
               )}
             </div>

@@ -100,59 +100,6 @@ export default function ClosingCTA() {
               </Link>
             </motion.div>
           </motion.div>
-
-          {/* Wayfinding arrow — animates once when this section enters view,
-              then rests fully drawn. It starts below the headline and curves
-              into the left edge of the CTA button, using the empty space
-              between the two columns intentionally. Hidden below md — on
-              stacked mobile the button sits directly under the h2. */}
-          <div
-            aria-hidden="true"
-            className="col-span-12 hidden md:col-span-7 md:block"
-          >
-            <svg
-              className="cta-arrow pointer-events-none -mt-28 block h-24 w-[calc(100%+5.25rem)] max-w-[48rem] overflow-visible"
-              viewBox="0 0 620 120"
-              preserveAspectRatio="none"
-              focusable="false"
-            >
-              <motion.path
-                d="M10 92 C 172 92, 334 86, 500 50"
-                fill="none"
-                stroke="var(--cobalt-light)"
-                strokeWidth="5.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                pathLength={1}
-                initial={mounted && !reduce ? { pathLength: 0, opacity: 0 } : false}
-                whileInView={{ pathLength: 1, opacity: 1 }}
-                viewport={{ once: true, amount: 0.65 }}
-                transition={{
-                  pathLength: {
-                    duration: reduce ? 0 : 0.75,
-                    ease: [0.22, 1, 0.36, 1],
-                  },
-                  opacity: { duration: reduce ? 0 : 0.2 },
-                }}
-              />
-              <motion.polyline
-                points="474,31 506,49 482,78"
-                fill="none"
-                stroke="var(--cobalt-light)"
-                strokeWidth="5.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                initial={mounted && !reduce ? { opacity: 0, scale: 0.88 } : false}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, amount: 0.65 }}
-                transition={{
-                  duration: reduce ? 0 : 0.28,
-                  delay: reduce ? 0 : 0.55,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-              />
-            </svg>
-          </div>
         </div>
       </div>
     </section>
