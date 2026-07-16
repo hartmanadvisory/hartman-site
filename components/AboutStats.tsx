@@ -147,7 +147,7 @@ export default function AboutStats() {
       aria-labelledby="about-stats-eyebrow"
       className="bg-[color:var(--navy-deep)]"
     >
-      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-24 sm:px-10 sm:pt-10 sm:pb-32 lg:px-14">
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-16 sm:px-10 sm:pt-10 sm:pb-20 lg:px-14">
         <p
           id="about-stats-eyebrow"
           className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt-light)]"
@@ -170,19 +170,6 @@ export default function AboutStats() {
             />
           ))}
         </dl>
-
-        {/* Founding date — plain <p> with semantic <time>. Outside the
-            <dl> so it doesn't get read as a fourth stat. */}
-        <p className="mt-12 text-[14px] text-[color:var(--parchment)]">
-          Firm founded{" "}
-          <time
-            dateTime="2024-05"
-            className="font-semibold text-[color:var(--cobalt-light)]"
-          >
-            May 2024
-          </time>
-          .
-        </p>
       </div>
     </section>
   );
