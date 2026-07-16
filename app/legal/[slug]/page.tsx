@@ -93,6 +93,8 @@ const components: PortableTextComponents = {
     link: ({ children, value }) => {
       const href: string = value?.href ?? "#";
       const isExternal = /^https?:\/\//i.test(href);
+      // mailto: and tel: hand off to native handlers — no "new tab"
+      // suffix (they never spawn a browser tab), no target=_blank.
       return (
         <a
           href={href}

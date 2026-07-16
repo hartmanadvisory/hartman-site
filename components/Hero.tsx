@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
@@ -39,9 +39,10 @@ const HEADLINE_LINES = [
   "Defining Deals",
 ] as const;
 const HEADLINE_FULL = HEADLINE_LINES.join(" ");
+const HEADLINE_TOTAL_CHARS = HEADLINE_FULL.length;
 
-// Cursor-swipe mask reveal — total sweep duration.
-const REVEAL_DURATION_S = 1.4;
+// Typewriter animation — total type-out duration.
+const REVEAL_DURATION_S = 1.6;
 
 /**
  * Hero slide catalogue. Every entry is a REAL Hartman photograph. Some have
@@ -58,64 +59,114 @@ const REVEAL_DURATION_S = 1.4;
  * floor); additive layer stacks on top for the two bright slides.
  */
 /**
- * CursorSwipeHeadline — visible, aria-hidden headline. Text renders in
- * place; a clip-path animates from `inset(0 100% 0 0)` (fully clipped
- * from the right) to `inset(0)` (fully revealed) over REVEAL_DURATION_S,
- * left→right — a calm "cursor unveils the code" effect. A thin 2px
- * cobalt-light bar rides the leading edge, synced to the same timing,
- * and blinks 2× at the end before fading. The parent h1 carries the
- * sr-only full text; SR reads the heading exactly once.
+ * TypewriterHeadline — visible, aria-hidden headline layer. Chars
+ * append one at a time over REVEAL_DURATION_S (~28ms per char across
+ * the 61-char headline). A cobalt-light cursor bar rides the tail of
+ * the typed text — solid during typing, then blinks 3× and fades.
  *
- * Under `reduce`, nothing animates — clip is `inset(0)` at rest and no
- * cursor renders. SC 2.3.3 compliant.
+ * Layout stability: every line renders all its characters at all
+ * times, but characters past the reveal window use `visibility:
+ * hidden` so their space is reserved. No layout shift as chars
+ * append. The parent h1 carries the sr-only full text; SR reads the
+ * heading exactly once.
+ *
+ * Under `reduce`, no rAF loop runs — headline renders at full text
+ * at rest with no cursor. SC 2.3.3 compliant.
  */
-function CursorSwipeHeadline({ reduce }: { reduce: boolean }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    // rAF defers a single frame so SSR paints the final state before
-    // the client swaps to the animated one — prevents a flash of the
-    // fully-revealed text on hydration.
-    const id = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
+function TypewriterHeadline({ reduce }: { reduce: boolean }) {
+  const [revealed, setRevealed] = useState(HEADLINE_TOTAL_CHARS);
+  const startedRef = useRef(false);
 
-  const animate = mounted && !reduce;
+  // Reset to 0 synchronously on client mount (before paint) so the
+  // typewriter runs from the beginning. SSR renders the full text,
+  // which prevents a flash if the client script never lands.
+  useLayoutEffect(() => {
+    if (reduce || startedRef.current) return;
+    startedRef.current = true;
+    setRevealed(0);
+  }, [reduce]);
+
+  useEffect(() => {
+    if (reduce) return;
+    const start = performance.now();
+    let raf = 0;
+    const tick = () => {
+      const elapsed = (performance.now() - start) / 1000;
+      const next = Math.min(
+        HEADLINE_TOTAL_CHARS,
+        Math.round((elapsed / REVEAL_DURATION_S) * HEADLINE_TOTAL_CHARS),
+      );
+      setRevealed(next);
+      if (next < HEADLINE_TOTAL_CHARS) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [reduce]);
+
+  const done = revealed >= HEADLINE_TOTAL_CHARS;
+
+  // Walk each line, mark which chars fall within the reveal window.
+  // Space characters between lines count toward the global index so
+  // the timing matches HEADLINE_FULL.length.
+  let seen = 0;
 
   return (
-    <span aria-hidden="true" className="relative block">
-      {/* Text layer — clipped from the right when animating. */}
-      <motion.span
-        className="block"
-        initial={animate ? { clipPath: "inset(0 100% 0 0)" } : false}
-        animate={{ clipPath: "inset(0 0% 0 0)" }}
-        transition={{ duration: animate ? REVEAL_DURATION_S : 0, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {HEADLINE_LINES.map((line, li) => (
-          <span key={li} className="block whitespace-pre">
-            {line}
-          </span>
-        ))}
-      </motion.span>
+    <span aria-hidden="true" className="block">
+      {HEADLINE_LINES.map((line, li) => {
+        const chars = [...line];
+        const startOfLine = seen;
+        seen += chars.length;
+        // Account for the join(" ") space between lines.
+        if (li < HEADLINE_LINES.length - 1) seen += 1;
 
-      {/* Cursor bar — synced to the reveal, then blinks 2× and fades.
-          Only renders when motion is allowed. Absolutely positioned so
-          it doesn't shift layout. */}
-      {animate && (
-        <motion.span
-          aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 w-[3px] bg-[color:var(--cobalt-light)]"
-          initial={{ left: 0, opacity: 1 }}
-          animate={{
-            left: ["0%", "100%", "100%", "100%", "100%"],
-            opacity: [1, 1, 0, 1, 0],
-          }}
-          transition={{
-            duration: REVEAL_DURATION_S + 0.8,
-            times: [0, REVEAL_DURATION_S / (REVEAL_DURATION_S + 0.8), (REVEAL_DURATION_S + 0.2) / (REVEAL_DURATION_S + 0.8), (REVEAL_DURATION_S + 0.5) / (REVEAL_DURATION_S + 0.8), 1],
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        />
-      )}
+        // Index (within THIS line) of the last visible character.
+        // When -1, no char on this line has been revealed yet.
+        const lastVisibleOnLine = Math.min(
+          chars.length - 1,
+          revealed - 1 - startOfLine,
+        );
+        // Does the cursor sit at the end of this line right now?
+        const isCursorLine =
+          !done && lastVisibleOnLine >= -1 && lastVisibleOnLine < chars.length &&
+          (li === HEADLINE_LINES.length - 1
+            ? revealed <= startOfLine + chars.length
+            : revealed <= startOfLine + chars.length);
+        const cursorOnThisLine =
+          !done &&
+          revealed >= startOfLine &&
+          revealed <= startOfLine + chars.length;
+
+        return (
+          <span key={li} className="block whitespace-pre">
+            {chars.map((ch, ci) => {
+              const globalIdx = startOfLine + ci;
+              const visible = globalIdx < revealed;
+              return (
+                <span
+                  key={ci}
+                  style={visible ? undefined : { visibility: "hidden" }}
+                >
+                  {ch}
+                </span>
+              );
+            })}
+            {/* Cursor: rides the tail on the current line, or at the
+                end of the last line when typing completes. */}
+            {(cursorOnThisLine || (done && li === HEADLINE_LINES.length - 1)) && (
+              <span
+                aria-hidden="true"
+                className={
+                  done
+                    ? "cursor-blink-3 ml-1 inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--cobalt-light)] align-baseline"
+                    : "ml-1 inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--cobalt-light)] align-baseline"
+                }
+              />
+            )}
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -240,10 +291,10 @@ export default function Hero() {
         <div className="absolute inset-x-0 top-0 z-10 px-6 pt-16 sm:px-10 sm:pt-20 lg:px-14">
           <h1
             id="hero-h1"
-            className="max-w-[46rem] font-[family-name:var(--font-display)] text-[clamp(2.6rem,6.4vw,5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
+            className="max-w-[56rem] font-[family-name:var(--font-display)] text-[clamp(2.4rem,5.8vw,4.6rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
           >
             <span className="sr-only">{HEADLINE_FULL}</span>
-            <CursorSwipeHeadline reduce={!!reduce} />
+            <TypewriterHeadline reduce={!!reduce} />
           </h1>
         </div>
 
