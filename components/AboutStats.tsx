@@ -111,11 +111,11 @@ function StatBlock({
         "col-span-12 flex min-h-[16rem] flex-col justify-between md:col-span-4",
         index === 0
           ? "md:col-start-1"
-          : "md:border-l md:border-[color:var(--rule-on-white)] md:pl-10",
+          : "md:border-l md:border-[rgba(106,142,230,0.20)] md:pl-10",
       ].join(" ")}
     >
       <dd
-        className="font-[family-name:var(--font-display)] text-[clamp(3rem,6.8vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[color:var(--ink)]"
+        className="font-[family-name:var(--font-display)] text-[clamp(3rem,6.8vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[color:var(--white)]"
         style={{ fontFeatureSettings: "'tnum' 1, 'cv11' 1" }}
       >
         <span aria-hidden="true">{display}</span>
@@ -127,10 +127,10 @@ function StatBlock({
         variants={meta}
         className="mt-6 space-y-3"
       >
-        <dt className="max-w-[15rem] text-[14px] font-medium uppercase tracking-[0.14em] text-[color:var(--ink)]">
+        <dt className="max-w-[15rem] text-[14px] font-medium uppercase tracking-[0.14em] text-[color:var(--white)]">
           {stat.label}
         </dt>
-        <p className="max-w-[18rem] text-[13.5px] leading-snug text-[color:var(--muted)]">
+        <p className="max-w-[18rem] text-[13.5px] leading-snug text-[color:var(--parchment)]">
           {stat.info}
         </p>
       </motion.div>
@@ -147,12 +147,12 @@ export default function AboutStats() {
     <section
       id="about-stats"
       aria-labelledby="about-stats-eyebrow"
-      className="bg-[color:var(--white)]"
+      className="bg-[color:var(--navy-deep)]"
     >
-      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-24 sm:px-10 sm:pt-10 sm:pb-32 lg:px-14">
+      <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-16 sm:px-10 sm:pt-10 sm:pb-20 lg:px-14">
         <p
           id="about-stats-eyebrow"
-          className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]"
+          className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt-light)]"
         >
           By the Numbers
         </p>
@@ -172,16 +172,6 @@ export default function AboutStats() {
             />
           ))}
         </dl>
-
-        {/* Founding date — plain <p> with semantic <time>. Outside the
-            <dl> so it doesn't get read as a fourth stat. */}
-        <p className="mt-12 text-[14px] text-[color:var(--muted)]">
-          Firm founded{" "}
-          <time dateTime="2024-05" className="font-semibold text-[color:var(--ink)]">
-            May 2024
-          </time>
-          .
-        </p>
       </div>
     </section>
   );

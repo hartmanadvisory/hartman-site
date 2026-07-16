@@ -51,10 +51,11 @@
   --fr-inner: var(--navy);
   --fr-outer: var(--gold-deep);
 
-  /* Fonts — Inter (self-hosted, neutral grotesk, Söhne/SF Pro/Neue Haas class,
-     matches the Blackstone-style display sans) with system fallback. */
-  --font-display: var(--font-inter), system-ui, -apple-system, "Segoe UI",
-    Helvetica, Arial, sans-serif;
+  /* Fonts — Geist Sans (Vercel variable geometric sans) drives display
+     headings; Inter (self-hosted, humanist neutral grotesk) drives body
+     copy. Both are self-hosted by next/font. */
+  --font-display: var(--font-geist-sans), var(--font-inter), system-ui,
+    -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
 
