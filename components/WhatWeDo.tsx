@@ -250,10 +250,16 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
         </div>
       </div>
 
-      {/* Event carousel — inset gutters, extends down past the dark band. */}
-      <div className="relative mx-6 h-[clamp(20rem,52vh,34rem)] sm:mx-10 lg:mx-14">
-        <JudgmentCarousel events={events} />
-      </div>
+      {/* Event carousel — hidden when Sanity is unpopulated so we
+          never ship placeholder events. Gated at this level (rather
+          than inside JudgmentCarousel) so the carousel component
+          never mounts with an empty array — cleaner Rules-of-Hooks
+          story than a mid-body early return. */}
+      {events.length > 0 && (
+        <div className="relative mx-6 h-[clamp(20rem,52vh,34rem)] sm:mx-10 lg:mx-14">
+          <JudgmentCarousel events={events} />
+        </div>
+      )}
     </section>
   );
 }
