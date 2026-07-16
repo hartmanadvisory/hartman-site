@@ -108,7 +108,12 @@ function StatBlock({
   return (
     <div
       className={[
-        "col-span-12 flex min-h-[16rem] flex-col justify-between md:col-span-4",
+        // Mobile-2 audit: 16rem min-height was fine when three stacked
+        // horizontally at md+ (parallel visual weight), but on mobile
+        // three stacked cells of 256px each read as huge dead space
+        // between the label + info blocks. Drop the min-height below
+        // md so mobile heights collapse to content-natural.
+        "col-span-12 flex flex-col justify-between md:col-span-4 md:min-h-[16rem]",
         index === 0
           ? "md:col-start-1"
           : "md:border-l md:border-[rgba(106,142,230,0.20)] md:pl-10",
@@ -160,7 +165,7 @@ export default function AboutStats() {
         <dl
           ref={statsRef}
           role="list"
-          className="grid grid-cols-12 gap-x-6 gap-y-14 sm:gap-x-10"
+          className="grid grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-10 md:gap-y-14"
         >
           {STATS.map((stat, i) => (
             <StatBlock

@@ -121,22 +121,25 @@ function TypewriterHeadline({ reduce }: { reduce: boolean }) {
         // Account for the join(" ") space between lines.
         if (li < HEADLINE_LINES.length - 1) seen += 1;
 
-        // Index (within THIS line) of the last visible character.
-        // When -1, no char on this line has been revealed yet.
-        const lastVisibleOnLine = Math.min(
-          chars.length - 1,
-          revealed - 1 - startOfLine,
-        );
-        // Does the cursor sit at the end of this line right now?
-        const isCursorLine =
-          !done && lastVisibleOnLine >= -1 && lastVisibleOnLine < chars.length &&
-          (li === HEADLINE_LINES.length - 1
-            ? revealed <= startOfLine + chars.length
-            : revealed <= startOfLine + chars.length);
-        const cursorOnThisLine =
-          !done &&
-          revealed >= startOfLine &&
-          revealed <= startOfLine + chars.length;
+        // Cursor position within this line, if any. `cursorPos` is
+        // the char index (0..chars.length) at which the cursor should
+        // sit — i.e., after the last-revealed char and before the
+        // first hidden char. -1 means the cursor is not on this line.
+        //
+        //   revealed < startOfLine                       → cursor is on a later line
+        //   revealed >= startOfLine + chars.length + 1   → cursor is past this line
+        //   otherwise                                    → cursorPos = revealed - startOfLine
+        //
+        // The final-line "done" state parks the cursor at the very
+        // end of the last line where it blinks 3× and fades.
+        let cursorPos = -1;
+        if (!done) {
+          if (revealed >= startOfLine && revealed <= startOfLine + chars.length) {
+            cursorPos = revealed - startOfLine;
+          }
+        } else if (li === HEADLINE_LINES.length - 1) {
+          cursorPos = chars.length;
+        }
 
         return (
           <span key={li} className="block whitespace-pre">
@@ -144,23 +147,35 @@ function TypewriterHeadline({ reduce }: { reduce: boolean }) {
               const globalIdx = startOfLine + ci;
               const visible = globalIdx < revealed;
               return (
-                <span
-                  key={ci}
-                  style={visible ? undefined : { visibility: "hidden" }}
-                >
+                <span key={ci} style={{ visibility: visible ? "visible" : "hidden", position: "relative" }}>
+                  {/* Inline cursor sitting immediately before this
+                      character. It's positioned absolute so it doesn't
+                      shift the character's own width; `left: 0` +
+                      `translateX(-2px)` snugs it to the leading edge. */}
+                  {cursorPos === ci && (
+                    <span
+                      aria-hidden="true"
+                      className={
+                        done
+                          ? "cursor-blink-3 absolute left-0 top-[0.075em] h-[0.85em] w-[0.06em] -translate-x-[2px] bg-[color:var(--cobalt-light)]"
+                          : "absolute left-0 top-[0.075em] h-[0.85em] w-[0.06em] -translate-x-[2px] bg-[color:var(--cobalt-light)]"
+                      }
+                      style={{ visibility: "visible" }}
+                    />
+                  )}
                   {ch}
                 </span>
               );
             })}
-            {/* Cursor: rides the tail on the current line, or at the
-                end of the last line when typing completes. */}
-            {(cursorOnThisLine || (done && li === HEADLINE_LINES.length - 1)) && (
+            {/* Cursor at end-of-line — only when no character remains
+                to anchor it, i.e., cursorPos === chars.length. */}
+            {cursorPos === chars.length && (
               <span
                 aria-hidden="true"
                 className={
                   done
-                    ? "cursor-blink-3 ml-1 inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--cobalt-light)] align-baseline"
-                    : "ml-1 inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--cobalt-light)] align-baseline"
+                    ? "cursor-blink-3 ml-[2px] inline-block h-[0.85em] w-[0.06em] translate-y-[0.075em] bg-[color:var(--cobalt-light)] align-baseline"
+                    : "ml-[2px] inline-block h-[0.85em] w-[0.06em] translate-y-[0.075em] bg-[color:var(--cobalt-light)] align-baseline"
                 }
               />
             )}
@@ -291,7 +306,7 @@ export default function Hero() {
         <div className="absolute inset-x-0 top-0 z-10 px-6 pt-16 sm:px-10 sm:pt-20 lg:px-14">
           <h1
             id="hero-h1"
-            className="max-w-[56rem] font-[family-name:var(--font-display)] text-[clamp(2.4rem,5.8vw,4.6rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
+            className="max-w-[56rem] font-[family-name:var(--font-display)] text-[clamp(1.75rem,5.8vw,4.6rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
           >
             <span className="sr-only">{HEADLINE_FULL}</span>
             <TypewriterHeadline reduce={!!reduce} />
