@@ -59,6 +59,8 @@ const STATS: Stat[] = [
   },
 ];
 
+const RULE_MT = ["mt-0", "mt-4", "mt-8"] as const;
+
 function StatBlock({
   stat,
   index,
@@ -109,13 +111,19 @@ function StatBlock({
     <div
       className={[
         "col-span-12 flex min-h-[16rem] flex-col justify-between md:col-span-4",
-        index === 0
-          ? "md:col-start-1"
-          : "md:border-l md:border-[color:var(--rule-on-white)] md:pl-10",
+        index === 0 ? "md:col-start-1" : "md:pl-10",
       ].join(" ")}
     >
+      {/* Decorative top hairline — staggered vertical offset per cell
+          creates a subtle stair-step rhythm across the row. Purely
+          visual (WCAG 1.4.11 note exempts decorative components), so
+          aria-hidden. */}
+      <span
+        aria-hidden="true"
+        className={`block h-px w-12 bg-[color:var(--cobalt-light)] ${RULE_MT[index]}`}
+      />
       <dd
-        className="font-[family-name:var(--font-display)] text-[clamp(3rem,6.8vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[color:var(--ink)]"
+        className="mt-6 font-[family-name:var(--font-display)] text-[clamp(3rem,6.8vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[color:var(--white)]"
         style={{ fontFeatureSettings: "'tnum' 1, 'cv11' 1" }}
       >
         <span aria-hidden="true">{display}</span>
@@ -127,10 +135,10 @@ function StatBlock({
         variants={meta}
         className="mt-6 space-y-3"
       >
-        <dt className="max-w-[15rem] text-[14px] font-medium uppercase tracking-[0.14em] text-[color:var(--ink)]">
+        <dt className="max-w-[15rem] text-[14px] font-medium uppercase tracking-[0.14em] text-[color:var(--white)]">
           {stat.label}
         </dt>
-        <p className="max-w-[18rem] text-[13.5px] leading-snug text-[color:var(--muted)]">
+        <p className="max-w-[18rem] text-[13.5px] leading-snug text-[color:var(--parchment)]">
           {stat.info}
         </p>
       </motion.div>
@@ -147,7 +155,7 @@ export default function AboutStats() {
     <section
       id="about-stats"
       aria-labelledby="about-stats-eyebrow"
-      className="bg-[color:var(--white)]"
+      className="bg-[color:var(--navy-deep)]"
     >
       <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-8 pb-24 sm:px-10 sm:pt-10 sm:pb-32 lg:px-14">
         <p
@@ -175,9 +183,12 @@ export default function AboutStats() {
 
         {/* Founding date — plain <p> with semantic <time>. Outside the
             <dl> so it doesn't get read as a fourth stat. */}
-        <p className="mt-12 text-[14px] text-[color:var(--muted)]">
+        <p className="mt-12 text-[14px] text-[color:var(--parchment)]">
           Firm founded{" "}
-          <time dateTime="2024-05" className="font-semibold text-[color:var(--ink)]">
+          <time
+            dateTime="2024-05"
+            className="font-semibold text-[color:var(--cobalt-light)]"
+          >
             May 2024
           </time>
           .

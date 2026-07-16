@@ -3,15 +3,15 @@ import AboutHero from "@/components/AboutHero";
 import AboutStats from "@/components/AboutStats";
 import AboutTimeline from "@/components/AboutTimeline";
 import AboutPrinciples from "@/components/AboutPrinciples";
-import ClosingCTA from "@/components/ClosingCTA";
 
 /**
  * /about — the firm's origin story. Same design DNA as the homepage.
  *
- *   AboutHero → AboutStats → Background (Timeline) → Principles → Closing CTA
+ *   AboutHero → AboutStats → Background (Timeline) → Principles
  *
- * Portfolio (logo wall) moved to the homepage between WhatWeDo and
- * WhoWeServe per the final-pass direction.
+ * ClosingCTA lives on the homepage only — About ends on the Principles
+ * band. Portfolio (logo wall) moved to the homepage between WhatWeDo
+ * and WhoWeServe per the final-pass direction.
  */
 export const metadata: Metadata = {
   title: "About — Hartman Venture Advisors",
@@ -26,7 +26,6 @@ export default function AboutPage() {
       <AboutStats />
       <AboutTimeline />
       <AboutPrinciples />
-      <ClosingCTA />
     </>
   );
 }
