@@ -10,6 +10,22 @@ export type JudgmentEvent = {
   imageAlt?: string;
 };
 
+/**
+ * Fallback used when Sanity is unconfigured or returns no records.
+ * Single real event (a16z Tech Week NYC) so the carousel band always
+ * has substantive content on screen — never renders as an empty band
+ * or under-construction placeholder. Real events replace this once
+ * Sanity is populated.
+ */
+const FALLBACK_EVENTS: JudgmentEvent[] = [
+  {
+    id: "fallback-a16z-tech-week",
+    title: "a16z Tech Week NYC",
+    date: "2025-06-01",
+    imageUrl: "/media/event-speaker-panel.jpg",
+  },
+];
+
 type RawEvent = {
   _id: string;
   title: string;
@@ -27,13 +43,12 @@ const JUDGMENT_QUERY = `*[_type == "judgmentEvent"] | order(order asc, date desc
 }`;
 
 /**
- * Fetch published judgment events. Returns an empty array when Sanity is
- * unconfigured or returns no records — the carousel component hides
- * itself when the array is empty so the site never ships placeholder
- * events (they read as "under construction" to visitors).
+ * Fetch published judgment events. Falls back to a single real event
+ * (see FALLBACK_EVENTS) when Sanity isn't configured or has no rows,
+ * so the carousel always renders substantive content.
  */
 export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
-  if (!sanityConfigured || !sanityClient) return [];
+  if (!sanityConfigured || !sanityClient) return FALLBACK_EVENTS;
 
   try {
     const rows = await sanityClient.fetch<RawEvent[]>(
@@ -41,7 +56,7 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
       {},
       { next: { revalidate: 300, tags: ["judgmentEvent"] } },
     );
-    if (!rows?.length) return [];
+    if (!rows?.length) return FALLBACK_EVENTS;
 
     return rows.map((row) => ({
       id: row._id,
@@ -51,7 +66,7 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
       imageUrl: row.image ? urlFor(row.image) : "",
     }));
   } catch {
-    return [];
+    return FALLBACK_EVENTS;
   }
 }
 
