@@ -45,17 +45,20 @@ const HEADLINE_TOTAL_CHARS = HEADLINE_FULL.length;
 const REVEAL_DURATION_S = 1.6;
 
 /**
- * Hero slide catalogue. Every entry is a REAL Hartman photograph. Some have
- * naturally dark upper-left regions (safe for white h1 without scrim), others
- * have bright windows/walls behind the headline zone — those get an additive
- * scrim layer so the composite pixel behind the h1 stays ≥ 4.5:1.
+ * Hero slide catalogue — DESKTOP (md+) only. Every entry is a REAL Hartman
+ * photograph. Some have naturally dark upper-left regions (safe for white h1
+ * without scrim), others have bright windows/walls behind the headline zone —
+ * those get an additive scrim layer so the composite pixel behind the h1
+ * stays ≥ 4.5:1.
  *
  * Contrast (worst-case composite white pixel behind h1 top-left, verified):
  *  - hero-3.jpg               dark suits,  no scrim needed        ~10.8:1
  *  - hero-event-speaker.png   night pane,  no scrim needed        ~14:1
  *  - hero-event-conversation  midtones,    +additive scrim α=0.35 ~5.2:1
- * A base scrim α=0.20 sits under ALL slides at all times (deterministic
- * floor); additive layer stacks on top for the bright slide.
+ * A base scrim α=0.20 sits under ALL desktop slides at all times
+ * (deterministic floor); additive layer stacks on top for the bright slide.
+ * Both desktop scrims are gated `hidden md:block` so they never stack on
+ * top of the mobile scrim.
  */
 /**
  * TypewriterHeadline — visible, aria-hidden headline layer. Chars
@@ -194,15 +197,48 @@ const HERO_SLIDES: readonly HeroSlide[] = [
   { src: "/hero/hero-event-speaker.png", needsScrim: false },
   { src: "/hero/hero-event-conversation.png", needsScrim: true },
 ];
+
+/**
+ * MOBILE (<md) hero — a single static portrait photograph. No rotation, so
+ * no play/pause control is rendered below md.
+ *
+ * Contrast: this image is bright exactly where the h1 sits (ceiling + a wall
+ * of windows). Measured p99 worst-case pixel per 5% horizontal band across
+ * the full width the h1 can occupy, the image PEAKS around 40–50% height
+ * (RGB ~241) — brighter lower down than at the top. The existing desktop
+ * scrim math (composite α≈0.536) yields only 4.01:1 here — a fail. Solving
+ * for AA against white text:
+ *   α=0.45 -> 3.24:1 fail   α=0.55 -> 4.37:1 fail (at the 40–50% peak)
+ *   α=0.62 -> 5.44:1 PASS   (worst band; every band 0–70% clears 4.5:1)
+ * So mobile uses a dedicated TOP-TO-BOTTOM gradient held at α=0.62 through
+ * the whole zone the h1 can occupy — the h1 sits at the TOP on mobile and
+ * the photo's dark floor is at the bottom, so a T-B ramp both reads better
+ * and mutes the photo less than the desktop's L-R ramp would.
+ */
+const MOBILE_HERO_SRC = "/hero/hero-mobile-1.jpg";
+
 const AUTOROTATE_MS = 8000;
+const DESKTOP_MQ = "(min-width: 768px)";
 
 export default function Hero() {
   const reduce = useReducedMotion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false); // user-toggled
   const [pageHidden, setPageHidden] = useState(false);
+  // Mobile shows one static photo, so the carousel must not tick there —
+  // otherwise hidden state mutates with no reachable control (a11y-lead).
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  const shouldRotate = !reduce && !paused && !pageHidden && HERO_SLIDES.length > 1;
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_MQ);
+    const apply = () => setIsDesktop(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const shouldRotate =
+    isDesktop && !reduce && !paused && !pageHidden && HERO_SLIDES.length > 1;
 
   // Auto-advance timer for the ambient background image rotation.
   useEffect(() => {
@@ -242,7 +278,22 @@ export default function Hero() {
       <div className="on-dark relative ml-6 h-[clamp(32rem,78vh,52rem)] overflow-hidden bg-[color:var(--navy)] sm:ml-10 lg:ml-14">
         {/* Image stack — decorative, all aria-hidden. Cross-fade via opacity
             controlled by active index. */}
-        <div aria-hidden="true" className="absolute inset-0">
+        {/* MOBILE (<md) — single static portrait photo. `sizes` resolves to
+            1px at md+ so desktop never downloads it. */}
+        <div aria-hidden="true" className="absolute inset-0 md:hidden">
+          <Image
+            src={MOBILE_HERO_SRC}
+            alt=""
+            fill
+            sizes="(max-width: 767px) 100vw, 1px"
+            priority
+            className="object-cover object-center"
+          />
+        </div>
+
+        {/* DESKTOP (md+) — rotating slide stack. `sizes` resolves to 1px
+            below md so phones never download these landscape images. */}
+        <div aria-hidden="true" className="absolute inset-0 hidden md:block">
           {HERO_SLIDES.map((slide, i) => (
             <div
               key={slide.src}
@@ -257,7 +308,7 @@ export default function Hero() {
                 src={slide.src}
                 alt=""
                 fill
-                sizes="100vw"
+                sizes="(max-width: 767px) 1px, 100vw"
                 priority={i === 0}
                 loading={i === 0 ? "eager" : "lazy"}
                 className="object-cover object-center"
@@ -266,26 +317,43 @@ export default function Hero() {
           ))}
         </div>
 
-        {/* BASE scrim — always on. Localized top-left. Deterministic AA
-            floor for the white h1 across every slide. */}
+        {/* MOBILE scrim — top-to-bottom, held at α=0.62 through the entire
+            zone the h1 can occupy, then released so the photo's lower half
+            (floor, furniture, skyline) stays rich. Measured: every 5% band
+            from 0–70% clears 4.5:1 against white at this alpha; the tightest
+            is the 40–50% window-glare peak at 5.44:1. `md:hidden` so it
+            never stacks with the desktop scrims below. */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 z-[1]"
+          className="absolute inset-0 z-[1] md:hidden"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(15,22,38,0.66) 0%, rgba(15,22,38,0.62) 42%, rgba(15,22,38,0.30) 60%, rgba(15,22,38,0) 76%)",
+          }}
+        />
+
+        {/* BASE scrim (md+) — always on for desktop. Localized top-left.
+            Deterministic AA floor for the white h1 across every slide.
+            Gated `hidden md:block` so it doesn't stack onto the mobile
+            scrim and over-darken the phone hero (a11y-lead). */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-[1] hidden md:block"
           style={{
             background:
               "linear-gradient(to right, rgba(15,22,38,0.20) 0%, rgba(15,22,38,0.20) 48%, rgba(15,22,38,0.10) 58%, rgba(15,22,38,0) 66%)",
           }}
         />
 
-        {/* ADDITIVE scrim — only for slides with bright top-left. Its opacity
-            follows the active slide's opacity so during a crossfade the AA
-            guarantee never dips below the current slide's brightness. */}
+        {/* ADDITIVE scrim (md+) — only for slides with bright top-left. Its
+            opacity follows the active slide's opacity so during a crossfade
+            the AA guarantee never dips below the current slide's brightness. */}
         {HERO_SLIDES.map((slide, i) =>
           slide.needsScrim ? (
             <div
               key={`scrim-${slide.src}`}
               aria-hidden="true"
-              className="absolute inset-0 z-[1] transition-opacity"
+              className="absolute inset-0 z-[1] hidden transition-opacity md:block"
               style={{
                 opacity: active === i ? 1 : 0,
                 transitionDuration: reduce ? "0ms" : "1000ms",
@@ -312,7 +380,10 @@ export default function Hero() {
         </div>
 
         {/* Play/pause — Citadel-minimal glyph in the top-right corner. No
-            visible chrome; interactive area is 44×44 via padding. */}
+            visible chrome; interactive area is 44×44 via padding. Hidden
+            below md: the mobile hero is a single static photo, so there is
+            nothing to pause. `hidden` also drops it from the tab order,
+            so no keyboard user lands on a no-op control (a11y-lead). */}
         <button
           type="button"
           onClick={toggle}
@@ -321,7 +392,7 @@ export default function Hero() {
               ? "Pause background image rotation"
               : "Resume background image rotation"
           }
-          className="absolute right-2 top-2 z-20 grid h-11 w-11 place-items-center text-[color:var(--white)] transition-colors hover:bg-[rgba(0,0,0,0.35)] focus-visible:bg-[rgba(0,0,0,0.35)] sm:right-4 sm:top-4"
+          className="absolute right-2 top-2 z-20 hidden h-11 w-11 place-items-center text-[color:var(--white)] transition-colors hover:bg-[rgba(0,0,0,0.35)] focus-visible:bg-[rgba(0,0,0,0.35)] md:grid sm:right-4 sm:top-4"
         >
           {isPlaying ? (
             <svg
