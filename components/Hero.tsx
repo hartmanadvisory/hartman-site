@@ -240,7 +240,7 @@ export default function Hero() {
         <div className="absolute inset-x-0 top-0 z-10 px-6 pt-16 sm:px-10 sm:pt-20 lg:px-14">
           <h1
             id="hero-h1"
-            className="max-w-[46rem] font-[family-name:var(--font-display)] text-[clamp(2.6rem,6.4vw,5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
+            className="max-w-[56rem] font-[family-name:var(--font-display)] text-[clamp(2.4rem,5.8vw,4.6rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
           >
             <span className="sr-only">{HEADLINE_FULL}</span>
             <CursorSwipeHeadline reduce={!!reduce} />
