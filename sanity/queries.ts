@@ -11,28 +11,18 @@ export type JudgmentEvent = {
 };
 
 /**
- * Hardcoded fallback used when Sanity isn't configured (local dev without
- * credentials, or pre-launch preview). Ships an event so the section always
- * has content on screen; real events replace this once the CMS is populated.
+ * Fallback used when Sanity is unconfigured or returns no records.
+ * Single real event (a16z Tech Week NYC) so the carousel band always
+ * has substantive content on screen — never renders as an empty band
+ * or under-construction placeholder. Real events replace this once
+ * Sanity is populated.
  */
 const FALLBACK_EVENTS: JudgmentEvent[] = [
   {
-    id: "fallback-1",
-    title: "Tech Week NYC · Fireside",
+    id: "fallback-a16z-tech-week",
+    title: "a16z Tech Week NYC",
     date: "2025-06-01",
     imageUrl: "/media/event-speaker-panel.jpg",
-  },
-  {
-    id: "fallback-2",
-    title: "LP Roundtable · Manhattan",
-    date: "2025-04-15",
-    imageUrl: "/media/event-conversation.jpg",
-  },
-  {
-    id: "fallback-3",
-    title: "Founder Dinner · Downtown",
-    date: "2025-02-11",
-    imageUrl: "/media/event-portrait.jpg",
   },
 ];
 
@@ -53,9 +43,9 @@ const JUDGMENT_QUERY = `*[_type == "judgmentEvent"] | order(order asc, date desc
 }`;
 
 /**
- * Fetch published judgment events. Runs on the server (RSC or server action);
- * cached with a 5-minute revalidation window and tagged so Sanity webhook
- * revalidation can bust it on publish.
+ * Fetch published judgment events. Falls back to a single real event
+ * (see FALLBACK_EVENTS) when Sanity isn't configured or has no rows,
+ * so the carousel always renders substantive content.
  */
 export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
   if (!sanityConfigured || !sanityClient) return FALLBACK_EVENTS;

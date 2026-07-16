@@ -250,7 +250,9 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
         </div>
       </div>
 
-      {/* Event carousel — inset gutters, extends down past the dark band. */}
+      {/* Event carousel — always renders. When Sanity is unpopulated,
+          getJudgmentEvents() returns a single-event fallback so the
+          band still shows substantive content (never an empty gap). */}
       <div className="relative mx-6 h-[clamp(20rem,52vh,34rem)] sm:mx-10 lg:mx-14">
         <JudgmentCarousel events={events} />
       </div>
