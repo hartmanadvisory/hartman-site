@@ -67,10 +67,10 @@ export default function AboutHero() {
               role="list"
               className="mt-6 flex flex-wrap gap-2"
             >
-              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]">
+              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] bg-transparent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)] transition-colors duration-200 ease-out hover:border-[color:var(--cobalt)] hover:bg-[rgba(28,68,184,0.06)]">
                 Formerly at Gunderson Dettmer &amp; Lowenstein Sandler
               </li>
-              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]">
+              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] bg-transparent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)] transition-colors duration-200 ease-out hover:border-[color:var(--cobalt)] hover:bg-[rgba(28,68,184,0.06)]">
                 Harvard Law JD
               </li>
             </ul>

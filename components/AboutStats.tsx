@@ -109,7 +109,9 @@ function StatBlock({
     <div
       className={[
         "col-span-12 flex min-h-[16rem] flex-col justify-between md:col-span-4",
-        index === 0 ? "md:col-start-1" : "md:pl-10",
+        index === 0
+          ? "md:col-start-1"
+          : "md:border-l md:border-[rgba(106,142,230,0.20)] md:pl-10",
       ].join(" ")}
     >
       <dd

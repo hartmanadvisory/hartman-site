@@ -1,14 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 
-// Inter — a modern neutral grotesk (Söhne / SF Pro / Neue Haas Grotesk class),
-// the industry-standard free stand-in for the display sans used by Blackstone
-// and Apple. Variable-weight, self-hosted by next/font. Exposed as
-// --font-display and consumed via CSS var chain.
-const display = Inter({
+// Geist Sans — Vercel's variable geometric sans. Purpose-built for
+// technical UI, still refined enough for a boutique NY firm. Drives
+// the display chain (--font-display) via --font-geist-sans (the
+// variable name geist/font/sans hard-codes).
+// Inter stays as the humanist body-copy fallback, aliased as
+// --font-inter and consumed inside globals.css.
+const body = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
@@ -66,7 +69,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${display.variable} h-full`}
+      className={`${body.variable} ${GeistSans.variable} h-full`}
     >
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <a href="#main" className="skip-link">

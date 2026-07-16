@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
@@ -39,26 +39,9 @@ const HEADLINE_LINES = [
   "Defining Deals",
 ] as const;
 const HEADLINE_FULL = HEADLINE_LINES.join(" ");
-const HEADLINE_CHAR_COUNT = HEADLINE_LINES.reduce(
-  (n, line) => n + [...line].length,
-  0,
-);
-// Scramble/decode animation total duration (also used to schedule the
-// cobalt caption reveal after the h1 resolves).
-const SCRAMBLE_DURATION_S = 1.6;
-const HEADLINE_DURATION_S = SCRAMBLE_DURATION_S + 0.25;
 
-// Glyph pool for the scramble effect. ASCII-only, no combining marks or
-// RTL characters — some SRs speak those; even though this layer is
-// aria-hidden, we keep the visible glyphs boring so nothing weird flashes
-// through (e.g., diacritics that would render outside their box).
-const SCRAMBLE_GLYPHS =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!<>-_/=+*#";
-function pickGlyph() {
-  return SCRAMBLE_GLYPHS.charAt(
-    Math.floor((performance.now() * 9301 + 49297) % SCRAMBLE_GLYPHS.length),
-  );
-}
+// Cursor-swipe mask reveal — total sweep duration.
+const REVEAL_DURATION_S = 1.4;
 
 /**
  * Hero slide catalogue. Every entry is a REAL Hartman photograph. Some have
@@ -75,105 +58,64 @@ function pickGlyph() {
  * floor); additive layer stacks on top for the two bright slides.
  */
 /**
- * ScrambleHeadline — the visible, aria-hidden headline layer. Each
- * character shuffles through random glyphs then locks in the target;
- * positions resolve staggered from left→right so the effect reads as a
- * "decode." The parent h1 already carries the sr-only full text so screen
- * readers announce the heading exactly once (no per-character noise, no
- * live-region announcements).
+ * CursorSwipeHeadline — visible, aria-hidden headline. Text renders in
+ * place; a clip-path animates from `inset(0 100% 0 0)` (fully clipped
+ * from the right) to `inset(0)` (fully revealed) over REVEAL_DURATION_S,
+ * left→right — a calm "cursor unveils the code" effect. A thin 2px
+ * cobalt-light bar rides the leading edge, synced to the same timing,
+ * and blinks 2× at the end before fading. The parent h1 carries the
+ * sr-only full text; SR reads the heading exactly once.
  *
- * Under `reduce`, no scramble runs — final text is what SSR emitted, no
- * cursor, no glyph churn. This matches SC 2.3.3 (Animation from
- * Interactions) with the reduce-motion opt-out and keeps SC 2.3.1 safe
- * (no flashes, monochrome text-only churn).
+ * Under `reduce`, nothing animates — clip is `inset(0)` at rest and no
+ * cursor renders. SC 2.3.3 compliant.
  */
-function ScrambleHeadline({ reduce }: { reduce: boolean }) {
-  // State is the per-line array of currently-displayed chars. SSR
-  // renders the target text (matches sr-only, matches hydration). On
-  // client mount (and only when motion is allowed), useLayoutEffect
-  // synchronously replaces to random glyphs before first paint, then
-  // a rAF loop resolves each position on its scheduled tick.
-  const [lines, setLines] = useState<readonly string[]>(HEADLINE_LINES);
-
-  useLayoutEffect(() => {
-    if (reduce) return;
-    // Reset to fully-scrambled synchronously so users don't see a target
-    // flash on mount before the rAF loop kicks in.
-    const scrambled = HEADLINE_LINES.map((line) =>
-      [...line]
-        .map((ch) =>
-          ch === " "
-            ? " "
-            : SCRAMBLE_GLYPHS.charAt(
-                Math.floor(Math.random() * SCRAMBLE_GLYPHS.length),
-              ),
-        )
-        .join(""),
-    );
-    setLines(scrambled);
-  }, [reduce]);
-
+function CursorSwipeHeadline({ reduce }: { reduce: boolean }) {
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    if (reduce) return;
-    const start = performance.now();
-    // Pre-compute resolve times per (line, char). Space characters skip
-    // scrambling entirely so word gaps are stable throughout.
-    const resolvePlan = HEADLINE_LINES.map((line, li) => {
-      const chars = [...line];
-      const perChar = chars.map((ch, ci) => {
-        if (ch === " ") return { target: " ", resolveAt: 0 };
-        // Global position across the whole headline so lines stagger.
-        const before = HEADLINE_LINES.slice(0, li).join(" ").length;
-        const globalIdx = before + ci;
-        const t = HEADLINE_CHAR_COUNT > 1 ? globalIdx / (HEADLINE_CHAR_COUNT - 1) : 0;
-        const resolveAt = (0.4 + t * 0.6) * SCRAMBLE_DURATION_S;
-        return { target: ch, resolveAt };
-      });
-      return perChar;
-    });
+    // rAF defers a single frame so SSR paints the final state before
+    // the client swaps to the animated one — prevents a flash of the
+    // fully-revealed text on hydration.
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
-    let raf = 0;
-    const tick = () => {
-      const elapsed = (performance.now() - start) / 1000;
-      const next = resolvePlan.map((chars) =>
-        chars
-          .map(({ target, resolveAt }) =>
-            elapsed >= resolveAt
-              ? target
-              : target === " "
-                ? " "
-                : SCRAMBLE_GLYPHS.charAt(
-                    Math.floor(Math.random() * SCRAMBLE_GLYPHS.length),
-                  ),
-          )
-          .join(""),
-      );
-      setLines(next);
-      if (elapsed < SCRAMBLE_DURATION_S) {
-        raf = requestAnimationFrame(tick);
-      } else {
-        // Lock in the final string exactly.
-        setLines(HEADLINE_LINES.map((l) => l));
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [reduce]);
+  const animate = mounted && !reduce;
 
   return (
-    <span aria-hidden="true" className="block">
-      {lines.map((line, li) => (
-        <span key={li} className="block whitespace-pre">
-          {line}
-          {li === lines.length - 1 && !reduce && (
-            <span
-              aria-hidden="true"
-              className="cursor-blink ml-1 inline-block h-[0.85em] w-[0.06em] translate-y-[0.05em] bg-[color:var(--white)] align-baseline"
-              style={{ animationDelay: `${SCRAMBLE_DURATION_S}s` }}
-            />
-          )}
-        </span>
-      ))}
+    <span aria-hidden="true" className="relative block">
+      {/* Text layer — clipped from the right when animating. */}
+      <motion.span
+        className="block"
+        initial={animate ? { clipPath: "inset(0 100% 0 0)" } : false}
+        animate={{ clipPath: "inset(0 0% 0 0)" }}
+        transition={{ duration: animate ? REVEAL_DURATION_S : 0, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {HEADLINE_LINES.map((line, li) => (
+          <span key={li} className="block whitespace-pre">
+            {line}
+          </span>
+        ))}
+      </motion.span>
+
+      {/* Cursor bar — synced to the reveal, then blinks 2× and fades.
+          Only renders when motion is allowed. Absolutely positioned so
+          it doesn't shift layout. */}
+      {animate && (
+        <motion.span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 bottom-0 w-[3px] bg-[color:var(--cobalt-light)]"
+          initial={{ left: 0, opacity: 1 }}
+          animate={{
+            left: ["0%", "100%", "100%", "100%", "100%"],
+            opacity: [1, 1, 0, 1, 0],
+          }}
+          transition={{
+            duration: REVEAL_DURATION_S + 0.8,
+            times: [0, REVEAL_DURATION_S / (REVEAL_DURATION_S + 0.8), (REVEAL_DURATION_S + 0.2) / (REVEAL_DURATION_S + 0.8), (REVEAL_DURATION_S + 0.5) / (REVEAL_DURATION_S + 0.8), 1],
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        />
+      )}
     </span>
   );
 }
@@ -301,7 +243,7 @@ export default function Hero() {
             className="max-w-[46rem] font-[family-name:var(--font-display)] text-[clamp(2.6rem,6.4vw,5rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
           >
             <span className="sr-only">{HEADLINE_FULL}</span>
-            <ScrambleHeadline reduce={!!reduce} />
+            <CursorSwipeHeadline reduce={!!reduce} />
           </h1>
         </div>
 
@@ -356,7 +298,7 @@ export default function Hero() {
         animate="show"
         transition={{
           duration: reduce ? 0 : 0.7,
-          delay: reduce ? 0 : HEADLINE_DURATION_S + 0.15,
+          delay: reduce ? 0 : REVEAL_DURATION_S + 0.35,
           ease,
         }}
         className="absolute left-6 right-16 z-30 bg-[color:var(--cobalt)] sm:left-10 sm:right-24 lg:left-14 lg:right-40"
