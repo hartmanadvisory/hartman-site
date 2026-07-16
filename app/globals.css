@@ -167,6 +167,15 @@ body {
   animation: cursor-blink 0.9s step-end infinite;
 }
 
+/* Three-blink-then-fade — applied once the typewriter finishes. Runs
+   3 iterations of the blink keyframes (~2.7s total) then holds
+   opacity 0 via fill-mode: forwards. ~1.1 flashes/sec, safely under
+   SC 2.3.1's 3-per-second flash threshold. Disabled under
+   prefers-reduced-motion via the block below. */
+.cursor-blink-3 {
+  animation: cursor-blink 0.9s step-end 3 forwards;
+}
+
 /* Primary CTA focus ring — near-black outer band guarantees ≥3:1 against
    both the cobalt fill (white/inner) and any page bg (black/outer). */
 .cta-primary:focus-visible {

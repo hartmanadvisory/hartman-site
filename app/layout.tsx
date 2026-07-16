@@ -1,21 +1,33 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { GeistSans } from "geist/font/sans";
+import localFont from "next/font/local";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 
-// Geist Sans — Vercel's variable geometric sans. Purpose-built for
-// technical UI, still refined enough for a boutique NY firm. Drives
-// the display chain (--font-display) via --font-geist-sans (the
-// variable name geist/font/sans hard-codes).
-// Inter stays as the humanist body-copy fallback, aliased as
-// --font-inter and consumed inside globals.css.
+// Inter — humanist neutral grotesk, body copy. Aliased as --font-inter
+// and consumed inside globals.css.
 const body = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
   fallback: ["system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+});
+
+// Geist Sans — Vercel's variable geometric sans, display headings.
+// Imported directly via next/font/local (rather than the shared
+// `geist` package) so we can set `display: "optional"`: cold-cache
+// visitors see the Inter fallback for their first paint and the
+// browser swaps to Geist on the next navigation. Prevents the
+// mid-paint size jump that caused the hero h1 to render "small" on
+// hard-refresh — the swap ships without a FOUT reflow.
+const display = localFont({
+  src: "../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+  weight: "100 900",
+  style: "normal",
+  variable: "--font-geist-sans",
+  display: "optional",
+  adjustFontFallback: "Arial",
 });
 
 const SITE_URL =
@@ -69,7 +81,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${body.variable} ${GeistSans.variable} h-full`}
+      className={`${body.variable} ${display.variable} h-full`}
     >
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <a href="#main" className="skip-link">
