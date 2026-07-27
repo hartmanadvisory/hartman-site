@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import AboutHero from "@/components/AboutHero";
 import AboutStats from "@/components/AboutStats";
 import AboutTimeline from "@/components/AboutTimeline";
+import {
+  getAboutHero,
+  getAboutBackground,
+  getAboutStats,
+} from "@/sanity/queries";
 
 /**
  * /about — the firm's origin story. PR #10 restructure:
@@ -18,12 +23,21 @@ export const metadata: Metadata = {
     "Hartman Venture Advisors is a boutique New York counsel practice founded by Mordechai Hartman in May 2024 after more than a decade at Gunderson Dettmer and Lowenstein Sandler. The firm advises venture funds, founders, and institutional LPs on their most consequential transactions.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [hero, stats, background] = await Promise.all([
+    getAboutHero(),
+    getAboutStats(),
+    getAboutBackground(),
+  ]);
   return (
     <>
-      <AboutHero />
-      <AboutStats />
-      <AboutTimeline />
+      <AboutHero {...hero} />
+      <AboutStats eyebrow={stats.eyebrow} stats={stats.stats} />
+      <AboutTimeline
+        heading={background.heading}
+        lead={background.lead}
+        bullets={background.bullets}
+      />
     </>
   );
 }

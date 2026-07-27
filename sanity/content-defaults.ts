@@ -96,6 +96,118 @@ export const CLOSING_CTA = {
   ctaLabel: "Start a Conversation",
 };
 
+/* -------------------------------------------------------------------------- *
+ *  /about                                                                      *
+ * -------------------------------------------------------------------------- */
+
+export const ABOUT_HERO = {
+  eyebrow: "Profile",
+  name: "Mordechai Hartman",
+  intro:
+    "Founder and Principal of Hartman Venture Advisors PLLC. More than a decade advising venture funds, founders, and dealmakers.",
+  credentials: [
+    "Formerly at Gunderson Dettmer & Lowenstein Sandler",
+    "Harvard Law JD",
+  ],
+  portraitSrc: "/media/mordechai-hartman-portrait.jpg",
+  ctaLabel: "Start a Conversation",
+  captionName: "Mordechai Hartman",
+  captionRole: ", Founder & Principal",
+};
+
+export const ABOUT_BACKGROUND = {
+  heading: "Background",
+  lead: "A continuous record across seed-through-growth venture transactions, at two of the country’s leading venture practices before founding Hartman Venture Advisors.",
+  bullets: [
+    "J.D. from Harvard Law School with a focus on corporate and securities law.",
+    "Began his career at Lowenstein Sandler advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
+    "Practiced seven years at Gunderson Dettmer, one of the country's pre-eminent venture practices, advising category-defining companies through priced rounds, secondaries, and exits.",
+    "Founded Hartman Venture Advisors in 2024 as a boutique New York practice built on the premise that consequential transactions deserve senior attention, end to end.",
+    "Over $6B in aggregate transaction value across financings, fund formations, secondaries, and M&A.",
+    "Represented marquee venture funds including a16z, Tiger Global, Insight, Altimeter, Dragoneer, Thrive, and Addition.",
+    "Advised category-defining companies including Anthropic, OpenAI, SpaceX, Anduril, Meta, Ramp, Notion, and Scale.",
+  ],
+};
+
+export type AboutStat = {
+  /** Display string, e.g. "$6B+". */
+  value: string;
+  label: string;
+  info: string;
+  /** Optional override for how the value is read aloud. */
+  spoken?: string;
+};
+
+export const ABOUT_STATS = {
+  eyebrow: "By the Numbers",
+  stats: [
+    {
+      value: "$6B+",
+      label: "Aggregate transaction value",
+      info: "Value of transactions on which the firm has served as principal counsel to founders, funds, or LPs.",
+    },
+    {
+      value: "100+",
+      label: "Financings, secondaries & M&A advised",
+      info: "Across seed to growth stage: priced rounds, structured secondaries, and strategic exits.",
+    },
+    {
+      value: "10",
+      label: "Marquee venture funds represented",
+      info: "Including a16z, Tiger, Insight, Altimeter, Dragoneer, Thrive, and Addition.",
+    },
+  ] satisfies AboutStat[],
+};
+
+/**
+ * Split a stat's display string into the pieces the count-up animation needs,
+ * e.g. "$6B+" → { prefix: "$", number: 6, suffix: "B+" }. Returns null when
+ * there's no number to animate (e.g. "Dozens"), in which case the caller
+ * renders the value statically.
+ */
+export function parseStatValue(
+  value: string,
+): { prefix: string; number: number; suffix: string } | null {
+  const m = /^([^\d]*)(\d[\d,]*)(.*)$/.exec(value.trim());
+  if (!m) return null;
+  const number = Number(m[2].replace(/,/g, ""));
+  if (!Number.isFinite(number)) return null;
+  return { prefix: m[1], number, suffix: m[3] };
+}
+
+/**
+ * How a stat should be READ ALOUD. "$6B+" spoken literally comes out as
+ * "dollar six B plus", which is why these strings were hand-written before
+ * the values were editable. So: use the author's override if they wrote one,
+ * otherwise expand the symbols ourselves. Falling back to the raw display
+ * string would silently reintroduce the exact bug this guards against, so
+ * that's only the last resort for values we can't parse (which are usually
+ * already words, e.g. "Dozens", and read fine).
+ */
+export function spokenStatValue(value: string, spoken?: string): string {
+  const override = spoken?.trim();
+  if (override) return override;
+
+  const parsed = parseStatValue(value);
+  if (!parsed) return value;
+
+  const { prefix, number, suffix } = parsed;
+  const scale = /B/i.test(suffix)
+    ? "billion"
+    : /M/i.test(suffix)
+      ? "million"
+      : /K/i.test(suffix)
+        ? "thousand"
+        : "";
+  const currency = prefix.includes("$") ? "dollars" : "";
+  const percent = suffix.includes("%") ? "percent" : "";
+  const orMore = suffix.includes("+") ? "or more" : "";
+
+  return [String(number), scale, currency, percent, orMore]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export type WhoWeServeSegment = {
   id: "venture-funds" | "founders" | "lps";
   h3: string;

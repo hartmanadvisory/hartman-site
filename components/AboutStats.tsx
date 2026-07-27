@@ -8,6 +8,13 @@ import {
   useReducedMotion,
   type Variants,
 } from "framer-motion";
+import {
+  ABOUT_STATS,
+  parseStatValue,
+  pick,
+  spokenStatValue,
+  type AboutStat,
+} from "@/sanity/content-defaults";
 
 /**
  * AboutStats — three-cell stat wall + a "Firm founded May 2024" subline.
@@ -27,37 +34,32 @@ import {
  *    mounted; reduced motion collapses transforms and skips count-up.
  */
 
+/**
+ * A stat as the component renders it: the display string is parsed into
+ * prefix/number/suffix so the count-up animates the numeric part, and the
+ * spoken form is resolved once (author override, else expanded from the
+ * symbols) so the sr-only text always matches the final value.
+ */
 type Stat = {
   label: string;
-  to: number;
-  format: (n: number) => string;
-  sr: string;
   info: string;
+  /** Final display string, e.g. "$6B+". */
+  value: string;
+  /** How the value is read aloud. */
+  sr: string;
+  /** null when there's no number to animate — render statically. */
+  parsed: { prefix: string; number: number; suffix: string } | null;
 };
 
-const STATS: Stat[] = [
-  {
-    label: "Aggregate transaction value",
-    to: 6,
-    format: (n) => `$${n}B+`,
-    sr: "6 billion dollars or more",
-    info: "Value of transactions on which the firm has served as principal counsel to founders, funds, or LPs.",
-  },
-  {
-    label: "Financings, secondaries & M&A advised",
-    to: 100,
-    format: (n) => `${n}+`,
-    sr: "one hundred or more",
-    info: "Across seed to growth stage: priced rounds, structured secondaries, and strategic exits.",
-  },
-  {
-    label: "Marquee venture funds represented",
-    to: 10,
-    format: (n) => String(n),
-    sr: "ten",
-    info: "Including a16z, Tiger, Insight, Altimeter, Dragoneer, Thrive, and Addition.",
-  },
-];
+function toStat(s: AboutStat): Stat {
+  return {
+    label: s.label,
+    info: s.info,
+    value: s.value,
+    sr: spokenStatValue(s.value, s.spoken),
+    parsed: parseStatValue(s.value),
+  };
+}
 
 function StatBlock({
   stat,
@@ -70,22 +72,28 @@ function StatBlock({
   active: boolean;
   reduce: boolean;
 }) {
-  const [display, setDisplay] = useState(() => stat.format(stat.to));
+  // Animate only the numeric part; the prefix/suffix ride along unchanged.
+  // A value with no number (e.g. "Dozens") skips the animation entirely.
+  const format = (n: number) =>
+    stat.parsed ? `${stat.parsed.prefix}${n}${stat.parsed.suffix}` : stat.value;
+  const [display, setDisplay] = useState(() => stat.value);
 
   useEffect(() => {
-    if (reduce) return;
-    const raf = requestAnimationFrame(() => setDisplay(stat.format(0)));
+    if (reduce || !stat.parsed) return;
+    const raf = requestAnimationFrame(() => setDisplay(format(0)));
     return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduce, stat]);
 
   useEffect(() => {
-    if (!active || reduce) return;
-    const controls = fmAnimate(0, stat.to, {
+    if (!active || reduce || !stat.parsed) return;
+    const controls = fmAnimate(0, stat.parsed.number, {
       duration: 1.4,
       ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => setDisplay(stat.format(Math.round(v))),
+      onUpdate: (v) => setDisplay(format(Math.round(v))),
     });
     return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, reduce, stat]);
 
   const revealDelay = reduce ? 0 : 1.15 + index * 0.15;
@@ -143,10 +151,19 @@ function StatBlock({
   );
 }
 
-export default function AboutStats() {
+export default function AboutStats({
+  eyebrow,
+  stats,
+}: {
+  // CMS copy; falls back to the shipped defaults when absent or blank.
+  eyebrow?: string;
+  stats?: AboutStat[];
+} = {}) {
   const reduce = useReducedMotion();
   const statsRef = useRef<HTMLDListElement>(null);
   const statsInView = useInView(statsRef, { once: true, amount: 0.35 });
+  const eyebrowText = pick(eyebrow, ABOUT_STATS.eyebrow);
+  const resolvedStats = (stats?.length ? stats : ABOUT_STATS.stats).map(toStat);
 
   return (
     <section
@@ -159,7 +176,7 @@ export default function AboutStats() {
           id="about-stats-eyebrow"
           className="mb-10 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt-light)]"
         >
-          By the Numbers
+          {eyebrowText}
         </p>
 
         <dl
@@ -167,7 +184,7 @@ export default function AboutStats() {
           role="list"
           className="grid grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-10 md:gap-y-14"
         >
-          {STATS.map((stat, i) => (
+          {resolvedStats.map((stat, i) => (
             <StatBlock
               key={stat.label}
               stat={stat}

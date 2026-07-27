@@ -202,7 +202,7 @@ works the same way: open it, change what you want, **Publish**, and
 
 | Sidebar item | Controls |
 | --- | --- |
-| **Homepage — Hero** | The big opening headline and the sentence in the blue block under it |
+| **Homepage — Hero** | The big opening headline, the sentence in the blue block under it, and the background photos |
 | **Homepage — Who We Are** | The small label, the large serif statement, and the button wording |
 | **Homepage — Closing CTA** | The closing headline, its supporting line, and the big button wording |
 
@@ -219,6 +219,38 @@ works the same way: open it, change what you want, **Publish**, and
 - **Buttons keep their destinations.** The Who We Are button always goes
   to the About page and the closing button always goes to Contact —
   only the wording is editable.
+
+### Hero background photos
+
+In **Homepage — Hero** you can also replace the photographs: a list of
+wide photos that fade into each other on computers, plus one photo for
+phones. Add a single desktop photo to stop the rotation entirely. Leave
+either field empty to keep the photos shipped with the site.
+
+Every uploaded photo automatically gets dark shading behind the
+headline. There is no switch for this on purpose — whether white text
+stays readable over a given photo is a measurement, and a bright photo
+without the shading is effectively white-on-white for anyone with low
+vision, while still looking fine on your own screen.
+
+---
+
+## 3c. Editing the About page
+
+| Sidebar item | Controls |
+| --- | --- |
+| **About — Hero** | The "Profile" label, the name heading, the intro paragraph, the credential chips (add/remove), the portrait photo, the button wording, and the caption under the photo |
+| **About — By the Numbers** | The three figures, plus each one's title and subtitle |
+| **About — Background** | The heading, the subtitle, and the bullet list (add/remove/reorder) |
+
+As everywhere else, anything left blank keeps the current wording.
+
+**About the three figures.** Type them the way they should look —
+`$6B+`, `100+`, `10`. The count-up animation reads the number out of
+what you type, and the site works out how each figure should be read
+aloud (`$6B+` is announced as "6 billion dollars or more", not "dollar
+six B plus"). There's an optional "spoken version" box if a figure ever
+needs something different.
 
 ---
 

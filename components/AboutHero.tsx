@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { ABOUT_HERO, pick, pickList } from "@/sanity/content-defaults";
 
 /**
  * AboutHero — magazine-style profile hero. Small "Profile" eyebrow, huge
@@ -24,8 +25,37 @@ import { motion, useReducedMotion } from "framer-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-export default function AboutHero() {
+export default function AboutHero({
+  eyebrow,
+  name,
+  intro,
+  credentials,
+  portraitSrc,
+  ctaLabel,
+  captionName,
+  captionRole,
+}: {
+  // CMS copy; each falls back to the shipped default when absent or blank.
+  // The button's href stays hardcoded (/contact) — only its wording is
+  // editable, and it must never gain a static aria-label.
+  eyebrow?: string;
+  name?: string;
+  intro?: string;
+  credentials?: string[];
+  portraitSrc?: string;
+  ctaLabel?: string;
+  captionName?: string;
+  captionRole?: string;
+} = {}) {
   const reduce = useReducedMotion();
+  const eyebrowText = pick(eyebrow, ABOUT_HERO.eyebrow);
+  const nameText = pick(name, ABOUT_HERO.name);
+  const introText = pick(intro, ABOUT_HERO.intro);
+  const chips = pickList(credentials, ABOUT_HERO.credentials);
+  const portrait = pick(portraitSrc, ABOUT_HERO.portraitSrc);
+  const ctaText = pick(ctaLabel, ABOUT_HERO.ctaLabel);
+  const capName = pick(captionName, ABOUT_HERO.captionName);
+  const capRole = pick(captionRole, ABOUT_HERO.captionRole);
 
   return (
     <section
@@ -45,7 +75,7 @@ export default function AboutHero() {
               aria-hidden="true"
               className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]"
             >
-              Profile
+              {eyebrowText}
             </p>
 
             {/* MOBILE-ONLY portrait between the eyebrow and the h1.
@@ -60,7 +90,7 @@ export default function AboutHero() {
               style={{ boxShadow: "0 20px 60px -20px rgba(15, 22, 38, 0.30)" }}
             >
               <Image
-                src="/media/mordechai-hartman-portrait.jpg"
+                src={portrait}
                 alt=""
                 fill
                 sizes="(max-width: 768px) 100vw, 1px"
@@ -72,11 +102,10 @@ export default function AboutHero() {
               id="about-hero-h1"
               className="mt-6 font-[family-name:var(--font-display)] text-[clamp(3rem,7.4vw,6rem)] font-bold leading-[1.02] tracking-[-0.03em] text-[color:var(--ink)]"
             >
-              Mordechai Hartman
+              {nameText}
             </h1>
             <p className="mt-8 max-w-xl text-[17px] leading-relaxed text-[color:var(--muted)] sm:text-[18px]">
-              Founder and Principal of Hartman Venture Advisors PLLC. More
-              than a decade advising venture funds, founders, and dealmakers.
+              {introText}
             </p>
 
             {/* Credential chips — two non-interactive labels rendered as
@@ -88,12 +117,14 @@ export default function AboutHero() {
               role="list"
               className="mt-6 flex flex-wrap gap-2"
             >
-              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] bg-transparent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)] transition-colors duration-200 ease-out hover:border-[color:var(--cobalt)] hover:bg-[rgba(28,68,184,0.06)]">
-                Formerly at Gunderson Dettmer &amp; Lowenstein Sandler
-              </li>
-              <li className="inline-flex items-center border border-[color:var(--rule-on-white)] bg-transparent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)] transition-colors duration-200 ease-out hover:border-[color:var(--cobalt)] hover:bg-[rgba(28,68,184,0.06)]">
-                Harvard Law JD
-              </li>
+              {chips.map((chip) => (
+                <li
+                  key={chip}
+                  className="inline-flex items-center border border-[color:var(--rule-on-white)] bg-transparent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)] transition-colors duration-200 ease-out hover:border-[color:var(--cobalt)] hover:bg-[rgba(28,68,184,0.06)]"
+                >
+                  {chip}
+                </li>
+              ))}
             </ul>
 
             {/* Primary CTA. mailto rather than a stubbed `#` target per
@@ -105,7 +136,7 @@ export default function AboutHero() {
                 href="/contact"
                 className="group inline-flex min-h-[3rem] items-center justify-center gap-2 bg-[color:var(--cobalt)] px-7 text-[15px] font-medium tracking-[0.01em] text-[color:var(--white)] transition-colors hover:bg-[#163a9e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--white)]"
               >
-                Start a Conversation
+                {ctaText}
                 <svg
                   aria-hidden="true"
                   focusable="false"
@@ -141,7 +172,7 @@ export default function AboutHero() {
               style={{ boxShadow: "0 30px 80px -20px rgba(15, 22, 38, 0.35)" }}
             >
               <Image
-                src="/media/mordechai-hartman-portrait.jpg"
+                src={portrait}
                 alt=""
                 fill
                 priority
@@ -159,10 +190,8 @@ export default function AboutHero() {
               aria-hidden="true"
               className="mt-4 text-[14px] text-[color:var(--ink)]"
             >
-              <span className="font-semibold">Mordechai Hartman</span>
-              <span className="text-[color:var(--muted)]">
-                , Founder &amp; Principal
-              </span>
+              <span className="font-semibold">{capName}</span>
+              <span className="text-[color:var(--muted)]">{capRole}</span>
             </div>
           </motion.div>
         </div>

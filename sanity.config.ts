@@ -7,6 +7,9 @@ import { whoWeServe } from "./sanity/schemas/whoWeServe";
 import { homeHero } from "./sanity/schemas/homeHero";
 import { homeWhoWeAre } from "./sanity/schemas/homeWhoWeAre";
 import { homeClosingCta } from "./sanity/schemas/homeClosingCta";
+import { aboutHero } from "./sanity/schemas/aboutHero";
+import { aboutBackground } from "./sanity/schemas/aboutBackground";
+import { aboutStats } from "./sanity/schemas/aboutStats";
 import { apiVersion, dataset, projectId } from "./sanity/env";
 
 /**
@@ -29,6 +32,9 @@ export default defineConfig({
       homeHero,
       homeWhoWeAre,
       homeClosingCta,
+      aboutHero,
+      aboutBackground,
+      aboutStats,
     ],
   },
 });

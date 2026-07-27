@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { ABOUT_BACKGROUND, pick, pickList } from "@/sanity/content-defaults";
 
 /**
  * AboutTimeline — "Background" band. Milton-Berg-style two-column layout:
@@ -21,16 +22,6 @@ import { motion, useReducedMotion } from "framer-motion";
  *  - Motion: single whileInView fade on the whole section.
  */
 
-const BULLETS: string[] = [
-  "J.D. from Harvard Law School with a focus on corporate and securities law.",
-  "Began his career at Lowenstein Sandler advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
-  "Practiced seven years at Gunderson Dettmer, one of the country's pre-eminent venture practices, advising category-defining companies through priced rounds, secondaries, and exits.",
-  "Founded Hartman Venture Advisors in 2024 as a boutique New York practice built on the premise that consequential transactions deserve senior attention, end to end.",
-  "Over $6B in aggregate transaction value across financings, fund formations, secondaries, and M&A.",
-  "Represented marquee venture funds including a16z, Tiger Global, Insight, Altimeter, Dragoneer, Thrive, and Addition.",
-  "Advised category-defining companies including Anthropic, OpenAI, SpaceX, Anduril, Meta, Ramp, Notion, and Scale.",
-];
-
 function CheckIcon() {
   return (
     <svg
@@ -50,8 +41,20 @@ function CheckIcon() {
   );
 }
 
-export default function AboutTimeline() {
+export default function AboutTimeline({
+  heading,
+  lead,
+  bullets,
+}: {
+  // CMS copy; each falls back to the shipped default when absent or blank.
+  heading?: string;
+  lead?: string;
+  bullets?: string[];
+} = {}) {
   const reduce = useReducedMotion();
+  const headingText = pick(heading, ABOUT_BACKGROUND.heading);
+  const leadText = pick(lead, ABOUT_BACKGROUND.lead);
+  const bulletList = pickList(bullets, ABOUT_BACKGROUND.bullets);
 
   return (
     <section
@@ -78,23 +81,21 @@ export default function AboutTimeline() {
               id="background-h2"
               className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--ink)]"
             >
-              Background
+              {headingText}
             </h2>
             <span
               aria-hidden="true"
               className="mt-3 block h-[2px] w-16 bg-[color:var(--cobalt)]"
             />
             <p className="mt-6 max-w-sm text-[17px] leading-relaxed text-[color:var(--muted)]">
-              A continuous record across seed-through-growth venture
-              transactions, at two of the country&rsquo;s leading venture
-              practices before founding Hartman Venture Advisors.
+              {leadText}
             </p>
           </motion.div>
 
           {/* RIGHT — bullet list. Each <li> soft-rises on its own trigger. */}
           <div className="col-span-12 md:col-span-7">
             <ul role="list" className="flex flex-col">
-              {BULLETS.map((text, i) => (
+              {bulletList.map((text, i) => (
                 <motion.li
                   key={i}
                   initial={
@@ -109,7 +110,7 @@ export default function AboutTimeline() {
                   }}
                   className={[
                     "flex items-start gap-5 py-6",
-                    i < BULLETS.length - 1
+                    i < bulletList.length - 1
                       ? "border-b border-[color:var(--hairline-on-light)]"
                       : "",
                   ].join(" ")}

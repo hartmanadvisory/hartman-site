@@ -312,6 +312,113 @@ export async function getHomeClosingCta(): Promise<HomeClosingCtaText> {
 }
 
 /* -------------------------------------------------------------------------- *
+ *  /about — Hero, Background, By the Numbers                                   *
+ * -------------------------------------------------------------------------- */
+
+export type AboutHeroText = {
+  eyebrow?: string;
+  name?: string;
+  intro?: string;
+  credentials?: string[];
+  portraitSrc?: string;
+  ctaLabel?: string;
+  captionName?: string;
+  captionRole?: string;
+};
+
+const strList = (v: unknown): string[] | undefined =>
+  Array.isArray(v)
+    ? v.filter((s): s is string => typeof s === "string")
+    : undefined;
+
+export async function getAboutHero(): Promise<AboutHeroText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<Record<string, unknown> | null>(
+      `*[_type == "aboutHero"][0]{ eyebrow, name, intro, credentials, portrait, ctaLabel, captionName, captionRole }`,
+      {},
+      { next: { revalidate: 300, tags: ["aboutHero"] } },
+    );
+    if (!row) return {};
+    const portraitSrc = row.portrait
+      ? urlFor(row.portrait as never)
+      : undefined;
+    return {
+      eyebrow: asStr(row.eyebrow),
+      name: asStr(row.name),
+      intro: asStr(row.intro),
+      credentials: strList(row.credentials),
+      portraitSrc: portraitSrc || undefined,
+      ctaLabel: asStr(row.ctaLabel),
+      captionName: asStr(row.captionName),
+      captionRole: asStr(row.captionRole),
+    };
+  } catch {
+    return {};
+  }
+}
+
+export type AboutBackgroundText = {
+  heading?: string;
+  lead?: string;
+  bullets?: string[];
+};
+
+export async function getAboutBackground(): Promise<AboutBackgroundText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<Record<string, unknown> | null>(
+      `*[_type == "aboutBackground"][0]{ heading, lead, bullets }`,
+      {},
+      { next: { revalidate: 300, tags: ["aboutBackground"] } },
+    );
+    if (!row) return {};
+    return {
+      heading: asStr(row.heading),
+      lead: asStr(row.lead),
+      bullets: strList(row.bullets),
+    };
+  } catch {
+    return {};
+  }
+}
+
+export type AboutStatsText = {
+  eyebrow?: string;
+  stats?: { value: string; label: string; info: string; spoken?: string }[];
+};
+
+export async function getAboutStats(): Promise<AboutStatsText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<Record<string, unknown> | null>(
+      `*[_type == "aboutStats"][0]{ eyebrow, stats[]{ value, label, info, spoken } }`,
+      {},
+      { next: { revalidate: 300, tags: ["aboutStats"] } },
+    );
+    if (!row) return {};
+    // Only keep rows the component can actually render — a half-filled row
+    // would otherwise produce an empty figure or an unlabelled one.
+    const stats = Array.isArray(row.stats)
+      ? (row.stats as Record<string, unknown>[])
+          .map((s) => ({
+            value: asStr(s.value) ?? "",
+            label: asStr(s.label) ?? "",
+            info: asStr(s.info) ?? "",
+            spoken: asStr(s.spoken),
+          }))
+          .filter((s) => s.value.trim() && s.label.trim())
+      : undefined;
+    return {
+      eyebrow: asStr(row.eyebrow),
+      stats: stats?.length ? stats : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+/* -------------------------------------------------------------------------- *
  *  Legal pages (Privacy · Terms · Disclosures)                                *
  * -------------------------------------------------------------------------- */
 
