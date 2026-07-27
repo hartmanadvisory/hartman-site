@@ -8,6 +8,11 @@ export type JudgmentEvent = {
   caption?: string;
   imageUrl: string;
   imageAlt?: string;
+  // Natural pixel dimensions of the photograph, when known. The carousel
+  // sizes each slide to the active image's own aspect ratio so nothing is
+  // cropped — so it needs the intrinsic width/height, not just the URL.
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
 /**
@@ -23,6 +28,8 @@ const FALLBACK_EVENTS: JudgmentEvent[] = [
     title: "a16z Tech Week NYC",
     date: "2025-06-01",
     imageUrl: "/media/event-speaker-panel.jpg",
+    imageWidth: 2048,
+    imageHeight: 1365,
   },
 ];
 
@@ -32,14 +39,20 @@ type RawEvent = {
   date: string;
   caption?: string;
   image?: unknown;
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
+// Pull the asset's intrinsic dimensions alongside the image ref so the
+// carousel can size each slide to its photo and avoid cropping.
 const JUDGMENT_QUERY = `*[_type == "judgmentEvent"] | order(order asc, date desc) {
   _id,
   title,
   date,
   caption,
-  image
+  image,
+  "imageWidth": image.asset->metadata.dimensions.width,
+  "imageHeight": image.asset->metadata.dimensions.height
 }`;
 
 /**
@@ -64,9 +77,63 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
       date: row.date,
       caption: row.caption,
       imageUrl: row.image ? urlFor(row.image) : "",
+      imageWidth: row.imageWidth,
+      imageHeight: row.imageHeight,
     }));
   } catch {
     return FALLBACK_EVENTS;
+  }
+}
+
+/* -------------------------------------------------------------------------- *
+ *  Who We Serve — the three panel photos on the homepage                       *
+ * -------------------------------------------------------------------------- */
+
+/**
+ * CMS overrides for the three "Funds, Founders, and LPs shaping venture"
+ * photos, keyed by the segment id used in the component. Any key left
+ * undefined means "no CMS image set" — the component keeps its bundled
+ * default for that panel, so the section never breaks on a missing upload.
+ */
+export type WhoWeServeImages = Partial<
+  Record<"venture-funds" | "founders" | "lps", string>
+>;
+
+type RawWhoWeServe = {
+  fundsImage?: unknown;
+  foundersImage?: unknown;
+  lpsImage?: unknown;
+};
+
+// Single settings-style document; project the three image refs so urlFor
+// can build CDN URLs the same way the carousel does.
+const WHO_WE_SERVE_QUERY = `*[_type == "whoWeServe"][0]{
+  fundsImage,
+  foundersImage,
+  lpsImage
+}`;
+
+/**
+ * Fetch the CMS-set Who We Serve photos. Returns only the panels that have
+ * an image in Sanity; the component falls back to its bundled image for the
+ * rest. Empty object when Sanity is unconfigured or the document is absent.
+ */
+export async function getWhoWeServeImages(): Promise<WhoWeServeImages> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<RawWhoWeServe | null>(
+      WHO_WE_SERVE_QUERY,
+      {},
+      { next: { revalidate: 300, tags: ["whoWeServe"] } },
+    );
+    if (!row) return {};
+    const out: WhoWeServeImages = {};
+    if (row.fundsImage) out["venture-funds"] = urlFor(row.fundsImage);
+    if (row.foundersImage) out["founders"] = urlFor(row.foundersImage);
+    if (row.lpsImage) out["lps"] = urlFor(row.lpsImage);
+    return out;
+  } catch {
+    return {};
   }
 }
 

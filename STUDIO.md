@@ -152,6 +152,43 @@ event, the fallback disappears automatically.
 
 ---
 
+## 3a. Swapping the "Who We Serve" photos
+
+The homepage "Funds, Founders, and LPs shaping venture" section shows
+three photographs (Venture Funds, Founders & Category-Definers,
+Institutional LPs & Family Offices). These are editable from a single
+settings document.
+
+### Steps
+
+1. Sidebar → **Who We Serve — Images** → open the existing document, or
+   **New document** if none exists yet (create only ONE).
+2. Upload a photo into any of the three image slots. Each slot is
+   labelled with the panel it controls.
+3. **Any slot left blank keeps the built-in default photo** — you can
+   replace one, two, or all three.
+4. Click **Publish**. Changes appear within the 5-minute cache window.
+
+### Image sourcing
+
+- **Vertical / portrait orientation** reads best — each photo is cropped
+  to fill a tall frame (`object-cover`), so wide landscape shots lose
+  their sides.
+- At least 1200px on the short edge. Sanity downscales.
+- **Atmospheric/editorial photos only** — no text, charts, or
+  infographics baked into the image. These photos are decorative (the
+  panel heading and paragraph carry the meaning), so any text inside the
+  image is invisible to screen readers.
+
+### The current default
+
+If the **Who We Serve — Images** document doesn't exist, or a slot is
+empty, the site uses the three photos bundled in the code
+(`/media/event-portrait.jpg`, `/media/event-conversation.jpg`,
+`/media/event-clients.jpg`). Uploading replaces them per-slot.
+
+---
+
 ## 4. What happens after Publish
 
 - Sanity persists the change immediately.
