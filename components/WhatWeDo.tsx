@@ -253,7 +253,7 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
       {/* Event carousel — inset gutters, extends down past the dark
           band into the section below. Falls back to a single event
           ("a16z Tech Week NYC") when Sanity is unpopulated. */}
-      <div className="relative mx-6 sm:mx-10 lg:mx-14">
+      <div className="relative mx-6 aspect-[3/2] max-h-[80vh] overflow-hidden sm:mx-10 lg:mx-14">
         <JudgmentCarousel events={events} />
       </div>
     </section>

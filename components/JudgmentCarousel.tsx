@@ -113,18 +113,6 @@ export default function JudgmentCarousel({
   const activeEv = events[active];
   const activeDate = formatDate(activeEv.date);
 
-  // Size the carousel to the ACTIVE photo's own aspect ratio so the whole
-  // image is shown (paired with object-contain) instead of being cropped to
-  // a fixed box. Width is full-bleed within the gutters; height follows from
-  // the ratio, clamped so a very tall portrait can't push the controls below
-  // the fold (max) and a wide panorama still reads on mobile (min). When a
-  // clamp bites, object-contain letterboxes over the section rather than
-  // cropping. Default ratio matches the landscape fallback (3:2).
-  const aspectRatio =
-    activeEv.imageWidth && activeEv.imageHeight
-      ? activeEv.imageWidth / activeEv.imageHeight
-      : 3 / 2;
-
   return (
     <section
       ref={regionRef}
@@ -137,8 +125,7 @@ export default function JudgmentCarousel({
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) setHasFocus(false);
       }}
-      className="relative w-full"
-      style={{ aspectRatio, minHeight: "18rem", maxHeight: "80vh" }}
+      className="relative h-full w-full"
     >
       {/* Slides + entry curtain — both scoped to the same overflow-hidden
           image box so the curtain covers ONLY the photograph plane, never the
@@ -151,6 +138,12 @@ export default function JudgmentCarousel({
           const label = `${i + 1} of ${total}: ${ev.title}${
             formatDate(ev.date) ? " · " + formatDate(ev.date) : ""
           }`;
+          // Crop focus: honor the image's Sanity hotspot; otherwise bias
+          // upper-center so faces/heads survive the landscape crop.
+          const objectPosition =
+            ev.focalX != null && ev.focalY != null
+              ? `${ev.focalX * 100}% ${ev.focalY * 100}%`
+              : "50% 35%";
           return (
             <div
               key={ev.id}
@@ -168,7 +161,8 @@ export default function JudgmentCarousel({
                   sizes="(max-width: 1440px) 100vw, 1440px"
                   priority={i === 0}
                   loading={i === 0 ? "eager" : "lazy"}
-                  className="object-contain"
+                  className="object-cover"
+                  style={{ objectPosition }}
                 />
               )}
             </div>
