@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import ScrollBorder from "./ScrollBorder";
 import type { JudgmentEvent } from "@/sanity/queries";
 
 /**
@@ -184,6 +185,18 @@ export default function JudgmentCarousel({
           style={{ willChange: "transform" }}
         />
       </div>
+
+      {/* Scroll-linked cobalt border draw — the same one the Who We Serve
+          images use. Deliberately a SIBLING of the image box, not a child:
+          inside that box's overflow-hidden the stroke's drop-shadow would be
+          clipped at every edge, and it would paint on top of the white
+          curtain instead of being revealed by it. Stays at z-10 (below the
+          z-20 controls) so it can never cover a focus ring. Its scroll window
+          starts later than the curtain's so the two don't animate over each
+          other. Skipped under reduced motion: the draw IS the effect. */}
+      {!reduce && (
+        <ScrollBorder blockRef={regionRef} enterAt={0.6} exitAt={0.4} />
+      )}
 
       {/* Visible caption — duplicate of the active slide's aria-label, so
           aria-hidden to prevent double-announcement. */}

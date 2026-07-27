@@ -235,6 +235,24 @@ vision, while still looking fine on your own screen.
 
 ---
 
+## 3d. The company logo wall
+
+**Homepage — Companies** controls the label, the heading, and which company
+logos appear on the homepage.
+
+1. Sidebar → **Homepage — Companies**.
+2. Under **Companies**, pick companies from the dropdown and drag them into
+   the order you want. Leave the list empty to keep the current one.
+3. Click **Publish**.
+
+You choose companies by **name** from a list, not by typing them. That's
+deliberate: the company name is what a screen reader announces for the logo,
+so picking from the list guarantees the name always matches the logo actually
+shown. It also means **adding a brand-new company is a developer change** —
+the logo file has to be added to the site first.
+
+---
+
 ## 3c. Editing the About page
 
 | Sidebar item | Controls |

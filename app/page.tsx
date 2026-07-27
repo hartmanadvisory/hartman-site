@@ -11,6 +11,7 @@ import {
   getHomeHero,
   getHomeWhoWeAre,
   getHomeClosingCta,
+  getHomePortfolio,
 } from "@/sanity/queries";
 
 // Homepage composition:
@@ -24,6 +25,7 @@ export default async function Home() {
     hero,
     whoWeAre,
     closingCta,
+    portfolio,
   ] = await Promise.all([
     getJudgmentEvents(),
     getWhoWeServeImages(),
@@ -31,6 +33,7 @@ export default async function Home() {
     getHomeHero(),
     getHomeWhoWeAre(),
     getHomeClosingCta(),
+    getHomePortfolio(),
   ]);
   return (
     <>
@@ -46,7 +49,11 @@ export default async function Home() {
         ctaLabel={whoWeAre.ctaLabel}
       />
       <WhatWeDo events={judgmentEvents} />
-      <HomePortfolio />
+      <HomePortfolio
+        eyebrow={portfolio.eyebrow}
+        heading={portfolio.heading}
+        companies={portfolio.companies}
+      />
       <WhoWeServe
         imageOverrides={whoWeServeImages}
         eyebrow={whoWeServeText.eyebrow}

@@ -1,79 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { type RefObject, useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  type Variants,
-} from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import ScrollBorder from "./ScrollBorder";
 import {
   WHO_WE_SERVE,
   pick,
   type WhoWeServeSegment,
 } from "@/sanity/content-defaults";
-
-/**
- * ScrollBorder — an SVG rectangle stroked around the sticky image whose
- * stroke-dashoffset (via SVG pathLength=1) is driven by the associated
- * sub-block's scroll progress. Only the ACTIVE image's border animates;
- * inactive borders reset to fully undrawn so a scroll-back never flashes a
- * pre-drawn frame (accessibility-lead's caveat).
- */
-function ScrollBorder({
-  blockRef,
-  active,
-}: {
-  blockRef: RefObject<HTMLDivElement | null>;
-  active: boolean;
-}) {
-  const { scrollYProgress } = useScroll({
-    target: blockRef,
-    offset: ["start 90%", "end 10%"],
-  });
-  const dashOffset = useMotionValue(1);
-
-  useEffect(() => {
-    if (!active) {
-      // Reset to fully DRAWN when this block isn't active, so scrolling back
-      // into it starts from the drawn state (per user request — reversed
-      // direction: draws un-completely as you scroll down through the block).
-      dashOffset.set(0);
-      return;
-    }
-    const clamp = (v: number) => Math.max(0, Math.min(1, v));
-    dashOffset.set(clamp(scrollYProgress.get()));
-    const unsub = scrollYProgress.on("change", (v) => {
-      dashOffset.set(clamp(v));
-    });
-    return unsub;
-  }, [active, dashOffset, scrollYProgress]);
-
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      className="pointer-events-none absolute inset-0 z-10 h-full w-full"
-      preserveAspectRatio="none"
-      style={{ filter: "drop-shadow(0 0 2px rgba(0,0,0,0.5))" }}
-    >
-      <motion.rect
-        x="1.5"
-        y="1.5"
-        width="calc(100% - 3px)"
-        height="calc(100% - 3px)"
-        fill="none"
-        stroke="var(--cobalt)"
-        strokeWidth="3"
-        pathLength={1}
-        strokeDasharray="1"
-        style={{ strokeDashoffset: dashOffset }}
-      />
-    </svg>
-  );
-}
 
 /**
  * "Who We Serve" — Blackstone-style sticky scrollytelling, for Hartman.

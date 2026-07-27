@@ -65,6 +65,7 @@ like the firm's bank login.
 - The homepage **"Who we are"** statement and its button wording
 - The **"Funds, Founders, and LPs shaping venture"** text and photos
 - The **closing** headline and button wording at the bottom of the page
+- The **company logo wall** — which companies show, and in what order
 - The whole **About page**: the profile (name, intro, credentials,
   portrait, button), the three figures, and the Background section
 

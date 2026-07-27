@@ -2,17 +2,35 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import {
+  HOME_PORTFOLIO,
+  pick,
+  resolveCompanies,
+} from "@/sanity/content-defaults";
 
 /**
- * HomePortfolio — logo wall of 19 companies Mordechai has advised or
+ * HomePortfolio — logo wall of the companies Mordechai has advised or
  * transacted on across his career, plus an "& more" cell signalling
  * the list is representative rather than exhaustive. Ships on the
  * homepage between WhatWeDo and WhoWeServe (moved from /about per
  * final-pass direction).
  *
+ * Which companies appear, and in what order, is CMS-editable — but as a list
+ * of logo FILENAMES. Company NAMES are looked up from COMPANY_LOGOS in
+ * sanity/content-defaults.ts and are deliberately NOT authorable: the name is
+ * this image's alt text, so a free-text field would let the OpenAI mark be
+ * labelled "Anthropic", telling sighted and screen-reader visitors two
+ * different things on a page making client-representation claims — with a
+ * non-empty alt that every automated checker would pass. Please don't
+ * reintroduce a name field.
+ *
  * a11y (accessibility-lead signed off):
- *  - <section aria-labelledby="portfolio-heading"> region.
- *  - Eyebrow aria-hidden — the h2 carries semantic identity.
+ *  - <section aria-labelledby="portfolio-heading"> region. The h2's id is a
+ *    hardcoded literal and must stay one — deriving it from CMS text would
+ *    silently break the reference and leave the region unnamed.
+ *  - Eyebrow is exposed (no aria-hidden). It was hidden as decorative when it
+ *    was a fixed word; now that an author can write into it, hiding it would
+ *    silently drop whatever they add from the accessible name tree.
  *  - <ul role="list"> wrapper — discrete facts, list semantics preserved.
  *  - Each logo is an <Image> with alt="{Company name}" — per WCAG 1.1.1
  *    every logo is a distinct piece of information, not decoration.
@@ -24,32 +42,24 @@ import { motion, useReducedMotion } from "framer-motion";
  *    letter-by-letter).
  */
 
-type Company = { name: string; file: string };
 
-const COMPANIES: Company[] = [
-  { name: "Anthropic", file: "anthropic.svg" },
-  { name: "OpenAI", file: "openai.svg" },
-  { name: "SpaceX", file: "spacex.svg" },
-  { name: "Anduril", file: "anduril.svg" },
-  { name: "Meta", file: "meta.svg" },
-  { name: "Notion", file: "notion.svg" },
-  { name: "Ramp", file: "ramp.svg" },
-  { name: "Replit", file: "replit.svg" },
-  { name: "ByteDance", file: "bytedance.svg" },
-  { name: "CoreWeave", file: "coreweave.svg" },
-  { name: "Circle", file: "circle.svg" },
-  { name: "Groq", file: "groq.svg" },
-  { name: "Scale AI", file: "scale.svg" },
-  { name: "Addepar", file: "addepar.svg" },
-  { name: "Glean", file: "glean.svg" },
-  { name: "Gecko Robotics", file: "gecko-robotics.svg" },
-  { name: "Huntress", file: "huntress.svg" },
-  { name: "Arena", file: "arena.svg" },
-  { name: "Saronic", file: "saronic.svg" },
-];
-
-export default function HomePortfolio() {
+export default function HomePortfolio({
+  eyebrow,
+  heading,
+  companies,
+}: {
+  // CMS copy; each falls back to the shipped default when absent or blank.
+  // `companies` is a list of bundled logo FILENAMES — the displayed name (and
+  // the image's alt text) is looked up from the logo registry, so the name a
+  // screen reader hears can never disagree with the mark on screen.
+  eyebrow?: string;
+  heading?: string;
+  companies?: string[];
+} = {}) {
   const reduce = useReducedMotion();
+  const eyebrowText = pick(eyebrow, HOME_PORTFOLIO.eyebrow);
+  const headingText = pick(heading, HOME_PORTFOLIO.heading);
+  const companyList = resolveCompanies(companies);
 
   return (
     <section
@@ -60,7 +70,6 @@ export default function HomePortfolio() {
       <div className="mx-auto w-full max-w-[var(--container)] px-6 pt-24 pb-24 sm:px-10 sm:pt-32 sm:pb-32 lg:px-14">
         <div className="grid grid-cols-12 gap-x-6 gap-y-8 sm:gap-x-10">
           <motion.p
-            aria-hidden="true"
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.5 }}
@@ -71,7 +80,7 @@ export default function HomePortfolio() {
             transition={{ duration: reduce ? 0 : 0.5 }}
             className="col-span-12 text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--cobalt)]"
           >
-            Selected Engagements
+            {eyebrowText}
           </motion.p>
 
           <motion.h2
@@ -89,8 +98,7 @@ export default function HomePortfolio() {
             }}
             className="col-span-12 font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.4vw,3.6rem)] font-bold leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)] md:col-span-10"
           >
-            We have advised our clients on investments into the following
-            companies.
+            {headingText}
           </motion.h2>
         </div>
 
@@ -98,7 +106,7 @@ export default function HomePortfolio() {
           role="list"
           className="mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-none border-y border-[color:var(--rule-on-light)] bg-[color:var(--rule-on-light)] sm:mt-20 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
         >
-          {COMPANIES.map((c, i) => (
+          {companyList.map((c, i) => (
             <motion.li
               key={c.file}
               initial="hidden"
@@ -135,7 +143,7 @@ export default function HomePortfolio() {
             }}
             transition={{
               duration: reduce ? 0 : 0.5,
-              delay: reduce ? 0 : (COMPANIES.length % 5) * 0.05,
+              delay: reduce ? 0 : (companyList.length % 5) * 0.05,
               ease: [0.22, 1, 0.36, 1] as const,
             }}
             className="relative flex aspect-[3/2] items-center justify-center bg-[color:var(--white)] p-6 sm:p-8"

@@ -10,6 +10,7 @@ import { homeClosingCta } from "./sanity/schemas/homeClosingCta";
 import { aboutHero } from "./sanity/schemas/aboutHero";
 import { aboutBackground } from "./sanity/schemas/aboutBackground";
 import { aboutStats } from "./sanity/schemas/aboutStats";
+import { homePortfolio } from "./sanity/schemas/homePortfolio";
 import { apiVersion, dataset, projectId } from "./sanity/env";
 
 /**
@@ -32,6 +33,7 @@ export default defineConfig({
       homeHero,
       homeWhoWeAre,
       homeClosingCta,
+      homePortfolio,
       aboutHero,
       aboutBackground,
       aboutStats,
