@@ -57,12 +57,18 @@ like the firm's bank login.
 
 ## 2. Editing content yourself — Sanity
 
-**What you can change without a developer:** the three legal pages
-(Privacy, Terms, Disclosures), the events in the homepage carousel, and
-the text and photos in the homepage "Funds, Founders, and LPs shaping
-venture" section. (More of the homepage is being made editable — this
-list is growing.) Everything else is part of the code, and needs the AI
-or a developer (Section 3).
+**What you can change without a developer:**
+
+- The three legal pages (Privacy, Terms, Disclosures)
+- The events in the homepage carousel
+- The homepage **hero** headline and the line beneath it
+- The homepage **"Who we are"** statement and its button wording
+- The **"Funds, Founders, and LPs shaping venture"** text and photos
+- The **closing** headline and button wording at the bottom of the page
+
+(More of the homepage is still being made editable — this list is
+growing.) Everything else is part of the code, and needs the AI or a
+developer (Section 3).
 
 **Where:** go to `hartman-site.vercel.app/studio` and log in (Google,
 GitHub, or email). This opens "Sanity Studio," a simple editor.
@@ -83,6 +89,19 @@ GitHub, or email). This opens "Sanity Studio," a simple editor.
 2. Fill in the event name, date, and a landscape photo. Caption and sort
    order are optional.
 3. Click **Publish**.
+
+### To change the homepage wording
+
+1. Sidebar → **Homepage — Hero**, **Homepage — Who We Are**, or
+   **Homepage — Closing CTA**.
+2. Edit the wording you want. Anything left blank keeps the current
+   text, so you can change one line and leave the rest alone.
+3. Click **Publish**.
+
+Two things the editor will refuse, on purpose: a hero headline longer
+than 3 short lines (it would spill off the dark shading and become
+unreadable over the photo), and vague button wording like "Click here"
+(it tells a screen-reader user nothing about where the button goes).
 
 ### To edit the "shaping venture" section (text + photos)
 

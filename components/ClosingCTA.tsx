@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { CLOSING_CTA, pick } from "@/sanity/content-defaults";
 
 /**
  * ClosingCTA — the final movement on the homepage. Full-bleed --navy-deep
@@ -24,8 +25,23 @@ import { motion, useReducedMotion, type Variants } from "framer-motion";
  *    be focusable/clickable from first paint regardless of animation state.
  *    Reduced motion skips the transform entirely.
  */
-export default function ClosingCTA() {
+export default function ClosingCTA({
+  heading,
+  body,
+  ctaLabel,
+}: {
+  // CMS copy; each falls back to the shipped default when absent or blank.
+  // The link's href stays hardcoded — only its wording is editable, and it
+  // must never gain a static aria-label (the visible text IS the accessible
+  // name, so a fixed label would drift from CMS copy on every edit).
+  heading?: string;
+  body?: string;
+  ctaLabel?: string;
+} = {}) {
   const reduce = useReducedMotion();
+  const headingText = pick(heading, CLOSING_CTA.heading);
+  const bodyText = pick(body, CLOSING_CTA.body);
+  const ctaText = pick(ctaLabel, CLOSING_CTA.ctaLabel);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true));
@@ -62,7 +78,7 @@ export default function ClosingCTA() {
             id="cta-h2"
             className="col-span-12 font-[family-name:var(--font-display)] text-[clamp(2.4rem,5.2vw,4.4rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)] md:col-span-7"
           >
-            Bring us your defining deal.
+            {headingText}
           </motion.h2>
 
           <motion.div
@@ -70,8 +86,7 @@ export default function ClosingCTA() {
             className="col-span-12 flex flex-col justify-end md:col-span-5"
           >
             <p className="max-w-md text-lg leading-relaxed text-[color:var(--parchment)]">
-              Confidential intake. The fastest path to a working call with the
-              founder.
+              {bodyText}
             </p>
             {/* Subtle zoom-in on scroll-into-view. Wrapper is a plain block
                 <div>, keeps <Link> as the only focusable element with its
@@ -96,7 +111,7 @@ export default function ClosingCTA() {
                 href="/contact"
                 className="cta-primary on-dark inline-flex w-full items-center justify-center bg-[color:var(--cobalt)] px-10 py-8 text-[clamp(1.25rem,2.2vw,1.75rem)] font-semibold tracking-[0.01em] text-[color:var(--white)] shadow-[0_18px_44px_-14px_rgba(28,68,184,0.7)] transition-colors hover:bg-[#163a9e] focus-visible:bg-[#163a9e]"
               >
-                Start a Conversation
+                {ctaText}
               </Link>
             </motion.div>
           </motion.div>

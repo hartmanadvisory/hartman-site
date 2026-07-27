@@ -4,6 +4,9 @@ import { visionTool } from "@sanity/vision";
 import { judgmentEvent } from "./sanity/schemas/judgmentEvent";
 import { legalPage } from "./sanity/schemas/legalPage";
 import { whoWeServe } from "./sanity/schemas/whoWeServe";
+import { homeHero } from "./sanity/schemas/homeHero";
+import { homeWhoWeAre } from "./sanity/schemas/homeWhoWeAre";
+import { homeClosingCta } from "./sanity/schemas/homeClosingCta";
 import { apiVersion, dataset, projectId } from "./sanity/env";
 
 /**
@@ -19,6 +22,13 @@ export default defineConfig({
   dataset,
   plugins: [structureTool(), visionTool({ defaultApiVersion: apiVersion })],
   schema: {
-    types: [judgmentEvent, legalPage, whoWeServe],
+    types: [
+      judgmentEvent,
+      legalPage,
+      whoWeServe,
+      homeHero,
+      homeWhoWeAre,
+      homeClosingCta,
+    ],
   },
 });

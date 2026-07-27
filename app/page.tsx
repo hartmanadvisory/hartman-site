@@ -8,21 +8,38 @@ import {
   getJudgmentEvents,
   getWhoWeServeImages,
   getWhoWeServeContent,
+  getHomeHero,
+  getHomeWhoWeAre,
+  getHomeClosingCta,
 } from "@/sanity/queries";
 
 // Homepage composition:
 // Hero → WhoWeAre → WhatWeDo (accordion + JudgmentCarousel) →
 // HomePortfolio → WhoWeServe → ClosingCTA → Footer (global in layout).
 export default async function Home() {
-  const [judgmentEvents, whoWeServeImages, whoWeServeText] = await Promise.all([
+  const [
+    judgmentEvents,
+    whoWeServeImages,
+    whoWeServeText,
+    hero,
+    whoWeAre,
+    closingCta,
+  ] = await Promise.all([
     getJudgmentEvents(),
     getWhoWeServeImages(),
     getWhoWeServeContent(),
+    getHomeHero(),
+    getHomeWhoWeAre(),
+    getHomeClosingCta(),
   ]);
   return (
     <>
-      <Hero />
-      <WhoWeAre />
+      <Hero headlineLines={hero.headlineLines} subtext={hero.subtext} />
+      <WhoWeAre
+        eyebrow={whoWeAre.eyebrow}
+        statement={whoWeAre.statement}
+        ctaLabel={whoWeAre.ctaLabel}
+      />
       <WhatWeDo events={judgmentEvents} />
       <HomePortfolio />
       <WhoWeServe
@@ -31,7 +48,11 @@ export default async function Home() {
         heading={whoWeServeText.heading}
         textOverrides={whoWeServeText.segments}
       />
-      <ClosingCTA />
+      <ClosingCTA
+        heading={closingCta.heading}
+        body={closingCta.body}
+        ctaLabel={closingCta.ctaLabel}
+      />
     </>
   );
 }

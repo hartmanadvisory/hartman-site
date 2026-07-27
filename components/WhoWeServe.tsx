@@ -9,14 +9,11 @@ import {
   useScroll,
   type Variants,
 } from "framer-motion";
-import { WHO_WE_SERVE, type WhoWeServeSegment } from "@/sanity/content-defaults";
-
-// Trimmed-non-empty fallback: an editor who CLEARS a Sanity field sends an
-// empty string, which `??` would let through — blanking a heading (and, for
-// the h2, the section's accessible name). So substitute the default whenever
-// the value is missing OR empty/whitespace.
-const pick = (v: string | undefined, fallback: string): string =>
-  v && v.trim() ? v : fallback;
+import {
+  WHO_WE_SERVE,
+  pick,
+  type WhoWeServeSegment,
+} from "@/sanity/content-defaults";
 
 /**
  * ScrollBorder — an SVG rectangle stroked around the sticky image whose

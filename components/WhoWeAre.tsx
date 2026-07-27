@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { WHO_WE_ARE, pick } from "@/sanity/content-defaults";
 
 /**
  * "Who We Are" — single-band section over an offset 12-col grid.
@@ -18,15 +19,33 @@ import { motion, useReducedMotion, type Variants } from "framer-motion";
  *  - Eyebrow is a decorative <p>, NOT a heading. Serif statement is the
  *    sole <h2>. Region named by both (aria-labelledby="who-eyebrow who-h2").
  *  - Button = plain <Link> (implicit role="link"), never role="button".
- *    Visible text = the accessible name.
+ *    Visible text = the accessible name. The label is CMS-driven, so never
+ *    add a static aria-label here — it would drift from the visible text on
+ *    every edit (SC 2.5.3 Label in Name).
+ *  - Eyebrow + statement are CMS-driven but resolve through `pick`, so a
+ *    cleared field can't blank them — both ids feed the region's accessible
+ *    name, and an empty name would drop the landmark entirely.
  *  - Vertical rule is decorative, aria-hidden, exempt from 3:1 UI
  *    contrast because layout separation carries the meaning.
  *  - Reveal never bakes opacity:0 into SSR: `initial` stays false until
  *    mounted (rAF-deferred), so content is visible without JS or on
  *    hydration failure; reduced motion collapses the transform.
  */
-export default function WhoWeAre() {
+export default function WhoWeAre({
+  eyebrow,
+  statement,
+  ctaLabel,
+}: {
+  // CMS copy; each falls back to the shipped default when absent or blank.
+  // The button's href stays hardcoded (/about) — only its wording is editable.
+  eyebrow?: string;
+  statement?: string;
+  ctaLabel?: string;
+} = {}) {
   const reduce = useReducedMotion();
+  const eyebrowText = pick(eyebrow, WHO_WE_ARE.eyebrow);
+  const statementText = pick(statement, WHO_WE_ARE.statement);
+  const ctaText = pick(ctaLabel, WHO_WE_ARE.ctaLabel);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true));
@@ -61,7 +80,7 @@ export default function WhoWeAre() {
                 id="who-eyebrow"
                 className="text-[17px] leading-tight text-[color:var(--ink)] sm:text-[18px]"
               >
-                Who we are
+                {eyebrowText}
               </motion.p>
             </div>
 
@@ -83,10 +102,7 @@ export default function WhoWeAre() {
                 }}
                 className="font-[family-name:var(--font-display)] text-[clamp(2rem,3.4vw,3.2rem)] font-bold leading-[1.1] tracking-[-0.02em] text-[color:var(--ink)]"
               >
-                Our practice is built to assist venture funds, founders, and
-                dealmakers across fund formations, financings, secondaries,
-                exits, and strategic transactions with commercially grounded
-                legal judgment.
+                {statementText}
               </motion.h2>
 
               <motion.div {...reveal(0.18)} className="mt-10">
@@ -94,7 +110,7 @@ export default function WhoWeAre() {
                   href="/about"
                   className="inline-flex min-h-[3rem] items-center justify-center bg-[color:var(--cobalt)] px-7 text-[15px] font-medium tracking-[0.01em] text-[color:var(--white)] transition-colors hover:bg-[#163a9e]"
                 >
-                  About the Firm
+                  {ctaText}
                 </Link>
               </motion.div>
             </div>
