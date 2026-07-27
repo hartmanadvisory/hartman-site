@@ -211,7 +211,12 @@ export async function getWhoWeServeContent(): Promise<WhoWeServeText> {
  * (via the shared pick/pickList guards). So an empty CMS never blanks the page.
  */
 
-export type HomeHeroText = { headlineLines?: string[]; subtext?: string };
+export type HomeHeroText = {
+  headlineLines?: string[];
+  subtext?: string;
+  slides?: { src: string; needsScrim: boolean }[];
+  mobileSrc?: string;
+};
 
 export async function getHomeHero(): Promise<HomeHeroText> {
   if (!sanityConfigured || !sanityClient) return {};
@@ -219,17 +224,37 @@ export async function getHomeHero(): Promise<HomeHeroText> {
     const row = await sanityClient.fetch<{
       headlineLines?: unknown;
       subtext?: unknown;
+      desktopImages?: unknown;
+      mobileImage?: unknown;
     } | null>(
-      `*[_type == "homeHero"][0]{ headlineLines, subtext }`,
+      `*[_type == "homeHero"][0]{ headlineLines, subtext, desktopImages, mobileImage }`,
       {},
       { next: { revalidate: 300, tags: ["homeHero"] } },
     );
     if (!row) return {};
+
+    // Every CMS-uploaded slide gets needsScrim: true. The bundled defaults
+    // carry per-image measured values, but an arbitrary upload's brightness
+    // is unknowable, so we always darken behind the headline rather than
+    // gamble on the white h1 clearing contrast.
+    const slides = Array.isArray(row.desktopImages)
+      ? row.desktopImages
+          .map((img) => urlFor(img as never))
+          .filter((src) => !!src)
+          .map((src) => ({ src, needsScrim: true }))
+      : undefined;
+
+    const mobileSrc = row.mobileImage
+      ? urlFor(row.mobileImage as never)
+      : undefined;
+
     return {
       headlineLines: Array.isArray(row.headlineLines)
         ? row.headlineLines.filter((s): s is string => typeof s === "string")
         : undefined,
       subtext: asStr(row.subtext),
+      slides: slides?.length ? slides : undefined,
+      mobileSrc: mobileSrc || undefined,
     };
   } catch {
     return {};

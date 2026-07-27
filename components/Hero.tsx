@@ -3,7 +3,12 @@
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { HERO, pick, pickList } from "@/sanity/content-defaults";
+import {
+  HERO,
+  pick,
+  pickList,
+  type HeroSlide,
+} from "@/sanity/content-defaults";
 
 /**
  * Home hero — Citadel-faithful for Hartman. The media has a small LEFT gutter
@@ -49,13 +54,20 @@ const REVEAL_DURATION_S = 1.6;
  * stays ≥ 4.5:1.
  *
  * Contrast (worst-case composite white pixel behind h1 top-left, verified):
- *  - hero-3.jpg               dark suits,  no scrim needed        ~10.8:1
- *  - hero-event-speaker.png   night pane,  no scrim needed        ~14:1
- *  - hero-event-conversation  midtones,    +additive scrim α=0.35 ~5.2:1
- * A base scrim α=0.20 sits under ALL desktop slides at all times
- * (deterministic floor); additive layer stacks on top for the bright slide.
- * Both desktop scrims are gated `hidden md:block` so they never stack on
- * top of the mobile scrim.
+ *  - hero-3.jpg               dark suits,  no additive scrim needed  ~10.8:1
+ *  - hero-event-speaker.png   night pane,  no additive scrim needed  ~14:1
+ *  - hero-event-conversation  midtones,    +additive scrim           ~5.2:1
+ * A base scrim α=0.20 sits under ALL desktop slides at all times; the
+ * additive layer stacks on top for bright slides. Both desktop scrims are
+ * gated `hidden md:block` so they never stack onto the mobile scrim.
+ *
+ * The additive layer is α=0.49 (was 0.42; the comment here long claimed
+ * 0.35, which matched neither). Solved against the REAL overlay colour
+ * #0f1626 — not black, which costs ~0.68 ratio points — for the worst case
+ * of a pure-white photograph: base alone is 1.54:1, base+0.42 is 3.84:1,
+ * base+0.49 clears the 4.5:1 contract this file has always claimed. That
+ * headroom matters now that CMS-uploaded photos, whose brightness nobody
+ * can verify in advance, always take the additive layer.
  */
 /**
  * TypewriterHeadline — visible, aria-hidden headline layer. Chars
@@ -199,15 +211,8 @@ function TypewriterHeadline({
   );
 }
 
-type HeroSlide = {
-  src: string;
-  needsScrim: boolean;
-};
-const HERO_SLIDES: readonly HeroSlide[] = [
-  { src: "/hero/hero-3.jpg", needsScrim: false },
-  { src: "/hero/hero-event-speaker.png", needsScrim: false },
-  { src: "/hero/hero-event-conversation.png", needsScrim: true },
-];
+// Default slides live in sanity/content-defaults.ts (HERO.desktopSlides);
+// CMS-supplied photos arrive via props and always carry needsScrim.
 
 /**
  * MOBILE (<md) hero — a single static portrait photograph. No rotation, so
@@ -226,7 +231,7 @@ const HERO_SLIDES: readonly HeroSlide[] = [
  * the photo's dark floor is at the bottom, so a T-B ramp both reads better
  * and mutes the photo less than the desktop's L-R ramp would.
  */
-const MOBILE_HERO_SRC = "/hero/hero-mobile-1.jpg";
+// Default mobile photo: HERO.mobileSrc in sanity/content-defaults.ts.
 
 const AUTOROTATE_MS = 8000;
 const DESKTOP_MQ = "(min-width: 768px)";
@@ -234,10 +239,17 @@ const DESKTOP_MQ = "(min-width: 768px)";
 export default function Hero({
   headlineLines,
   subtext,
+  slides,
+  mobileSrc,
 }: {
   // CMS copy; each falls back to the shipped default when absent or blank.
   headlineLines?: string[];
   subtext?: string;
+  // CMS photos. Blank-src entries are dropped, and an empty list falls back
+  // to the bundled photos — an empty <Image src=""> would throw and take the
+  // whole hero (headline included) down with it, not just the picture.
+  slides?: HeroSlide[];
+  mobileSrc?: string;
 } = {}) {
   const reduce = useReducedMotion();
   // ONE resolution feeds both the sr-only string and the typed layer, so the
@@ -250,6 +262,13 @@ export default function Hero({
   );
   const headlineFull = useMemo(() => lines.join(" "), [lines]);
   const subtextText = pick(subtext, HERO.subtext);
+  const heroSlides = useMemo(() => {
+    const cleaned = (slides ?? []).filter((s) => s?.src?.trim());
+    return cleaned.length ? cleaned : HERO.desktopSlides;
+  }, [slides]);
+  const heroMobileSrc = pick(mobileSrc, HERO.mobileSrc);
+  // Is there anything to pause? One photo, or reduced motion, means no.
+  const canRotate = heroSlides.length > 1 && !reduce;
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false); // user-toggled
   const [pageHidden, setPageHidden] = useState(false);
@@ -266,16 +285,16 @@ export default function Hero({
   }, []);
 
   const shouldRotate =
-    isDesktop && !reduce && !paused && !pageHidden && HERO_SLIDES.length > 1;
+    isDesktop && !reduce && !paused && !pageHidden && heroSlides.length > 1;
 
   // Auto-advance timer for the ambient background image rotation.
   useEffect(() => {
     if (!shouldRotate) return;
     const id = window.setInterval(() => {
-      setActive((i) => (i + 1) % HERO_SLIDES.length);
+      setActive((i) => (i + 1) % heroSlides.length);
     }, AUTOROTATE_MS);
     return () => window.clearInterval(id);
-  }, [shouldRotate]);
+  }, [shouldRotate, heroSlides.length]);
 
   // Pause rotation when the tab is hidden (battery + jarring resume avoidance).
   useEffect(() => {
@@ -310,7 +329,7 @@ export default function Hero({
             1px at md+ so desktop never downloads it. */}
         <div aria-hidden="true" className="absolute inset-0 md:hidden">
           <Image
-            src={MOBILE_HERO_SRC}
+            src={heroMobileSrc}
             alt=""
             fill
             sizes="(max-width: 767px) 100vw, 1px"
@@ -322,9 +341,9 @@ export default function Hero({
         {/* DESKTOP (md+) — rotating slide stack. `sizes` resolves to 1px
             below md so phones never download these landscape images. */}
         <div aria-hidden="true" className="absolute inset-0 hidden md:block">
-          {HERO_SLIDES.map((slide, i) => (
+          {heroSlides.map((slide, i) => (
             <div
-              key={slide.src}
+              key={`${i}-${slide.src}`}
               className="absolute inset-0 transition-opacity"
               style={{
                 opacity: active === i ? 1 : 0,
@@ -356,7 +375,7 @@ export default function Hero({
           className="absolute inset-0 z-[1] md:hidden"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(15,22,38,0.66) 0%, rgba(15,22,38,0.62) 42%, rgba(15,22,38,0.30) 60%, rgba(15,22,38,0) 76%)",
+              "linear-gradient(to bottom, rgba(15,22,38,0.66) 0%, rgba(15,22,38,0.62) 50%, rgba(15,22,38,0.30) 64%, rgba(15,22,38,0) 78%)",
           }}
         />
 
@@ -376,17 +395,17 @@ export default function Hero({
         {/* ADDITIVE scrim (md+) — only for slides with bright top-left. Its
             opacity follows the active slide's opacity so during a crossfade
             the AA guarantee never dips below the current slide's brightness. */}
-        {HERO_SLIDES.map((slide, i) =>
+        {heroSlides.map((slide, i) =>
           slide.needsScrim ? (
             <div
-              key={`scrim-${slide.src}`}
+              key={`scrim-${i}-${slide.src}`}
               aria-hidden="true"
               className="absolute inset-0 z-[1] hidden transition-opacity md:block"
               style={{
                 opacity: active === i ? 1 : 0,
                 transitionDuration: reduce ? "0ms" : "1000ms",
                 background:
-                  "linear-gradient(to right, rgba(15,22,38,0.42) 0%, rgba(15,22,38,0.42) 48%, rgba(15,22,38,0.20) 58%, rgba(15,22,38,0) 66%)",
+                  "linear-gradient(to right, rgba(15,22,38,0.49) 0%, rgba(15,22,38,0.49) 48%, rgba(15,22,38,0.24) 58%, rgba(15,22,38,0) 66%)",
               }}
             />
           ) : null,
@@ -415,10 +434,22 @@ export default function Hero({
         </div>
 
         {/* Play/pause — Citadel-minimal glyph in the top-right corner. No
-            visible chrome; interactive area is 44×44 via padding. Hidden
-            below md: the mobile hero is a single static photo, so there is
-            nothing to pause. `hidden` also drops it from the tab order,
-            so no keyboard user lands on a no-op control (a11y-lead). */}
+            interactive area is 44×44. Hidden below md: the mobile hero is a
+            single static photo, so there is nothing to pause. `hidden` also
+            drops it from the tab order, so no keyboard user lands on a no-op
+            control (a11y-lead).
+
+            Rendered ONLY when there is actually something to pause. It used
+            to render whenever the viewport was md+, so a single CMS photo (or
+            reduced motion) produced a button that announced "Pause background
+            image rotation", did nothing, then flipped to "Resume".
+
+            It also now carries a resting dark pill. Without one the white
+            glyph sat at ~97% width — well outside the scrim ramp, which is
+            fully transparent by 66% — so over a bright photo it was white on
+            white. The pill guarantees the icon's contrast on any upload,
+            matching the carousel controls elsewhere on the site. */}
+        {canRotate && (
         <button
           type="button"
           onClick={toggle}
@@ -427,7 +458,7 @@ export default function Hero({
               ? "Pause background image rotation"
               : "Resume background image rotation"
           }
-          className="absolute right-2 top-2 z-20 hidden h-11 w-11 place-items-center text-[color:var(--white)] transition-colors hover:bg-[rgba(0,0,0,0.35)] focus-visible:bg-[rgba(0,0,0,0.35)] md:grid sm:right-4 sm:top-4"
+          className="absolute right-2 top-2 z-20 hidden h-11 w-11 place-items-center rounded-full bg-[rgba(15,22,38,0.55)] text-[color:var(--white)] backdrop-blur-sm transition-colors hover:bg-[rgba(15,22,38,0.75)] focus-visible:bg-[rgba(15,22,38,0.75)] md:grid sm:right-4 sm:top-4"
         >
           {isPlaying ? (
             <svg
@@ -457,6 +488,7 @@ export default function Hero({
             </svg>
           )}
         </button>
+        )}
       </div>
 
       {/* Cobalt caption — overlaps the image bottom-left, extends LEFT past

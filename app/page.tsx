@@ -34,7 +34,12 @@ export default async function Home() {
   ]);
   return (
     <>
-      <Hero headlineLines={hero.headlineLines} subtext={hero.subtext} />
+      <Hero
+        headlineLines={hero.headlineLines}
+        subtext={hero.subtext}
+        slides={hero.slides}
+        mobileSrc={hero.mobileSrc}
+      />
       <WhoWeAre
         eyebrow={whoWeAre.eyebrow}
         statement={whoWeAre.statement}
