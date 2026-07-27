@@ -7,7 +7,7 @@ import type { MetadataRoute } from "next";
  * snapshot — Sanity-backed lastUpdated could feed this later.
  */
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://hartman-site.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hartmanadvisory.com";
 
 type ChangeFrequency = MetadataRoute.Sitemap[number]["changeFrequency"];
 

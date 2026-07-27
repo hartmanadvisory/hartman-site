@@ -31,8 +31,12 @@ const display = localFont({
   adjustFontFallback: "Arial",
 });
 
+// Drives metadataBase — i.e. the absolute URLs in og:url, og:image and
+// canonical tags. Falls back to the real production domain (www; the apex
+// redirects to it) rather than the old Vercel URL, so share previews and
+// search results point at hartmanadvisory.com even if the env var is unset.
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://hartman-site.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hartmanadvisory.com";
 const SITE_TITLE =
   "Precision Legal Counsel for Venture Capital's Defining Deals — Hartman Venture Advisors";
 const SITE_DESCRIPTION =
