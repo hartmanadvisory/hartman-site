@@ -311,6 +311,35 @@ export async function getHomeClosingCta(): Promise<HomeClosingCtaText> {
   }
 }
 
+export type HomePortfolioText = {
+  eyebrow?: string;
+  heading?: string;
+  companies?: string[];
+};
+
+export async function getHomePortfolio(): Promise<HomePortfolioText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<Record<string, unknown> | null>(
+      `*[_type == "homePortfolio"][0]{ eyebrow, heading, companies }`,
+      {},
+      { next: { revalidate: 300, tags: ["homePortfolio"] } },
+    );
+    if (!row) return {};
+    return {
+      eyebrow: asStr(row.eyebrow),
+      heading: asStr(row.heading),
+      // Filenames only — the component maps them to names via the logo
+      // registry, and drops anything it doesn't recognise.
+      companies: Array.isArray(row.companies)
+        ? row.companies.filter((s): s is string => typeof s === "string")
+        : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
 /* -------------------------------------------------------------------------- *
  *  /about — Hero, Background, By the Numbers                                   *
  * -------------------------------------------------------------------------- */

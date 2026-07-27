@@ -97,6 +97,104 @@ export const CLOSING_CTA = {
 };
 
 /* -------------------------------------------------------------------------- *
+ *  Homepage — the company logo wall                                            *
+ * -------------------------------------------------------------------------- */
+
+/**
+ * The logos bundled at /public/brand/companies, mapped to the company name.
+ *
+ * This map is the SINGLE source of truth for both the file and the name, and
+ * that's deliberate: the name is what a screen reader announces for the logo
+ * (it's the image's alt text). If the CMS let an author type the name
+ * separately, they could pick the OpenAI mark and label it "Anthropic" — the
+ * page would then tell sighted and screen-reader visitors two different
+ * things, on a page making client-representation claims, and no automated
+ * checker would flag it because the alt text is non-empty either way. So the
+ * Studio dropdown shows these names and stores the filename; the alt text is
+ * always read back out of this map.
+ *
+ * Adding a company therefore means adding its SVG here and in /public — a
+ * code change, which is what the owner asked for.
+ */
+export const COMPANY_LOGOS: Record<string, string> = {
+  "addepar.svg": "Addepar",
+  "anduril.svg": "Anduril",
+  "anthropic.svg": "Anthropic",
+  "arena.svg": "Arena",
+  "bytedance.svg": "ByteDance",
+  "circle.svg": "Circle",
+  "coreweave.svg": "CoreWeave",
+  "gecko-robotics.svg": "Gecko Robotics",
+  "glean.svg": "Glean",
+  "groq.svg": "Groq",
+  "huntress.svg": "Huntress",
+  "meta.svg": "Meta",
+  "notion.svg": "Notion",
+  "openai.svg": "OpenAI",
+  "ramp.svg": "Ramp",
+  "replit.svg": "Replit",
+  "saronic.svg": "Saronic",
+  "scale.svg": "Scale AI",
+  "shield-ai.svg": "Shield AI",
+  "spacex.svg": "SpaceX",
+};
+
+export const HOME_PORTFOLIO = {
+  eyebrow: "Selected Engagements",
+  heading:
+    "We have advised our clients on investments into the following companies.",
+  /** Display order. Names come from COMPANY_LOGOS. */
+  companies: [
+    "anthropic.svg",
+    "openai.svg",
+    "spacex.svg",
+    "anduril.svg",
+    "meta.svg",
+    "notion.svg",
+    "ramp.svg",
+    "replit.svg",
+    "bytedance.svg",
+    "coreweave.svg",
+    "circle.svg",
+    "groq.svg",
+    "scale.svg",
+    "addepar.svg",
+    "glean.svg",
+    "gecko-robotics.svg",
+    "huntress.svg",
+    "arena.svg",
+    "saronic.svg",
+  ],
+};
+
+/**
+ * Resolve a list of logo filenames to renderable {name, file} pairs: unknown
+ * files are dropped (the filename reaches the DOM as an image path, and
+ * Studio validation is bypassable via the API) and duplicates are removed
+ * (a repeated logo would be announced twice). Falls back to the shipped list
+ * when nothing usable survives.
+ */
+export function resolveCompanies(
+  files: string[] | undefined,
+): { name: string; file: string }[] {
+  const source = files?.length ? files : HOME_PORTFOLIO.companies;
+  const seen = new Set<string>();
+  const out: { name: string; file: string }[] = [];
+  for (const file of source) {
+    const name = COMPANY_LOGOS[file];
+    if (!name || seen.has(file)) continue;
+    seen.add(file);
+    out.push({ name, file });
+  }
+  return out.length
+    ? out
+    : HOME_PORTFOLIO.companies.map((file) => ({
+        name: COMPANY_LOGOS[file],
+        file,
+      }));
+}
+
+/* -------------------------------------------------------------------------- *
  *  /about                                                                      *
  * -------------------------------------------------------------------------- */
 
