@@ -61,14 +61,15 @@ like the firm's bank login.
 
 - The three legal pages (Privacy, Terms, Disclosures)
 - The events in the homepage carousel
-- The homepage **hero** headline and the line beneath it
+- The homepage **hero** headline, the line beneath it, and its background photos
 - The homepage **"Who we are"** statement and its button wording
 - The **"Funds, Founders, and LPs shaping venture"** text and photos
 - The **closing** headline and button wording at the bottom of the page
+- The whole **About page**: the profile (name, intro, credentials,
+  portrait, button), the three figures, and the Background section
 
-(More of the homepage is still being made editable — this list is
-growing.) Everything else is part of the code, and needs the AI or a
-developer (Section 3).
+Everything else is part of the code, and needs the AI or a developer
+(Section 3).
 
 **Where:** go to `hartman-site.vercel.app/studio` and log in (Google,
 GitHub, or email). This opens "Sanity Studio," a simple editor.
