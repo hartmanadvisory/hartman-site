@@ -253,8 +253,14 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
       {/* Event carousel — inset gutters, extends down past the dark
           band into the section below. Falls back to a single event
           ("a16z Tech Week NYC") when Sanity is unpopulated. */}
-      <div className="relative mx-6 aspect-[3/2] max-h-[80vh] overflow-hidden sm:mx-10 lg:mx-14">
-        <JudgmentCarousel events={events} />
+      {/* Gutters live on this padded parent so the frame itself can center.
+          When max-h clamps the height, the aspect-ratio shrinks the frame's
+          WIDTH — as a plain margin box it stayed pinned left, leaving a big
+          gap on the right; mx-auto keeps it centered at every viewport. */}
+      <div className="relative px-6 sm:px-10 lg:px-14">
+        <div className="relative mx-auto aspect-[3/2] max-h-[80vh] overflow-hidden">
+          <JudgmentCarousel events={events} />
+        </div>
       </div>
     </section>
   );
