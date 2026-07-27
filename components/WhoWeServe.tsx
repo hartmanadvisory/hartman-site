@@ -9,6 +9,14 @@ import {
   useScroll,
   type Variants,
 } from "framer-motion";
+import { WHO_WE_SERVE, type WhoWeServeSegment } from "@/sanity/content-defaults";
+
+// Trimmed-non-empty fallback: an editor who CLEARS a Sanity field sends an
+// empty string, which `??` would let through — blanking a heading (and, for
+// the h2, the section's accessible name). So substitute the default whenever
+// the value is missing OR empty/whitespace.
+const pick = (v: string | undefined, fallback: string): string =>
+  v && v.trim() ? v : fallback;
 
 /**
  * ScrollBorder — an SVG rectangle stroked around the sticky image whose
@@ -98,47 +106,32 @@ function ScrollBorder({
  *  - Image loading: first eager+high priority, rest lazy.
  */
 
-type Segment = {
-  id: string;
-  h3: string;
-  body: string;
-  image: string;
-};
-
-const SEGMENTS: Segment[] = [
-  {
-    id: "venture-funds",
-    h3: "Venture Funds",
-    body:
-      "General partners at the fund level: from first-time formations to complex spin-outs, GP-led secondaries, and the LP negotiations that decide a fund's economics. We advise the funds shaping the next generation of institutional venture.",
-    image: "/media/event-portrait.jpg",
-  },
-  {
-    id: "founders",
-    h3: "Founders & Category-Definers",
-    body:
-      "Repeat founders in the transactions that decide a company's trajectory: priced rounds, tender offers and secondaries, cofounder disputes, strategic sales, and IPOs. Counsel that matches the stakes.",
-    image: "/media/event-conversation.jpg",
-  },
-  {
-    id: "lps",
-    h3: "Institutional LPs & Family Offices",
-    body:
-      "Institutional limited partners and family offices on the buy side of the private markets: side letters, direct investment vehicles, secondary purchases, and the diligence that decides where the next allocation goes.",
-    image: "/media/event-clients.jpg",
-  },
-];
+// Default segments (id, heading, body, bundled photo) live in the shared
+// content-defaults module so queries.ts and this component agree on the
+// fallback copy.
+const SEGMENTS = WHO_WE_SERVE.segments;
 
 export default function WhoWeServe({
   imageOverrides,
+  eyebrow,
+  heading,
+  textOverrides,
 }: {
   // CMS-supplied photo per segment id; falls back to the bundled default
   // when a panel has no image set in Sanity. Same override feeds both the
   // desktop sticky stack and the mobile inline image for a given segment.
   imageOverrides?: Partial<Record<string, string>>;
+  // CMS section header text; each falls back to the bundled default.
+  eyebrow?: string;
+  heading?: string;
+  // CMS per-segment heading/body override, keyed by segment id.
+  textOverrides?: Partial<Record<string, { h3?: string; body?: string }>>;
 } = {}) {
   const reduce = useReducedMotion();
-  const imageFor = (seg: Segment) => imageOverrides?.[seg.id] ?? seg.image;
+  const imageFor = (seg: WhoWeServeSegment) =>
+    imageOverrides?.[seg.id] ?? seg.image;
+  const eyebrowText = pick(eyebrow, WHO_WE_SERVE.eyebrow);
+  const headingText = pick(heading, WHO_WE_SERVE.heading);
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(0);
   // SEGMENTS.length is 3 (constant), so three refs is safe under rules of
@@ -267,7 +260,7 @@ export default function WhoWeServe({
                 className="h-px w-16 bg-[color:var(--rule-on-light)]"
               />
               <span className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gold-deep)]">
-                Who We Serve
+                {eyebrowText}
               </span>
             </motion.div>
 
@@ -292,7 +285,7 @@ export default function WhoWeServe({
               // the sticky column as originally designed.
               className="mt-10 max-w-[38rem] self-end text-left font-[family-name:var(--font-display)] text-[clamp(2.2rem,4.4vw,3.8rem)] font-bold leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)] md:text-right"
             >
-              Funds, Founders, and LPs shaping venture.
+              {headingText}
             </motion.h2>
 
             <div className="mt-16 flex flex-col md:mt-24">
@@ -331,10 +324,10 @@ export default function WhoWeServe({
                   </div>
 
                   <h3 className="relative z-10 font-[family-name:var(--font-display)] text-[clamp(1.6rem,2.6vw,2.2rem)] font-semibold leading-tight tracking-[-0.01em] text-[color:var(--ink)]">
-                    {seg.h3}
+                    {pick(textOverrides?.[seg.id]?.h3, seg.h3)}
                   </h3>
                   <p className="relative z-10 mt-5 text-lg leading-relaxed text-[color:var(--muted)]">
-                    {seg.body}
+                    {pick(textOverrides?.[seg.id]?.body, seg.body)}
                   </p>
                 </motion.div>
               ))}

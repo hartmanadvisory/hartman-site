@@ -85,7 +85,7 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
 }
 
 /* -------------------------------------------------------------------------- *
- *  Who We Serve — the three panel photos on the homepage                       *
+ *  Who We Serve — text + the three panel photos on the homepage                *
  * -------------------------------------------------------------------------- */
 
 /**
@@ -131,6 +131,71 @@ export async function getWhoWeServeImages(): Promise<WhoWeServeImages> {
     if (row.foundersImage) out["founders"] = urlFor(row.foundersImage);
     if (row.lpsImage) out["lps"] = urlFor(row.lpsImage);
     return out;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * CMS text overrides for the Who We Serve section: the eyebrow, heading, and
+ * per-segment heading/body. Sparse by design — any field absent/blank in
+ * Sanity is omitted, and the component substitutes its bundled default (with
+ * a trimmed-non-empty guard). Reads the SAME `whoWeServe` document as the
+ * images getter above.
+ */
+export type WhoWeServeText = {
+  eyebrow?: string;
+  heading?: string;
+  segments?: Partial<
+    Record<"venture-funds" | "founders" | "lps", { h3?: string; body?: string }>
+  >;
+};
+
+type RawWhoWeServeText = {
+  eyebrow?: unknown;
+  heading?: unknown;
+  fundsHeading?: unknown;
+  fundsBody?: unknown;
+  foundersHeading?: unknown;
+  foundersBody?: unknown;
+  lpsHeading?: unknown;
+  lpsBody?: unknown;
+};
+
+const WHO_WE_SERVE_TEXT_QUERY = `*[_type == "whoWeServe"][0]{
+  eyebrow, heading,
+  fundsHeading, fundsBody,
+  foundersHeading, foundersBody,
+  lpsHeading, lpsBody
+}`;
+
+const asStr = (v: unknown): string | undefined =>
+  typeof v === "string" ? v : undefined;
+
+export async function getWhoWeServeContent(): Promise<WhoWeServeText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<RawWhoWeServeText | null>(
+      WHO_WE_SERVE_TEXT_QUERY,
+      {},
+      { next: { revalidate: 300, tags: ["whoWeServe"] } },
+    );
+    if (!row) return {};
+    return {
+      eyebrow: asStr(row.eyebrow),
+      heading: asStr(row.heading),
+      segments: {
+        "venture-funds": {
+          h3: asStr(row.fundsHeading),
+          body: asStr(row.fundsBody),
+        },
+        founders: {
+          h3: asStr(row.foundersHeading),
+          body: asStr(row.foundersBody),
+        },
+        lps: { h3: asStr(row.lpsHeading), body: asStr(row.lpsBody) },
+      },
+    };
   } catch {
     return {};
   }

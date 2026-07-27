@@ -152,21 +152,26 @@ event, the fallback disappears automatically.
 
 ---
 
-## 3a. Swapping the "Who We Serve" photos
+## 3a. Editing the "Who We Serve" section (text + photos)
 
-The homepage "Funds, Founders, and LPs shaping venture" section shows
-three photographs (Venture Funds, Founders & Category-Definers,
-Institutional LPs & Family Offices). These are editable from a single
-settings document.
+The homepage "Funds, Founders, and LPs shaping venture" section has a
+header (eyebrow + heading) and three panels (Venture Funds, Founders &
+Category-Definers, Institutional LPs & Family Offices), each with a
+heading, a paragraph, and a photograph. All of it is editable from one
+settings document, grouped into **Section header**, **Panels (text)**,
+and **Panel photos**.
 
 ### Steps
 
-1. Sidebar → **Who We Serve — Images** → open the existing document, or
-   **New document** if none exists yet (create only ONE).
-2. Upload a photo into any of the three image slots. Each slot is
-   labelled with the panel it controls.
-3. **Any slot left blank keeps the built-in default photo** — you can
-   replace one, two, or all three.
+1. Sidebar → **Who We Serve** → open the existing document, or **New
+   document** if none exists yet (create only ONE).
+2. Edit any field you want:
+   - **Section header** — the eyebrow and the large heading.
+   - **Panels (text)** — the heading + paragraph for each of the three
+     panels.
+   - **Panel photos** — a photo for each panel.
+3. **Any field left blank keeps the built-in default** — change one
+   field or all of them.
 4. Click **Publish**. Changes appear within the 5-minute cache window.
 
 ### Image sourcing
@@ -182,10 +187,10 @@ settings document.
 
 ### The current default
 
-If the **Who We Serve — Images** document doesn't exist, or a slot is
-empty, the site uses the three photos bundled in the code
+If the **Who We Serve** document doesn't exist, or a field is empty, the
+site uses the copy and the three photos bundled in the code
 (`/media/event-portrait.jpg`, `/media/event-conversation.jpg`,
-`/media/event-clients.jpg`). Uploading replaces them per-slot.
+`/media/event-clients.jpg`). Editing a field replaces just that field.
 
 ---
 
