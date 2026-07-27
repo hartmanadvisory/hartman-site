@@ -8,11 +8,12 @@ export type JudgmentEvent = {
   caption?: string;
   imageUrl: string;
   imageAlt?: string;
-  // Natural pixel dimensions of the photograph, when known. The carousel
-  // sizes each slide to the active image's own aspect ratio so nothing is
-  // cropped — so it needs the intrinsic width/height, not just the URL.
-  imageWidth?: number;
-  imageHeight?: number;
+  // Hotspot focal point (0–1 fractions) set in Sanity Studio. The carousel
+  // fills a fixed landscape frame with object-cover and focuses the crop
+  // here via object-position, so the subject (e.g. faces) isn't cropped
+  // out. Undefined → the component's upper-center default.
+  focalX?: number;
+  focalY?: number;
 };
 
 /**
@@ -28,8 +29,6 @@ const FALLBACK_EVENTS: JudgmentEvent[] = [
     title: "a16z Tech Week NYC",
     date: "2025-06-01",
     imageUrl: "/media/event-speaker-panel.jpg",
-    imageWidth: 2048,
-    imageHeight: 1365,
   },
 ];
 
@@ -39,20 +38,20 @@ type RawEvent = {
   date: string;
   caption?: string;
   image?: unknown;
-  imageWidth?: number;
-  imageHeight?: number;
+  focalX?: number;
+  focalY?: number;
 };
 
-// Pull the asset's intrinsic dimensions alongside the image ref so the
-// carousel can size each slide to its photo and avoid cropping.
+// Pull the image's hotspot focal point alongside the ref so the carousel
+// can focus its crop (object-position) on the subject the curator marked.
 const JUDGMENT_QUERY = `*[_type == "judgmentEvent"] | order(order asc, date desc) {
   _id,
   title,
   date,
   caption,
   image,
-  "imageWidth": image.asset->metadata.dimensions.width,
-  "imageHeight": image.asset->metadata.dimensions.height
+  "focalX": image.hotspot.x,
+  "focalY": image.hotspot.y
 }`;
 
 /**
@@ -77,8 +76,8 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
       date: row.date,
       caption: row.caption,
       imageUrl: row.image ? urlFor(row.image) : "",
-      imageWidth: row.imageWidth,
-      imageHeight: row.imageHeight,
+      focalX: row.focalX,
+      focalY: row.focalY,
     }));
   } catch {
     return FALLBACK_EVENTS;
