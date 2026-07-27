@@ -129,8 +129,16 @@ const SEGMENTS: Segment[] = [
   },
 ];
 
-export default function WhoWeServe() {
+export default function WhoWeServe({
+  imageOverrides,
+}: {
+  // CMS-supplied photo per segment id; falls back to the bundled default
+  // when a panel has no image set in Sanity. Same override feeds both the
+  // desktop sticky stack and the mobile inline image for a given segment.
+  imageOverrides?: Partial<Record<string, string>>;
+} = {}) {
   const reduce = useReducedMotion();
+  const imageFor = (seg: Segment) => imageOverrides?.[seg.id] ?? seg.image;
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(0);
   // SEGMENTS.length is 3 (constant), so three refs is safe under rules of
@@ -210,7 +218,7 @@ export default function WhoWeServe() {
                   }}
                 >
                   <Image
-                    src={seg.image}
+                    src={imageFor(seg)}
                     alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -313,7 +321,7 @@ export default function WhoWeServe() {
                   {/* Mobile-only inline image (sticky column hidden below md). */}
                   <div className="relative mb-8 h-[clamp(16rem,44vh,22rem)] w-full overflow-hidden md:hidden">
                     <Image
-                      src={seg.image}
+                      src={imageFor(seg)}
                       alt=""
                       fill
                       sizes="100vw"
