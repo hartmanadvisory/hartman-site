@@ -50,14 +50,35 @@ export const pickList = (
  * scrim's decay onto raw photograph (and `whitespace-pre` means an over-long
  * line is clipped rather than wrapped).
  */
+export type HeroSlide = {
+  src: string;
+  /**
+   * Whether this photo gets the ADDITIVE dark scrim behind the headline, on
+   * top of the always-on base scrim. For the bundled photos below this is a
+   * per-image MEASUREMENT (two are dark enough without it). CMS-uploaded
+   * photos always get it — see the note on the schema: nobody can eyeball
+   * whether white text will clear contrast over an arbitrary photo, and a
+   * bright photo with no additive scrim measures ~1.5:1 (white on near-white).
+   */
+  needsScrim: boolean;
+};
+
 export const HERO = {
   headlineLines: [
-    "Precision legal Counsel",
+    "Precision Legal Counsel",
     "for Venture Capital’s",
     "Defining Deals",
   ],
   subtext:
     "A boutique New York law firm guiding venture funds, founders, and dealmakers through their most consequential transactions.",
+  /** Desktop (md+) rotating background photos. */
+  desktopSlides: [
+    { src: "/hero/hero-3.jpg", needsScrim: false },
+    { src: "/hero/hero-event-speaker.png", needsScrim: false },
+    { src: "/hero/hero-event-conversation.png", needsScrim: true },
+  ] satisfies HeroSlide[],
+  /** Mobile (<md) single static photo. */
+  mobileSrc: "/hero/hero-mobile-1.jpg",
 };
 
 /** "Who We Are" — the panel band on the homepage. CTA points at /about. */

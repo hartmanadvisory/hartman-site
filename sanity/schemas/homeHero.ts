@@ -33,6 +33,32 @@ export const homeHero = defineType({
       description:
         "The sentence in the blue block under the headline. Leave blank to keep the current default.",
     }),
+
+    /**
+     * Photos. Deliberately NO "darken the photo" toggle: whether white
+     * headline text stays readable over a given photo is a measurement, not
+     * something an author can eyeball (a bright photo without the extra
+     * darkening measures about 1.5:1 — white on near-white, invisible to
+     * anyone with low vision, while still looking fine on the author's
+     * laptop). So every uploaded photo gets the darkening automatically.
+     */
+    defineField({
+      name: "desktopImages",
+      title: "Background photos (desktop)",
+      type: "array",
+      of: [{ type: "image", options: { hotspot: true } }],
+      validation: (Rule) => Rule.max(5),
+      description:
+        "Wide photos that fade from one to the next behind the headline on computers. Add up to 5; add just one to stop the rotation. Leave empty to keep the current photos. These are decorative background images — no text, charts, or infographics, and there's no need to fill in the “alt text” box Sanity shows on an upload.",
+    }),
+    defineField({
+      name: "mobileImage",
+      title: "Background photo (phones)",
+      type: "image",
+      options: { hotspot: true },
+      description:
+        "The single photo shown behind the headline on phones (there is no rotation on phones). An upright/portrait photo works best. Leave blank to keep the current one.",
+    }),
   ],
   preview: {
     select: { lines: "headlineLines" },

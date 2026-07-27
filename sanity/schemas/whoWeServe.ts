@@ -15,7 +15,7 @@ import { defineField, defineType } from "sanity";
  */
 export const whoWeServe = defineType({
   name: "whoWeServe",
-  title: "Who We Serve",
+  title: "Homepage — Who We Serve",
   type: "document",
   fieldsets: [
     { name: "header", title: "Section header", options: { collapsible: false } },
