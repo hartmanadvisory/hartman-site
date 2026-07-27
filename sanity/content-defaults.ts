@@ -347,3 +347,5 @@ export const WHO_WE_SERVE = {
     },
   ] satisfies WhoWeServeSegment[],
 };
+
+// (temporary line for a manual screenshot — not to be merged)
