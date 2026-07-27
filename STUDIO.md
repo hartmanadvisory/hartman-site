@@ -1,5 +1,9 @@
 # Sanity Studio — content editing guide
 
+> New to the site? Start with **[OWNER_GUIDE.md](./OWNER_GUIDE.md)** — a
+> plain-language overview of the accounts, content editing, and making
+> changes with AI. This file is the detailed, technical companion.
+
 This is the day-to-day guide for editing the two pieces of content on
 hartmanadvisory.com that live in Sanity CMS: the three legal pages
 (Privacy, Terms, Disclosures) and the Judgment at the Forefront event
