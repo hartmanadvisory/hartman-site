@@ -59,10 +59,10 @@ like the firm's bank login.
 
 **What you can change without a developer:** the three legal pages
 (Privacy, Terms, Disclosures), the events in the homepage carousel, and
-the three photos in the homepage "Funds, Founders, and LPs shaping
-venture" section. Everything else — the headlines, the "what we do"
-services, colors, and layout — is part of the code, and needs the AI or
-a developer (Section 3).
+the text and photos in the homepage "Funds, Founders, and LPs shaping
+venture" section. (More of the homepage is being made editable — this
+list is growing.) Everything else is part of the code, and needs the AI
+or a developer (Section 3).
 
 **Where:** go to `hartman-site.vercel.app/studio` and log in (Google,
 GitHub, or email). This opens "Sanity Studio," a simple editor.
@@ -84,13 +84,14 @@ GitHub, or email). This opens "Sanity Studio," a simple editor.
    order are optional.
 3. Click **Publish**.
 
-### To swap the three "shaping venture" photos
+### To edit the "shaping venture" section (text + photos)
 
-1. Sidebar → **Who We Serve — Images** → open it (or create it once).
-2. Upload a photo into any of the three slots (Venture Funds / Founders /
-   LPs). Any slot you leave blank keeps the current built-in photo.
-3. Click **Publish**. Use a vertical/portrait photo — these are cropped
-   to fill a tall frame.
+1. Sidebar → **Who We Serve** → open it (or create it once).
+2. Edit any field — the section heading, each panel's heading and
+   paragraph, or each panel's photo. Anything you leave blank keeps the
+   current built-in default.
+3. Click **Publish**. For photos, use a vertical/portrait image — these
+   are cropped to fill a tall frame.
 
 **Important — right now, nothing has been entered in Sanity yet.** The
 legal text you see on the site is a **conservative starter template** —
