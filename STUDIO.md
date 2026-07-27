@@ -194,6 +194,34 @@ site uses the copy and the three photos bundled in the code
 
 ---
 
+## 3b. Editing the homepage wording
+
+Three more parts of the homepage have their own settings documents. Each
+works the same way: open it, change what you want, **Publish**, and
+**anything you leave blank keeps the wording shipped with the site**.
+
+| Sidebar item | Controls |
+| --- | --- |
+| **Homepage — Hero** | The big opening headline and the sentence in the blue block under it |
+| **Homepage — Who We Are** | The small label, the large serif statement, and the button wording |
+| **Homepage — Closing CTA** | The closing headline, its supporting line, and the big button wording |
+
+### Things the Studio will stop you from doing
+
+- **The hero headline is capped at 3 lines of ~30 characters.** This is
+  not a style rule — the dark shading behind the headline is sized for
+  exactly that block. A 4th line (or a very long one) puts white text
+  onto the bright part of the photo, where it can't be read.
+- **Button wording must describe where the link goes.** "Click here",
+  "Learn more", "Read more" and similar are rejected, because a screen
+  reader user hearing only the button text would learn nothing about
+  the destination. "About the Firm" is good.
+- **Buttons keep their destinations.** The Who We Are button always goes
+  to the About page and the closing button always goes to Contact —
+  only the wording is editable.
+
+---
+
 ## 4. What happens after Publish
 
 - Sanity persists the change immediately.

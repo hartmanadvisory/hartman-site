@@ -11,6 +11,70 @@
  * This module grows one section at a time as each is made CMS-editable.
  */
 
+/**
+ * Trimmed-non-empty fallback. An editor who CLEARS a Sanity field sends an
+ * empty string, which `??` would let through — blanking a heading (and, where
+ * a heading is referenced by aria-labelledby, the section's accessible name).
+ * So substitute the default whenever the value is missing OR blank.
+ */
+export const pick = (v: string | undefined, fallback: string): string => {
+  const t = typeof v === "string" ? v.trim() : "";
+  return t ? t : fallback;
+};
+
+/**
+ * Same idea for string arrays: trim every entry and drop the blanks, then use
+ * the CMS list only if anything survived — otherwise keep the shipped default.
+ * (`["", "  "]` has length 2 but is empty content, so filter BEFORE the
+ * length check.)
+ */
+export const pickList = (
+  v: string[] | undefined,
+  fallback: readonly string[],
+): string[] => {
+  const cleaned = (Array.isArray(v) ? v : [])
+    .map((s) => (typeof s === "string" ? s.trim() : ""))
+    .filter(Boolean);
+  return cleaned.length ? cleaned : [...fallback];
+};
+
+/**
+ * Hero — the opening headline and the cobalt caption line beneath it.
+ *
+ * `headlineLines` is an array because the h1 is typed out line by line. The
+ * component recomputes the joined full string (the screen-reader text and the
+ * animation's character budget) from whatever lines it ends up with, so CMS
+ * copy can be any length — but the SCHEMA caps it at 3 lines of ~30 chars.
+ * That cap is load-bearing, not cosmetic: the hero scrims are hand-solved for
+ * this headline block, and a 4th line would push white text down past the
+ * scrim's decay onto raw photograph (and `whitespace-pre` means an over-long
+ * line is clipped rather than wrapped).
+ */
+export const HERO = {
+  headlineLines: [
+    "Precision legal Counsel",
+    "for Venture Capital’s",
+    "Defining Deals",
+  ],
+  subtext:
+    "A boutique New York law firm guiding venture funds, founders, and dealmakers through their most consequential transactions.",
+};
+
+/** "Who We Are" — the panel band on the homepage. CTA points at /about. */
+export const WHO_WE_ARE = {
+  eyebrow: "Who we are",
+  statement:
+    "Our practice is built to assist venture funds, founders, and dealmakers across fund formations, financings, secondaries, exits, and strategic transactions with commercially grounded legal judgment.",
+  ctaLabel: "About the Firm",
+};
+
+/** Closing call-to-action band. CTA points at /contact. */
+export const CLOSING_CTA = {
+  heading: "Bring us your defining deal.",
+  body: "Confidential intake. The fastest path to a working call with the founder.",
+  ctaLabel: "Start a Conversation",
+};
+
 export type WhoWeServeSegment = {
   id: "venture-funds" | "founders" | "lps";
   h3: string;

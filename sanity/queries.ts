@@ -202,6 +202,91 @@ export async function getWhoWeServeContent(): Promise<WhoWeServeText> {
 }
 
 /* -------------------------------------------------------------------------- *
+ *  Homepage sections — Hero, Who We Are, Closing CTA                           *
+ * -------------------------------------------------------------------------- */
+
+/**
+ * All three getters return SPARSE overrides: a field that's absent or blank in
+ * Sanity is simply omitted, and the component substitutes its shipped default
+ * (via the shared pick/pickList guards). So an empty CMS never blanks the page.
+ */
+
+export type HomeHeroText = { headlineLines?: string[]; subtext?: string };
+
+export async function getHomeHero(): Promise<HomeHeroText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<{
+      headlineLines?: unknown;
+      subtext?: unknown;
+    } | null>(
+      `*[_type == "homeHero"][0]{ headlineLines, subtext }`,
+      {},
+      { next: { revalidate: 300, tags: ["homeHero"] } },
+    );
+    if (!row) return {};
+    return {
+      headlineLines: Array.isArray(row.headlineLines)
+        ? row.headlineLines.filter((s): s is string => typeof s === "string")
+        : undefined,
+      subtext: asStr(row.subtext),
+    };
+  } catch {
+    return {};
+  }
+}
+
+export type HomeWhoWeAreText = {
+  eyebrow?: string;
+  statement?: string;
+  ctaLabel?: string;
+};
+
+export async function getHomeWhoWeAre(): Promise<HomeWhoWeAreText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<Record<string, unknown> | null>(
+      `*[_type == "homeWhoWeAre"][0]{ eyebrow, statement, ctaLabel }`,
+      {},
+      { next: { revalidate: 300, tags: ["homeWhoWeAre"] } },
+    );
+    if (!row) return {};
+    return {
+      eyebrow: asStr(row.eyebrow),
+      statement: asStr(row.statement),
+      ctaLabel: asStr(row.ctaLabel),
+    };
+  } catch {
+    return {};
+  }
+}
+
+export type HomeClosingCtaText = {
+  heading?: string;
+  body?: string;
+  ctaLabel?: string;
+};
+
+export async function getHomeClosingCta(): Promise<HomeClosingCtaText> {
+  if (!sanityConfigured || !sanityClient) return {};
+  try {
+    const row = await sanityClient.fetch<Record<string, unknown> | null>(
+      `*[_type == "homeClosingCta"][0]{ heading, body, ctaLabel }`,
+      {},
+      { next: { revalidate: 300, tags: ["homeClosingCta"] } },
+    );
+    if (!row) return {};
+    return {
+      heading: asStr(row.heading),
+      body: asStr(row.body),
+      ctaLabel: asStr(row.ctaLabel),
+    };
+  } catch {
+    return {};
+  }
+}
+
+/* -------------------------------------------------------------------------- *
  *  Legal pages (Privacy · Terms · Disclosures)                                *
  * -------------------------------------------------------------------------- */
 

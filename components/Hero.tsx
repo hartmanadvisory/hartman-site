@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { HERO, pick, pickList } from "@/sanity/content-defaults";
 
 /**
  * Home hero — Citadel-faithful for Hartman. The media has a small LEFT gutter
@@ -33,13 +34,9 @@ import { motion, useReducedMotion } from "framer-motion";
  *  - Reveal never bakes opacity:0 into SSR.
  */
 
-const HEADLINE_LINES = [
-  "Precision legal Counsel",
-  "for Venture Capital’s",
-  "Defining Deals",
-] as const;
-const HEADLINE_FULL = HEADLINE_LINES.join(" ");
-const HEADLINE_TOTAL_CHARS = HEADLINE_FULL.length;
+// Headline copy defaults live in sanity/content-defaults.ts; the Hero resolves
+// CMS lines against them ONCE and derives both the screen-reader string and the
+// typed layer from that single resolution, so the two can never disagree.
 
 // Typewriter animation — total type-out duration.
 const REVEAL_DURATION_S = 1.6;
@@ -75,18 +72,32 @@ const REVEAL_DURATION_S = 1.6;
  * Under `reduce`, no rAF loop runs — headline renders at full text
  * at rest with no cursor. SC 2.3.3 compliant.
  */
-function TypewriterHeadline({ reduce }: { reduce: boolean }) {
-  const [revealed, setRevealed] = useState(HEADLINE_TOTAL_CHARS);
+function TypewriterHeadline({
+  lines,
+  reduce,
+}: {
+  lines: string[];
+  reduce: boolean;
+}) {
+  // Character budget is derived from the lines actually being rendered (the
+  // parent memoizes `lines`, and keys this component on the joined text, so a
+  // copy change remounts rather than leaving a stale total latched in state —
+  // which would strand the tail of a longer headline permanently hidden).
+  const total = useMemo(() => lines.join(" ").length, [lines]);
+  const [revealed, setRevealed] = useState(total);
   const startedRef = useRef(false);
 
   // Reset to 0 synchronously on client mount (before paint) so the
   // typewriter runs from the beginning. SSR renders the full text,
   // which prevents a flash if the client script never lands.
+  // The once-guard is safe despite CMS-variable copy: the parent keys this
+  // component on the headline text, so new copy remounts it (fresh ref and
+  // fresh `total`) rather than reusing a latched one.
   useLayoutEffect(() => {
     if (reduce || startedRef.current) return;
     startedRef.current = true;
     setRevealed(0);
-  }, [reduce]);
+  }, [reduce, total]);
 
   useEffect(() => {
     if (reduce) return;
@@ -95,33 +106,33 @@ function TypewriterHeadline({ reduce }: { reduce: boolean }) {
     const tick = () => {
       const elapsed = (performance.now() - start) / 1000;
       const next = Math.min(
-        HEADLINE_TOTAL_CHARS,
-        Math.round((elapsed / REVEAL_DURATION_S) * HEADLINE_TOTAL_CHARS),
+        total,
+        Math.round((elapsed / REVEAL_DURATION_S) * total),
       );
       setRevealed(next);
-      if (next < HEADLINE_TOTAL_CHARS) {
+      if (next < total) {
         raf = requestAnimationFrame(tick);
       }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [reduce]);
+  }, [reduce, total]);
 
-  const done = revealed >= HEADLINE_TOTAL_CHARS;
+  const done = revealed >= total;
 
   // Walk each line, mark which chars fall within the reveal window.
   // Space characters between lines count toward the global index so
-  // the timing matches HEADLINE_FULL.length.
+  // the timing matches the joined headline's length.
   let seen = 0;
 
   return (
     <span aria-hidden="true" className="block">
-      {HEADLINE_LINES.map((line, li) => {
+      {lines.map((line, li) => {
         const chars = [...line];
         const startOfLine = seen;
         seen += chars.length;
         // Account for the join(" ") space between lines.
-        if (li < HEADLINE_LINES.length - 1) seen += 1;
+        if (li < lines.length - 1) seen += 1;
 
         // Cursor position within this line, if any. `cursorPos` is
         // the char index (0..chars.length) at which the cursor should
@@ -139,7 +150,7 @@ function TypewriterHeadline({ reduce }: { reduce: boolean }) {
           if (revealed >= startOfLine && revealed <= startOfLine + chars.length) {
             cursorPos = revealed - startOfLine;
           }
-        } else if (li === HEADLINE_LINES.length - 1) {
+        } else if (li === lines.length - 1) {
           cursorPos = chars.length;
         }
 
@@ -220,8 +231,25 @@ const MOBILE_HERO_SRC = "/hero/hero-mobile-1.jpg";
 const AUTOROTATE_MS = 8000;
 const DESKTOP_MQ = "(min-width: 768px)";
 
-export default function Hero() {
+export default function Hero({
+  headlineLines,
+  subtext,
+}: {
+  // CMS copy; each falls back to the shipped default when absent or blank.
+  headlineLines?: string[];
+  subtext?: string;
+} = {}) {
   const reduce = useReducedMotion();
+  // ONE resolution feeds both the sr-only string and the typed layer, so the
+  // accessible name always matches what's on screen. Memoized on the raw prop
+  // because pickList returns a fresh array each call — an unstable identity
+  // here would restart the typewriter every frame.
+  const lines = useMemo(
+    () => pickList(headlineLines, HERO.headlineLines),
+    [headlineLines],
+  );
+  const headlineFull = useMemo(() => lines.join(" "), [lines]);
+  const subtextText = pick(subtext, HERO.subtext);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false); // user-toggled
   const [pageHidden, setPageHidden] = useState(false);
@@ -374,8 +402,15 @@ export default function Hero() {
             id="hero-h1"
             className="max-w-[56rem] font-[family-name:var(--font-display)] text-[clamp(1.75rem,5.8vw,4.6rem)] font-bold leading-[1.02] tracking-[-0.02em] text-[color:var(--white)]"
           >
-            <span className="sr-only">{HEADLINE_FULL}</span>
-            <TypewriterHeadline reduce={!!reduce} />
+            <span className="sr-only">{headlineFull}</span>
+            {/* Keyed on the joined TEXT (never the array identity) so new copy
+                remounts the typewriter cleanly instead of latching a stale
+                character count. */}
+            <TypewriterHeadline
+              key={headlineFull}
+              lines={lines}
+              reduce={!!reduce}
+            />
           </h1>
         </div>
 
@@ -441,8 +476,7 @@ export default function Hero() {
       >
         <div className="px-6 py-10 sm:px-10 sm:py-12 lg:px-14">
           <p className="max-w-2xl text-[1.25rem] leading-relaxed text-[color:var(--white)] sm:text-[1.35rem]">
-            A boutique New York law firm guiding venture funds, founders, and
-            dealmakers through their most consequential transactions.
+            {subtextText}
           </p>
         </div>
       </motion.div>
