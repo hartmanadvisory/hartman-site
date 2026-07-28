@@ -5,6 +5,8 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import StructuredData from "@/components/StructuredData";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 // Inter — humanist neutral grotesk, body copy. Aliased as --font-inter
 // and consumed inside globals.css.
@@ -31,16 +33,10 @@ const display = localFont({
   adjustFontFallback: "Arial",
 });
 
-// Drives metadataBase — i.e. the absolute URLs in og:url, og:image and
-// canonical tags. Falls back to the real production domain (www; the apex
-// redirects to it) rather than the old Vercel URL, so share previews and
-// search results point at hartmanadvisory.com even if the env var is unset.
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hartmanadvisory.com";
-const SITE_TITLE =
-  "Precision Legal Counsel for Venture Capital's Defining Deals — Hartman Venture Advisors";
-const SITE_DESCRIPTION =
-  "A boutique New York practice for late-stage venture transactions.";
+// SITE_URL / SITE_TITLE / SITE_DESCRIPTION now live in @/lib/site so the
+// sitemap, robots.txt, and the JSON-LD structured data all agree with the
+// page metadata. SITE_URL drives metadataBase — the absolute URLs in og:url,
+// og:image, and canonical tags.
 
 export const viewport: Viewport = {
   // width=device-width, initial-scale=1 is the Next 16 default; adding
@@ -60,23 +56,34 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: SITE_TITLE,
+  // `default` is required alongside `template` — without it the homepage,
+  // which sets no title of its own, would resolve to no title at all.
+  // `template` applies only to CHILD segments, so pages supply just their
+  // own name ("About") and the site name is appended here once.
+  title: { default: SITE_TITLE, template: `%s — ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   openGraph: {
     // Image is served from app/opengraph-image.tsx via file convention.
     // Fields below become <meta property="og:*">.
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    url: SITE_URL,
-    siteName: "Hartman Venture Advisors",
+    //
+    // Deliberately NO title/description/url here. Setting them at the root
+    // pinned every page's share preview to the homepage's text — pasting
+    // /about into LinkedIn showed the homepage title and blurb. Left unset,
+    // each route's own resolved title and description are used instead.
+    // (og/twitter titles do NOT inherit the template above; they inherit the
+    // already-resolved per-route title, which is what we want.)
+    siteName: SITE_NAME,
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
   },
+  // Lets Search Console verify the site with an HTML tag instead of a DNS
+  // record — the domain's DNS isn't accessible to us. Unset env var emits no
+  // tag at all (the framework skips falsy values), so this is inert until a
+  // token is added in Vercel.
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION },
   // Stop iOS Safari from auto-linking phone numbers, email addresses,
   // and street addresses in decorative body text. Real <a href="tel:…">
   // and <a href="mailto:…">  anchors remain interactive; only the
@@ -104,6 +111,10 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        {/* Machine-readable identity for search engines. Renders nothing and
+            sits outside <main>, so it can't affect the skip-link target or
+            reading order. */}
+        <StructuredData />
       </body>
     </html>
   );

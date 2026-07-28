@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import AboutHero from "@/components/AboutHero";
 import AboutStats from "@/components/AboutStats";
 import AboutTimeline from "@/components/AboutTimeline";
+import { ABOUT_DESCRIPTION } from "@/lib/site";
 import {
   getAboutHero,
   getAboutBackground,
@@ -18,9 +19,11 @@ import {
  * on the homepage only.
  */
 export const metadata: Metadata = {
-  title: "About — Hartman Venture Advisors",
-  description:
-    "Hartman Venture Advisors is a boutique New York counsel practice founded by Mordechai Hartman in May 2024 after more than a decade at Gunderson Dettmer and Lowenstein Sandler. The firm advises venture funds, founders, and institutional LPs on their most consequential transactions.",
+  // Site name is appended by the root layout's title template.
+  title: "About",
+  // Was 281 characters, which Google cut off mid-sentence.
+  description: ABOUT_DESCRIPTION,
+  alternates: { canonical: "/about" },
 };
 
 export default async function AboutPage() {

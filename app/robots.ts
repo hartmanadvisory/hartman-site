@@ -1,22 +1,20 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
 /**
- * /robots.txt — Next 16 Metadata Route convention. Emits at request
- * time from the same `NEXT_PUBLIC_SITE_URL` env var that drives
- * layout.tsx's metadataBase.
+ * /robots.txt — Next 16 Metadata Route convention.
  *
- * The fallback is the real production domain (www — the apex redirects to
- * it). It used to be the Vercel URL, which meant that after the domain went
- * live the site was still advertising hartman-site.vercel.app as its home to
- * crawlers and social platforms. Setting NEXT_PUBLIC_SITE_URL in Vercel now
- * only matters if the domain ever changes again.
+ * `/api/` is disallowed because nothing under it is a page (the contact
+ * endpoint is POST-only and answers GET with 405).
+ *
+ * `/studio` is deliberately NOT disallowed. It's kept out of search results
+ * with a `noindex` tag in app/studio/layout.tsx instead — a crawler that is
+ * blocked from fetching a URL can never read the instruction not to index it,
+ * so blocking it here would be the one thing guaranteed to leave it listed.
  */
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hartmanadvisory.com";
-
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/" },
+    rules: { userAgent: "*", allow: "/", disallow: ["/api/"] },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
   };

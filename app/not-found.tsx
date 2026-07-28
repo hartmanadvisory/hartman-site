@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+// Without this the 404 falls through to the root layout's default title and
+// announces itself as the homepage — so a screen-reader user following a dead
+// link gets no audible signal that anything went wrong.
+export const metadata: Metadata = {
+  title: "Page not found",
+  robots: { index: false, follow: true },
+};
 
 /**
  * 404 — branded not-found page. Renders inside the layout's <main>,

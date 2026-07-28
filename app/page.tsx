@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Hero from "@/components/Hero";
 import WhoWeAre from "@/components/WhoWeAre";
 import WhatWeDo from "@/components/WhatWeDo";
@@ -13,6 +14,14 @@ import {
   getHomeClosingCta,
   getHomePortfolio,
 } from "@/sanity/queries";
+
+// Title and description come from the root layout. Only the canonical is
+// set here — it's declared per route rather than once at the root, because
+// a root canonical is inherited by every page that doesn't override it,
+// which would quietly point the whole site at the homepage.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 // Homepage composition:
 // Hero → WhoWeAre → WhatWeDo (accordion + JudgmentCarousel) →
