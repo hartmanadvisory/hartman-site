@@ -31,8 +31,6 @@ function isLegalSlug(v: string): v is LegalSlug {
   return (LEGAL_SLUGS as readonly string[]).includes(v);
 }
 
-const TITLE_SUFFIX = " — Hartman Venture Advisors";
-
 export async function generateStaticParams(): Promise<Params[]> {
   return LEGAL_SLUGS.map((slug) => ({ slug }));
 }
@@ -41,11 +39,16 @@ export async function generateMetadata(
   { params }: { params: Promise<Params> },
 ): Promise<Metadata> {
   const { slug } = await params;
-  if (!isLegalSlug(slug)) return { title: `Not found${TITLE_SUFFIX}` };
+  // An unknown slug 404s in the body anyway; calling notFound() here too
+  // means it never gets metadata that makes it look like a real page.
+  if (!isLegalSlug(slug)) notFound();
   const page = await getLegalPage(slug);
   return {
-    title: `${page.title}${TITLE_SUFFIX}`,
+    // Site name is appended by the root layout's title template — the
+    // hardcoded suffix that used to live here would now double up.
+    title: page.title,
     description: `${page.title} for Hartman Venture Advisors PLLC.`,
+    alternates: { canonical: `/legal/${slug}` },
   };
 }
 
