@@ -6,6 +6,7 @@ import {
   LEGAL_SLUGS,
   type LegalSlug,
 } from "@/sanity/queries";
+import { LEGAL_DESCRIPTIONS } from "@/lib/site";
 
 /**
  * /legal/[slug] — Sanity-backed legal pages. Three real slugs
@@ -47,7 +48,7 @@ export async function generateMetadata(
     // Site name is appended by the root layout's title template — the
     // hardcoded suffix that used to live here would now double up.
     title: page.title,
-    description: `${page.title} for Hartman Venture Advisors PLLC.`,
+    description: LEGAL_DESCRIPTIONS[slug],
     alternates: { canonical: `/legal/${slug}` },
   };
 }
