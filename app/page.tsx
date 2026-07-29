@@ -14,6 +14,7 @@ import {
   getHomeClosingCta,
   getHomePortfolio,
 } from "@/sanity/queries";
+import { SITE_TAGLINE_TITLE } from "@/lib/site";
 
 // Title and description come from the root layout. Only the canonical is
 // set here — it's declared per route rather than once at the root, because
@@ -21,6 +22,11 @@ import {
 // which would quietly point the whole site at the homepage.
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
+  // Search results get the brand-first <title> (Google truncates at ~60
+  // chars, so the firm's name has to come first). Social previews have room
+  // for the fuller line, so keep it here.
+  openGraph: { title: SITE_TAGLINE_TITLE },
+  twitter: { title: SITE_TAGLINE_TITLE },
 };
 
 // Homepage composition:

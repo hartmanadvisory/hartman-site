@@ -32,7 +32,18 @@ export const COUNTRY = "US";
 /** Month the firm was founded, per the About page copy. */
 export const FOUNDING_DATE = "2024-05";
 
-export const SITE_TITLE = `Precision Legal Counsel for Venture Capital's Defining Deals — ${SITE_NAME}`;
+/**
+ * Homepage title. Brand first, then what the firm is: Google shows about 60
+ * characters, and the previous 94-character marketing line pushed the firm's
+ * own name past the cut — the one term it most needs to be found by.
+ *
+ * The marketing line still leads on social shares (see openGraph.title in
+ * app/page.tsx), where there's room for it.
+ */
+export const SITE_TITLE = `${SITE_NAME} | Venture Capital Legal Counsel`;
+
+/** The line kept for share previews, where length isn't punished. */
+export const SITE_TAGLINE_TITLE = `Precision Legal Counsel for Venture Capital's Defining Deals`;
 
 /**
  * Search-result descriptions. Google shows roughly 155 characters, so these
@@ -44,6 +55,23 @@ export const SITE_DESCRIPTION =
 
 export const ABOUT_DESCRIPTION =
   "Mordechai Hartman founded Hartman Venture Advisors in 2024 after more than a decade at Gunderson Dettmer and Lowenstein Sandler. Boutique New York counsel.";
+
+export const CONTACT_DESCRIPTION =
+  "Contact Hartman Venture Advisors for confidential inquiries on fund formations, venture financings, secondaries, and exits. Boutique New York counsel.";
+
+/**
+ * Legal pages had ~48-character descriptions, which render as a single stubby
+ * line in search results. These are written to the same ~150 as every other
+ * page so each result fills its two lines.
+ */
+export const LEGAL_DESCRIPTIONS: Record<LegalSlug, string> = {
+  privacy:
+    "How Hartman Venture Advisors PLLC collects, uses, and protects information submitted through this site, including contact form inquiries. New York.",
+  terms:
+    "The terms governing use of hartmanadvisory.com, the website of Hartman Venture Advisors PLLC, a boutique New York venture capital law practice.",
+  disclosures:
+    "Attorney advertising notice, admissions, jurisdictional limits, and prior results disclaimers for Hartman Venture Advisors PLLC of New York.",
+};
 
 /**
  * When each marketing page's copy last meaningfully changed.

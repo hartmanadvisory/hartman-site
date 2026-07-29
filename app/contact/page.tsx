@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import { CONTACT_DESCRIPTION } from "@/lib/site";
 
 export const metadata: Metadata = {
   // Site name is appended by the root layout's title template.
   title: "Contact",
-  description:
-    "Contact Hartman Venture Advisors for confidential venture transaction inquiries.",
+  description: CONTACT_DESCRIPTION,
   alternates: { canonical: "/contact" },
 };
 

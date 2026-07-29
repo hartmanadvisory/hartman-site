@@ -60,7 +60,8 @@ export const metadata: Metadata = {
   // which sets no title of its own, would resolve to no title at all.
   // `template` applies only to CHILD segments, so pages supply just their
   // own name ("About") and the site name is appended here once.
-  title: { default: SITE_TITLE, template: `%s — ${SITE_NAME}` },
+  // Pipe rather than an em dash, matching the homepage title's separator.
+  title: { default: SITE_TITLE, template: `%s | ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   openGraph: {
     // Image is served from app/opengraph-image.tsx via file convention.
