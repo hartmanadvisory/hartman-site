@@ -146,7 +146,7 @@ const SERVICES: Service[] = [
     title: "Fund formations",
     subtitle: "Formation through deployment.",
     detail:
-      "We form venture funds and SPVs end to end: entity structuring, LPA and side-letter negotiation, GP economics, and the compliance groundwork to get to first close and deploy capital.",
+      "We form venture funds and SPVs, end to end: entity structuring, LPA and side-letter negotiation, GP economics, and the compliance groundwork to get to first close and deploy capital.",
     Icon: IconFund,
   },
   {
@@ -234,9 +234,7 @@ export default function WhatWeDo({ events }: { events: JudgmentEvent[] }) {
             </h2>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-[color:var(--parchment)]">
               We are outside general counsel to venture funds, founders, and
-              dealmakers building in high-growth markets. Clients come to us
-              for counsel that is both commercially grounded and technically
-              precise.
+              dealmakers building in high-growth markets.
             </p>
           </motion.div>
 

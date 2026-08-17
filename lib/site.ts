@@ -54,7 +54,7 @@ export const SITE_DESCRIPTION =
   "Outside general counsel to venture funds, founders, and dealmakers. Fund formations, financings, secondaries, and exits. A boutique New York practice.";
 
 export const ABOUT_DESCRIPTION =
-  "Mordechai Hartman founded Hartman Venture Advisors in 2024 after more than a decade at Gunderson Dettmer and Lowenstein Sandler. Boutique New York counsel.";
+  "Mordechai Hartman founded Hartman Venture Advisors in 2024 after seven years in venture practice, at Gunderson Dettmer and Lowenstein Sandler. New York.";
 
 export const CONTACT_DESCRIPTION =
   "Contact Hartman Venture Advisors for confidential inquiries on fund formations, venture financings, secondaries, and exits. Boutique New York counsel.";

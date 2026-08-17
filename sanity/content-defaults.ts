@@ -202,10 +202,11 @@ export const ABOUT_HERO = {
   eyebrow: "Profile",
   name: "Mordechai Hartman",
   intro:
-    "Founder and Principal of Hartman Venture Advisors PLLC. More than a decade advising venture funds, founders, and dealmakers.",
+    "Founder and Principal of Hartman Venture Advisors PLLC. Seven years advising venture funds, founders, and dealmakers.",
   credentials: [
-    "Formerly at Gunderson Dettmer & Lowenstein Sandler",
-    "Harvard Law JD",
+    "Gunderson Dettmer",
+    "Lowenstein Sandler",
+    "Harvard Law School",
   ],
   portraitSrc: "/media/mordechai-hartman-portrait.jpg",
   ctaLabel: "Start a Conversation",
@@ -216,14 +217,21 @@ export const ABOUT_HERO = {
 export const ABOUT_BACKGROUND = {
   heading: "Background",
   lead: "A continuous record across seed-through-growth venture transactions, at two of the country’s leading venture practices before founding Hartman Venture Advisors.",
+  // A career timeline only: Harvard, then Gunderson, then Lowenstein, then
+  // founding the firm. The transaction-volume, marquee-fund, and
+  // notable-company bullets were removed because By the Numbers already
+  // carries those claims.
+  //
+  // No tenure is asserted at either firm — the previous copy said he began
+  // at Lowenstein and spent seven years at Gunderson, which had the order
+  // backwards. Only the order is corrected here. The real dates are
+  // Gunderson Sep 2019 – Mar 2022 and Lowenstein Mar 2022 – Apr 2024, per
+  // the LinkedIn record, if they're ever wanted in the copy.
   bullets: [
     "J.D. from Harvard Law School with a focus on corporate and securities law.",
-    "Began his career at Lowenstein Sandler advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
-    "Practiced seven years at Gunderson Dettmer, one of the country's pre-eminent venture practices, advising category-defining companies through priced rounds, secondaries, and exits.",
-    "Founded Hartman Venture Advisors in 2024 as a boutique New York practice built on the premise that consequential transactions deserve senior attention, end to end.",
-    "Over $6B in aggregate transaction value across financings, fund formations, secondaries, and M&A.",
-    "Represented marquee venture funds including a16z, Tiger Global, Insight, Altimeter, Dragoneer, Thrive, and Addition.",
-    "Advised category-defining companies including Anthropic, OpenAI, SpaceX, Anduril, Meta, Ramp, Notion, and Scale.",
+    "Began his career at Gunderson Dettmer, one of the country's pre-eminent venture practices, advising category-defining companies through priced rounds, secondaries, and exits.",
+    "Moved to Lowenstein Sandler, advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
+    "Founded Hartman Venture Advisors in 2024 as a boutique New York based practice built on the premise that consequential transactions deserve senior attention, end to end.",
   ],
 };
 
@@ -237,16 +245,16 @@ export type AboutStat = {
 };
 
 export const ABOUT_STATS = {
-  eyebrow: "By the Numbers",
+  eyebrow: "Deal Sheet: By the Numbers",
   stats: [
     {
       value: "$6B+",
       label: "Aggregate transaction value",
-      info: "Value of transactions on which the firm has served as principal counsel to founders, funds, or LPs.",
+      info: "Mordechai has advised in excess of $6B in transaction value as counsel to founders, funds, and LPs.",
     },
     {
       value: "100+",
-      label: "Financings, secondaries & M&A advised",
+      label: "Financings, formations, secondaries, & exits",
       info: "Across seed to growth stage: priced rounds, structured secondaries, and strategic exits.",
     },
     {
@@ -328,21 +336,21 @@ export const WHO_WE_SERVE = {
       id: "venture-funds",
       h3: "Venture Funds",
       body:
-        "General partners at the fund level: from first-time formations to complex spin-outs, GP-led secondaries, and the LP negotiations that decide a fund's economics. We advise the funds shaping the next generation of institutional venture.",
+        "General partners and investment managers: from formations to complex spin-outs, GP-led secondaries, and LP negotiations. We advise the funds shaping the next generation of institutional venture.",
       image: "/media/event-portrait.jpg",
     },
     {
       id: "founders",
       h3: "Founders & Category-Definers",
       body:
-        "Repeat founders in the transactions that decide a company's trajectory: priced rounds, tender offers and secondaries, cofounder disputes, strategic sales, and IPOs. Counsel that matches the stakes.",
+        "Repeat founders and executives in transactions determining a company's trajectory: priced rounds, tender offers and secondaries, cofounder disputes, strategic sales, and IPOs. Counsel that matches the stakes.",
       image: "/media/event-conversation.jpg",
     },
     {
       id: "lps",
       h3: "Institutional LPs & Family Offices",
       body:
-        "Institutional limited partners and family offices on the buy side of the private markets: side letters, direct investment vehicles, secondary purchases, and the diligence that decides where the next allocation goes.",
+        "Institutional limited partners and family offices on the buy side of the private markets: direct investment vehicles, side letters, and the diligence that decides where the next allocation goes.",
       image: "/media/event-clients.jpg",
     },
   ] satisfies WhoWeServeSegment[],
