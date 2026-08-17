@@ -231,7 +231,7 @@ export const ABOUT_BACKGROUND = {
     "J.D. from Harvard Law School with a focus on corporate and securities law.",
     "Began his career at Gunderson Dettmer, one of the country's pre-eminent venture practices, advising category-defining companies through priced rounds, secondaries, and exits.",
     "Moved to Lowenstein Sandler, advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
-    "Founded Hartman Venture Advisors in 2024 as a boutique New York practice built on the premise that consequential transactions deserve senior attention, end to end.",
+    "Founded Hartman Venture Advisors in 2024 as a boutique New York based practice built on the premise that consequential transactions deserve senior attention, end to end.",
   ],
 };
 
