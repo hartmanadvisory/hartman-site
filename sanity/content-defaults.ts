@@ -202,7 +202,7 @@ export const ABOUT_HERO = {
   eyebrow: "Profile",
   name: "Mordechai Hartman",
   intro:
-    "Founder and Principal of Hartman Venture Advisors PLLC. Nearly a decade advising venture funds, founders, and dealmakers.",
+    "Founder and Principal of Hartman Venture Advisors PLLC. Seven years advising venture funds, founders, and dealmakers.",
   credentials: [
     "Gunderson Dettmer",
     "Lowenstein Sandler",
@@ -222,14 +222,14 @@ export const ABOUT_BACKGROUND = {
   // notable-company bullets were removed because By the Numbers already
   // carries those claims.
   //
-  // No tenure is asserted at either firm yet — the previous copy said he
-  // began at Lowenstein and spent seven years at Gunderson, which had the
-  // order backwards. Order is corrected here; the exact years are pending
-  // and should be added once confirmed.
+  // Tenures are taken from the LinkedIn record: Gunderson Dettmer
+  // Sep 2019 – Mar 2022, Lowenstein Sandler Mar 2022 – Apr 2024. Earlier
+  // copy said he began at Lowenstein and spent seven years at Gunderson,
+  // which had both the order and the durations wrong.
   bullets: [
     "J.D. from Harvard Law School with a focus on corporate and securities law.",
-    "Began his career at Gunderson Dettmer, one of the country's pre-eminent venture practices, advising category-defining companies through priced rounds, secondaries, and exits.",
-    "Moved to Lowenstein Sandler, advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
+    "Began his career at Gunderson Dettmer from 2019 to 2022, one of the country's pre-eminent venture practices, advising storied venture funds and category-defining companies through priced rounds, secondaries, tender offers, and exits.",
+    "Moved to Lowenstein Sandler from 2022 to 2024, advising emerging-company financings and venture-fund formations across seed-stage founders and institutional GPs.",
     "Founded Hartman Venture Advisors in 2024 as a boutique New York practice built on the premise that consequential transactions deserve senior attention, end to end.",
   ],
 };
