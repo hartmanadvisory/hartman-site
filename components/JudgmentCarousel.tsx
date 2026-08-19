@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import ScrollBorder from "./ScrollBorder";
 import type { JudgmentEvent } from "@/sanity/queries";
+import { layoutEvent, MOSAIC_COLS, MOSAIC_ROWS } from "@/lib/mosaic";
 
 /**
  * JudgmentCarousel — auto-rotating event photo carousel for the "Judgment at
@@ -14,8 +15,14 @@ import type { JudgmentEvent } from "@/sanity/queries";
  *  - <section role="region" aria-roledescription="carousel" aria-label>.
  *  - Each slide is <div role="group" aria-roledescription="slide"
  *    aria-label="N of M: <event title, formatted date>">.
- *  - Inactive slides get `hidden` — removes them from the tab order and a11y
- *    tree so SR only ever announces the active slide.
+ *  - Slide changes crossfade (500ms opacity), then the outgoing slide gets
+ *    visibility:hidden via a delayed transition — same end state as the old
+ *    `hidden` attribute (out of the a11y tree and hit-testing), with a
+ *    smooth swap. Safe ONLY because slides contain zero focusable elements
+ *    and all-decorative images; if a future change puts links/buttons
+ *    inside a slide, the fade window becomes a real tab-order hole and
+ *    this mechanism must be revisited. Reduced motion: no transition,
+ *    instant swap. Accessibility-lead approved this design.
  *  - Images are decorative alt=""; the group's aria-label carries the meaning.
  *    The visible caption is aria-hidden (duplicate of the aria-label).
  *  - Auto-play state machine: pauses on hover, focus-within, page-hidden.
@@ -24,7 +31,17 @@ import type { JudgmentEvent } from "@/sanity/queries";
  *    aria-disabled so users can't fight the OS setting.
  *  - Announcements: a visually-hidden aria-live="polite" region is written to
  *    ONLY on user-triggered advance (prev/next click, keyboard); auto-advance
- *    stays silent — otherwise SR gets slammed every 5s.
+ *    stays silent — otherwise SR gets slammed every 8s.
+ *  - Each slide is one EVENT rendered as a 1–4 photo mosaic (lib/mosaic.ts
+ *    picks cells by photo count + orientation). The photos are COLLECTIVELY
+ *    decorative: they illustrate one named event, and the group's
+ *    aria-label (title · date, photo count) is the equivalent text under
+ *    SC 1.1.1 — per-photo alt from a non-technical CMS would be noise.
+ *    Accessibility-lead signed off on this rationale; do not "fix" it to
+ *    per-photo alts. The escape hatch: a photo with an author-written
+ *    `alt` in Sanity renders that alt instead of "". Mosaic cells carry
+ *    no roles, no tabindex, and no text nodes, so the slide exposes
+ *    exactly one node (the labeled group) to the a11y tree.
  *  - Prev/Next/Toggle: native <button type="button">, 44×44 target, dark pill
  *    backdrop for 3:1 icon contrast on variable photo pixels, .on-dark
  *    two-color focus ring.
@@ -33,13 +50,35 @@ import type { JudgmentEvent } from "@/sanity/queries";
  *  - scroll-margin-top on focusable controls clears the sticky nav (SC 2.4.11).
  */
 
-const AUTOPLAY_MS = 6000;
+// 8s, up from 6s when slides held one photo: a 4-photo mosaic needs more
+// dwell time to take in. SC 2.2.2 is interval-independent (pause control).
+const AUTOPLAY_MS = 8000;
+
+/**
+ * "Tech Week NYC · June 2025 (3 photos)" — the slide's accessible name.
+ * Photo count only when > 1: it explains why this slide visually differs
+ * from single-photo slides; "(1 photo)" would be noise.
+ */
+function eventLabel(ev: JudgmentEvent): string {
+  const dateStr = formatDate(ev.date);
+  const count = ev.photos.length > 1 ? ` (${ev.photos.length} photos)` : "";
+  return `${ev.title}${dateStr ? " · " + dateStr : ""}${count}`;
+}
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString("en-US", {
+    // Sanity date fields are plain YYYY-MM-DD. `new Date("2026-05-01")`
+    // parses as UTC MIDNIGHT, which is the previous day in every Western
+    // Hemisphere timezone -- so events dated the 1st displayed the PREVIOUS
+    // month ("April 2026" for a May 1 date). Same fix as the legal pages:
+    // pin to noon UTC and format in UTC.
+    const d = iso.includes("T")
+      ? new Date(iso)
+      : new Date(iso + "T12:00:00Z");
+    return d.toLocaleDateString("en-US", {
       month: "long",
       year: "numeric",
+      timeZone: "UTC",
     });
   } catch {
     return "";
@@ -87,10 +126,8 @@ export default function JudgmentCarousel({
       setActive((i) => {
         const next = (i + dir + total) % total;
         if (announce) {
-          const ev = events[next];
-          const dateStr = formatDate(ev.date);
           setStatus(
-            `${ev.title}${dateStr ? " · " + dateStr : ""}, slide ${next + 1} of ${total}`,
+            `${eventLabel(events[next])}, slide ${next + 1} of ${total}`,
           );
         }
         return next;
@@ -111,7 +148,11 @@ export default function JudgmentCarousel({
 
   if (total === 0) return null;
 
-  const activeEv = events[active];
+  // Clamp: if the events list shrinks under a live component (HMR in dev,
+  // or a CMS deletion arriving via refresh), `active` can point past the
+  // end — previously a hard crash into the error boundary.
+  const activeIdx = Math.min(active, total - 1);
+  const activeEv = events[activeIdx];
   const activeDate = formatDate(activeEv.date);
 
   return (
@@ -135,37 +176,70 @@ export default function JudgmentCarousel({
           who tabs into the controls mid-wipe still sees their focus ring. */}
       <div className="absolute inset-0 overflow-hidden">
         {events.map((ev, i) => {
-          const isActive = i === active;
-          const label = `${i + 1} of ${total}: ${ev.title}${
-            formatDate(ev.date) ? " · " + formatDate(ev.date) : ""
-          }`;
-          // Crop focus: honor the image's Sanity hotspot; otherwise bias
-          // upper-center so faces/heads survive the landscape crop.
-          const objectPosition =
-            ev.focalX != null && ev.focalY != null
-              ? `${ev.focalX * 100}% ${ev.focalY * 100}%`
-              : "50% 35%";
+          const isActive = i === activeIdx;
+          const label = `${i + 1} of ${total}: ${eventLabel(ev)}`;
+          // Cell shapes + photo->cell assignment chosen from the photos'
+          // native aspect ratios (see lib/mosaic.ts). Deterministic and
+          // cheap (<=72 candidate scores), so no memo needed.
+          const { cells, assignment } = layoutEvent(
+            ev.photos.map((p) => p.aspect),
+          );
           return (
             <div
               key={ev.id}
               role="group"
               aria-roledescription="slide"
               aria-label={label}
-              hidden={!isActive}
-              className="absolute inset-0"
+              className="absolute inset-0 grid gap-[3px]"
+              style={{
+                gridTemplateColumns: `repeat(${MOSAIC_COLS}, 1fr)`,
+                gridTemplateRows: `repeat(${MOSAIC_ROWS}, 1fr)`,
+                opacity: isActive ? 1 : 0,
+                // visibility flips AFTER the fade (500ms delay on hide,
+                // none on show), so the outgoing slide leaves the a11y
+                // tree and hit-testing exactly when it finishes fading.
+                visibility: isActive ? "visible" : "hidden",
+                transition: reduce
+                  ? "none"
+                  : `opacity 500ms ease, visibility 0s ${isActive ? "0s" : "500ms"}`,
+              }}
             >
-              {ev.imageUrl && (
-                <Image
-                  src={ev.imageUrl}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1440px) 100vw, 1440px"
-                  priority={i === 0}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  className="object-cover"
-                  style={{ objectPosition }}
-                />
-              )}
+              {cells.map((cellDef, ci) => {
+                const photo = ev.photos[assignment[ci]];
+                if (!photo) return null;
+                // Crop focus: honor the photo's Sanity hotspot; otherwise
+                // bias upper-center so faces/heads survive the crop.
+                const objectPosition =
+                  photo.focalX != null && photo.focalY != null
+                    ? `${photo.focalX * 100}% ${photo.focalY * 100}%`
+                    : "50% 35%";
+                // Frame is <=1440px wide; this cell is colSpan/12 of it.
+                const frac = cellDef.colSpan / MOSAIC_COLS;
+                const sizes = `(max-width: 1440px) ${Math.round(
+                  100 * frac,
+                )}vw, ${Math.round(1440 * frac)}px`;
+                return (
+                  <div
+                    key={photo.key}
+                    className="relative overflow-hidden"
+                    style={{
+                      gridColumn: `${cellDef.col} / span ${cellDef.colSpan}`,
+                      gridRow: `${cellDef.row} / span ${cellDef.rowSpan}`,
+                    }}
+                  >
+                    <Image
+                      src={photo.url}
+                      alt={photo.alt ?? ""}
+                      fill
+                      sizes={sizes}
+                      priority={i === 0}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      className="object-cover"
+                      style={{ objectPosition }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           );
         })}
@@ -199,19 +273,37 @@ export default function JudgmentCarousel({
       )}
 
       {/* Visible caption — duplicate of the active slide's aria-label, so
-          aria-hidden to prevent double-announcement. */}
+          aria-hidden to prevent double-announcement. aria-hidden lives on
+          this STATIC wrapper, not the animated node: AnimatePresence keeps
+          exiting nodes in the DOM, and a wrapper-level aria-hidden makes it
+          structurally impossible for an exiting caption to leak into the
+          a11y tree (accessibility-lead condition). mode="wait": old tag
+          fades out fully, then the new one fades in — no overlap artifacts.
+          The y-drift is genuine motion, so it is zeroed under reduced
+          motion along with the durations. */}
       <div
         aria-hidden="true"
-        className="absolute bottom-6 left-6 z-10 max-w-[70%] bg-[color:var(--cobalt)] px-5 py-3 text-[color:var(--white)] sm:bottom-8 sm:left-8"
+        className="absolute bottom-6 left-6 z-10 max-w-[70%] sm:bottom-8 sm:left-8"
       >
-        <span className="block text-[15px] font-semibold leading-tight">
-          {activeEv.title}
-        </span>
-        {(activeEv.caption || activeDate) && (
-          <span className="mt-0.5 block text-[13px] leading-tight opacity-90">
-            {activeEv.caption || activeDate}
-          </span>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeEv.id}
+            initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: reduce ? 0 : 6 }}
+            transition={{ duration: reduce ? 0 : 0.25, ease: "easeOut" }}
+            className="bg-[color:var(--cobalt)] px-5 py-3 text-[color:var(--white)]"
+          >
+            <span className="block text-[15px] font-semibold leading-tight">
+              {activeEv.title}
+            </span>
+            {(activeEv.caption || activeDate) && (
+              <span className="mt-0.5 block text-[13px] leading-tight opacity-90">
+                {activeEv.caption || activeDate}
+              </span>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Controls — dark pill backdrop guarantees icon contrast on any photo. */}

@@ -1,19 +1,29 @@
 import { sanityClient, urlFor } from "./client";
 import { sanityConfigured } from "./env";
 
+export type EventPhoto = {
+  /** Stable React key: the array item's _key, or "legacy" for old docs. */
+  key: string;
+  url: string;
+  /** Optional author-written description; photos are decorative when unset. */
+  alt?: string;
+  // Hotspot focal point (0-1 fractions) set in Sanity Studio. The mosaic
+  // fills each cell with object-cover and focuses the crop here via
+  // object-position, so the subject (e.g. faces) isn't cropped out.
+  // Undefined -> the component's upper-center default.
+  focalX?: number;
+  focalY?: number;
+  /** Native width/height ratio from asset metadata; drives cell selection. */
+  aspect?: number;
+};
+
 export type JudgmentEvent = {
   id: string;
   title: string;
   date: string; // ISO
   caption?: string;
-  imageUrl: string;
-  imageAlt?: string;
-  // Hotspot focal point (0–1 fractions) set in Sanity Studio. The carousel
-  // fills a fixed landscape frame with object-cover and focuses the crop
-  // here via object-position, so the subject (e.g. faces) isn't cropped
-  // out. Undefined → the component's upper-center default.
-  focalX?: number;
-  focalY?: number;
+  /** 1-4 photos, in the author's order (first = lead). Never empty. */
+  photos: EventPhoto[];
 };
 
 /**
@@ -28,36 +38,72 @@ const FALLBACK_EVENTS: JudgmentEvent[] = [
     id: "fallback-a16z-tech-week",
     title: "a16z Tech Week NYC",
     date: "2025-06-01",
-    imageUrl: "/media/event-speaker-panel.jpg",
+    photos: [
+      { key: "fallback", url: "/media/event-speaker-panel.jpg", aspect: 1.5 },
+    ],
   },
 ];
+
+type RawPhoto = {
+  _key?: string;
+  alt?: string;
+  focalX?: number;
+  focalY?: number;
+  aspect?: number;
+} & Record<string, unknown>;
 
 type RawEvent = {
   _id: string;
   title: string;
   date: string;
   caption?: string;
-  image?: unknown;
-  focalX?: number;
-  focalY?: number;
+  photos?: RawPhoto[];
+  image?: RawPhoto;
 };
 
-// Pull the image's hotspot focal point alongside the ref so the carousel
-// can focus its crop (object-position) on the subject the curator marked.
+// Each photo is projected with its hotspot (crop focus), the optional
+// author-written alt, and the asset's native aspect ratio (drives which
+// mosaic cell it lands in). Note the hotspot path is RELATIVE inside the
+// array projection. The legacy single `image` gets the same projection so
+// pre-mosaic documents keep rendering without a migration.
+const PHOTO_PROJECTION = `{
+  ...,
+  "focalX": hotspot.x,
+  "focalY": hotspot.y,
+  "aspect": asset->metadata.dimensions.aspectRatio
+}`;
+
 const JUDGMENT_QUERY = `*[_type == "judgmentEvent"] | order(order asc, date desc) {
   _id,
   title,
   date,
   caption,
-  image,
-  "focalX": image.hotspot.x,
-  "focalY": image.hotspot.y
+  "photos": photos[]${PHOTO_PROJECTION},
+  "image": image${PHOTO_PROJECTION}
 }`;
+
+/** Map a projected photo to the renderable shape; null when unusable. */
+function toEventPhoto(raw: RawPhoto, fallbackKey: string): EventPhoto | null {
+  const url = urlFor(raw as never);
+  if (!url) return null;
+  return {
+    key: typeof raw._key === "string" && raw._key ? raw._key : fallbackKey,
+    url,
+    alt: typeof raw.alt === "string" && raw.alt.trim() ? raw.alt.trim() : undefined,
+    focalX: typeof raw.focalX === "number" ? raw.focalX : undefined,
+    focalY: typeof raw.focalY === "number" ? raw.focalY : undefined,
+    aspect: typeof raw.aspect === "number" ? raw.aspect : undefined,
+  };
+}
 
 /**
  * Fetch published judgment events. Falls back to a single real event
  * (see FALLBACK_EVENTS) when Sanity isn't configured or has no rows,
  * so the carousel always renders substantive content.
+ *
+ * Photos come from the `photos` array (capped at 4), or the legacy single
+ * `image` for documents created before the mosaic. Events with no usable
+ * photo are dropped rather than rendered as an empty frame.
  */
 export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
   if (!sanityConfigured || !sanityClient) return FALLBACK_EVENTS;
@@ -70,15 +116,28 @@ export async function getJudgmentEvents(): Promise<JudgmentEvent[]> {
     );
     if (!rows?.length) return FALLBACK_EVENTS;
 
-    return rows.map((row) => ({
-      id: row._id,
-      title: row.title,
-      date: row.date,
-      caption: row.caption,
-      imageUrl: row.image ? urlFor(row.image) : "",
-      focalX: row.focalX,
-      focalY: row.focalY,
-    }));
+    const events = rows
+      .map((row) => {
+        const source = row.photos?.length
+          ? row.photos
+          : row.image
+            ? [{ ...row.image, _key: "legacy" }]
+            : [];
+        const photos = source
+          .slice(0, 4)
+          .map((p, i) => toEventPhoto(p, `photo-${i}`))
+          .filter((p): p is EventPhoto => p !== null);
+        return {
+          id: row._id,
+          title: row.title,
+          date: row.date,
+          caption: row.caption,
+          photos,
+        };
+      })
+      .filter((ev) => ev.photos.length > 0);
+
+    return events.length ? events : FALLBACK_EVENTS;
   } catch {
     return FALLBACK_EVENTS;
   }
