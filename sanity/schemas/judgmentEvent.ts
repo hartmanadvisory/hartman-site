@@ -1,10 +1,15 @@
 import { defineField, defineType } from "sanity";
 
 /**
- * "Judgment Event" — an entry in the Judgment at the Forefront hero carousel.
- * One document per event: title, date, hero image, optional short caption.
- * Deployed items are ordered by `order` (ascending), then by date descending
- * as a tiebreak, so the schedule can be curated manually.
+ * "Judgment Event" — an entry in the Judgment at the Forefront carousel.
+ * One document per EVENT, holding 1–4 photos that display together as a
+ * mosaic on one slide. Deployed items are ordered by `order` (ascending),
+ * then by date descending as a tiebreak, so the schedule can be curated
+ * manually.
+ *
+ * The original schema had a single required `image`; it's kept below as a
+ * hidden legacy field so existing documents render unchanged (the query
+ * coalesces `photos` → `[image]`). No migration needed.
  */
 export const judgmentEvent = defineType({
   name: "judgmentEvent",
@@ -27,13 +32,38 @@ export const judgmentEvent = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "photos",
+      title: "Photos",
+      type: "array",
+      of: [
+        {
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            {
+              name: "alt",
+              title: "Photo description (optional)",
+              type: "string",
+              description:
+                "Only fill this in if the photo shows something the event name doesn't cover — e.g. a named speaker on stage. Most photos can leave it blank.",
+              validation: (Rule) => Rule.max(120),
+            },
+          ],
+        },
+      ],
+      description:
+        "Add 1–4 photos of the event. Drag to reorder — the first photo gets the largest spot in the collage. On each photo, use the crop/hotspot tool (the circle) to mark the faces or action so they stay in frame.",
+      validation: (Rule) => Rule.min(1).max(4),
+    }),
+    defineField({
+      // Legacy single photo from before the photos array existed. Hidden in
+      // the Studio; still read by the site for documents that predate the
+      // change. Safe to ignore.
       name: "image",
-      title: "Photograph",
+      title: "Photograph (legacy)",
       type: "image",
       options: { hotspot: true },
-      description:
-        "Landscape photo. Hotspot marks the subject so the crop stays on face/action across breakpoints.",
-      validation: (Rule) => Rule.required(),
+      hidden: true,
     }),
     defineField({
       name: "caption",
@@ -63,8 +93,13 @@ export const judgmentEvent = defineType({
     },
   ],
   preview: {
-    select: { title: "title", date: "date", media: "image" },
-    prepare: ({ title, date, media }) => ({
+    select: {
+      title: "title",
+      date: "date",
+      photo0: "photos.0",
+      legacy: "image",
+    },
+    prepare: ({ title, date, photo0, legacy }) => ({
       title,
       subtitle: date
         ? new Date(date).toLocaleDateString("en-US", {
@@ -72,7 +107,7 @@ export const judgmentEvent = defineType({
             year: "numeric",
           })
         : undefined,
-      media,
+      media: photo0 ?? legacy,
     }),
   },
 });

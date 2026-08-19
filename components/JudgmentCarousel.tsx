@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import ScrollBorder from "./ScrollBorder";
 import type { JudgmentEvent } from "@/sanity/queries";
+import { layoutEvent, MOSAIC_COLS, MOSAIC_ROWS } from "@/lib/mosaic";
 
 /**
  * JudgmentCarousel — auto-rotating event photo carousel for the "Judgment at
@@ -24,7 +25,17 @@ import type { JudgmentEvent } from "@/sanity/queries";
  *    aria-disabled so users can't fight the OS setting.
  *  - Announcements: a visually-hidden aria-live="polite" region is written to
  *    ONLY on user-triggered advance (prev/next click, keyboard); auto-advance
- *    stays silent — otherwise SR gets slammed every 5s.
+ *    stays silent — otherwise SR gets slammed every 8s.
+ *  - Each slide is one EVENT rendered as a 1–4 photo mosaic (lib/mosaic.ts
+ *    picks cells by photo count + orientation). The photos are COLLECTIVELY
+ *    decorative: they illustrate one named event, and the group's
+ *    aria-label (title · date, photo count) is the equivalent text under
+ *    SC 1.1.1 — per-photo alt from a non-technical CMS would be noise.
+ *    Accessibility-lead signed off on this rationale; do not "fix" it to
+ *    per-photo alts. The escape hatch: a photo with an author-written
+ *    `alt` in Sanity renders that alt instead of "". Mosaic cells carry
+ *    no roles, no tabindex, and no text nodes, so the slide exposes
+ *    exactly one node (the labeled group) to the a11y tree.
  *  - Prev/Next/Toggle: native <button type="button">, 44×44 target, dark pill
  *    backdrop for 3:1 icon contrast on variable photo pixels, .on-dark
  *    two-color focus ring.
@@ -33,7 +44,20 @@ import type { JudgmentEvent } from "@/sanity/queries";
  *  - scroll-margin-top on focusable controls clears the sticky nav (SC 2.4.11).
  */
 
-const AUTOPLAY_MS = 6000;
+// 8s, up from 6s when slides held one photo: a 4-photo mosaic needs more
+// dwell time to take in. SC 2.2.2 is interval-independent (pause control).
+const AUTOPLAY_MS = 8000;
+
+/**
+ * "Tech Week NYC · June 2025 (3 photos)" — the slide's accessible name.
+ * Photo count only when > 1: it explains why this slide visually differs
+ * from single-photo slides; "(1 photo)" would be noise.
+ */
+function eventLabel(ev: JudgmentEvent): string {
+  const dateStr = formatDate(ev.date);
+  const count = ev.photos.length > 1 ? ` (${ev.photos.length} photos)` : "";
+  return `${ev.title}${dateStr ? " · " + dateStr : ""}${count}`;
+}
 
 function formatDate(iso: string): string {
   try {
@@ -87,10 +111,8 @@ export default function JudgmentCarousel({
       setActive((i) => {
         const next = (i + dir + total) % total;
         if (announce) {
-          const ev = events[next];
-          const dateStr = formatDate(ev.date);
           setStatus(
-            `${ev.title}${dateStr ? " · " + dateStr : ""}, slide ${next + 1} of ${total}`,
+            `${eventLabel(events[next])}, slide ${next + 1} of ${total}`,
           );
         }
         return next;
@@ -136,15 +158,13 @@ export default function JudgmentCarousel({
       <div className="absolute inset-0 overflow-hidden">
         {events.map((ev, i) => {
           const isActive = i === active;
-          const label = `${i + 1} of ${total}: ${ev.title}${
-            formatDate(ev.date) ? " · " + formatDate(ev.date) : ""
-          }`;
-          // Crop focus: honor the image's Sanity hotspot; otherwise bias
-          // upper-center so faces/heads survive the landscape crop.
-          const objectPosition =
-            ev.focalX != null && ev.focalY != null
-              ? `${ev.focalX * 100}% ${ev.focalY * 100}%`
-              : "50% 35%";
+          const label = `${i + 1} of ${total}: ${eventLabel(ev)}`;
+          // Cell shapes + photo->cell assignment chosen from the photos'
+          // native aspect ratios (see lib/mosaic.ts). Deterministic and
+          // cheap (<=72 candidate scores), so no memo needed.
+          const { cells, assignment } = layoutEvent(
+            ev.photos.map((p) => p.aspect),
+          );
           return (
             <div
               key={ev.id}
@@ -152,20 +172,48 @@ export default function JudgmentCarousel({
               aria-roledescription="slide"
               aria-label={label}
               hidden={!isActive}
-              className="absolute inset-0"
+              className="absolute inset-0 grid gap-[3px]"
+              style={{
+                gridTemplateColumns: `repeat(${MOSAIC_COLS}, 1fr)`,
+                gridTemplateRows: `repeat(${MOSAIC_ROWS}, 1fr)`,
+              }}
             >
-              {ev.imageUrl && (
-                <Image
-                  src={ev.imageUrl}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1440px) 100vw, 1440px"
-                  priority={i === 0}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  className="object-cover"
-                  style={{ objectPosition }}
-                />
-              )}
+              {cells.map((cellDef, ci) => {
+                const photo = ev.photos[assignment[ci]];
+                if (!photo) return null;
+                // Crop focus: honor the photo's Sanity hotspot; otherwise
+                // bias upper-center so faces/heads survive the crop.
+                const objectPosition =
+                  photo.focalX != null && photo.focalY != null
+                    ? `${photo.focalX * 100}% ${photo.focalY * 100}%`
+                    : "50% 35%";
+                // Frame is <=1440px wide; this cell is colSpan/12 of it.
+                const frac = cellDef.colSpan / MOSAIC_COLS;
+                const sizes = `(max-width: 1440px) ${Math.round(
+                  100 * frac,
+                )}vw, ${Math.round(1440 * frac)}px`;
+                return (
+                  <div
+                    key={photo.key}
+                    className="relative overflow-hidden"
+                    style={{
+                      gridColumn: `${cellDef.col} / span ${cellDef.colSpan}`,
+                      gridRow: `${cellDef.row} / span ${cellDef.rowSpan}`,
+                    }}
+                  >
+                    <Image
+                      src={photo.url}
+                      alt={photo.alt ?? ""}
+                      fill
+                      sizes={sizes}
+                      priority={i === 0}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      className="object-cover"
+                      style={{ objectPosition }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           );
         })}
