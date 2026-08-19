@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import ScrollBorder from "./ScrollBorder";
 import type { JudgmentEvent } from "@/sanity/queries";
 import { layoutEvent, MOSAIC_COLS, MOSAIC_ROWS } from "@/lib/mosaic";
@@ -15,8 +15,14 @@ import { layoutEvent, MOSAIC_COLS, MOSAIC_ROWS } from "@/lib/mosaic";
  *  - <section role="region" aria-roledescription="carousel" aria-label>.
  *  - Each slide is <div role="group" aria-roledescription="slide"
  *    aria-label="N of M: <event title, formatted date>">.
- *  - Inactive slides get `hidden` — removes them from the tab order and a11y
- *    tree so SR only ever announces the active slide.
+ *  - Slide changes crossfade (500ms opacity), then the outgoing slide gets
+ *    visibility:hidden via a delayed transition — same end state as the old
+ *    `hidden` attribute (out of the a11y tree and hit-testing), with a
+ *    smooth swap. Safe ONLY because slides contain zero focusable elements
+ *    and all-decorative images; if a future change puts links/buttons
+ *    inside a slide, the fade window becomes a real tab-order hole and
+ *    this mechanism must be revisited. Reduced motion: no transition,
+ *    instant swap. Accessibility-lead approved this design.
  *  - Images are decorative alt=""; the group's aria-label carries the meaning.
  *    The visible caption is aria-hidden (duplicate of the aria-label).
  *  - Auto-play state machine: pauses on hover, focus-within, page-hidden.
@@ -133,7 +139,11 @@ export default function JudgmentCarousel({
 
   if (total === 0) return null;
 
-  const activeEv = events[active];
+  // Clamp: if the events list shrinks under a live component (HMR in dev,
+  // or a CMS deletion arriving via refresh), `active` can point past the
+  // end — previously a hard crash into the error boundary.
+  const activeIdx = Math.min(active, total - 1);
+  const activeEv = events[activeIdx];
   const activeDate = formatDate(activeEv.date);
 
   return (
@@ -157,7 +167,7 @@ export default function JudgmentCarousel({
           who tabs into the controls mid-wipe still sees their focus ring. */}
       <div className="absolute inset-0 overflow-hidden">
         {events.map((ev, i) => {
-          const isActive = i === active;
+          const isActive = i === activeIdx;
           const label = `${i + 1} of ${total}: ${eventLabel(ev)}`;
           // Cell shapes + photo->cell assignment chosen from the photos'
           // native aspect ratios (see lib/mosaic.ts). Deterministic and
@@ -171,11 +181,18 @@ export default function JudgmentCarousel({
               role="group"
               aria-roledescription="slide"
               aria-label={label}
-              hidden={!isActive}
               className="absolute inset-0 grid gap-[3px]"
               style={{
                 gridTemplateColumns: `repeat(${MOSAIC_COLS}, 1fr)`,
                 gridTemplateRows: `repeat(${MOSAIC_ROWS}, 1fr)`,
+                opacity: isActive ? 1 : 0,
+                // visibility flips AFTER the fade (500ms delay on hide,
+                // none on show), so the outgoing slide leaves the a11y
+                // tree and hit-testing exactly when it finishes fading.
+                visibility: isActive ? "visible" : "hidden",
+                transition: reduce
+                  ? "none"
+                  : `opacity 500ms ease, visibility 0s ${isActive ? "0s" : "500ms"}`,
               }}
             >
               {cells.map((cellDef, ci) => {
@@ -247,19 +264,37 @@ export default function JudgmentCarousel({
       )}
 
       {/* Visible caption — duplicate of the active slide's aria-label, so
-          aria-hidden to prevent double-announcement. */}
+          aria-hidden to prevent double-announcement. aria-hidden lives on
+          this STATIC wrapper, not the animated node: AnimatePresence keeps
+          exiting nodes in the DOM, and a wrapper-level aria-hidden makes it
+          structurally impossible for an exiting caption to leak into the
+          a11y tree (accessibility-lead condition). mode="wait": old tag
+          fades out fully, then the new one fades in — no overlap artifacts.
+          The y-drift is genuine motion, so it is zeroed under reduced
+          motion along with the durations. */}
       <div
         aria-hidden="true"
-        className="absolute bottom-6 left-6 z-10 max-w-[70%] bg-[color:var(--cobalt)] px-5 py-3 text-[color:var(--white)] sm:bottom-8 sm:left-8"
+        className="absolute bottom-6 left-6 z-10 max-w-[70%] sm:bottom-8 sm:left-8"
       >
-        <span className="block text-[15px] font-semibold leading-tight">
-          {activeEv.title}
-        </span>
-        {(activeEv.caption || activeDate) && (
-          <span className="mt-0.5 block text-[13px] leading-tight opacity-90">
-            {activeEv.caption || activeDate}
-          </span>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeEv.id}
+            initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: reduce ? 0 : 6 }}
+            transition={{ duration: reduce ? 0 : 0.25, ease: "easeOut" }}
+            className="bg-[color:var(--cobalt)] px-5 py-3 text-[color:var(--white)]"
+          >
+            <span className="block text-[15px] font-semibold leading-tight">
+              {activeEv.title}
+            </span>
+            {(activeEv.caption || activeDate) && (
+              <span className="mt-0.5 block text-[13px] leading-tight opacity-90">
+                {activeEv.caption || activeDate}
+              </span>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Controls — dark pill backdrop guarantees icon contrast on any photo. */}
