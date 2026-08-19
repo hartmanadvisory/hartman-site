@@ -67,9 +67,18 @@ function eventLabel(ev: JudgmentEvent): string {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString("en-US", {
+    // Sanity date fields are plain YYYY-MM-DD. `new Date("2026-05-01")`
+    // parses as UTC MIDNIGHT, which is the previous day in every Western
+    // Hemisphere timezone -- so events dated the 1st displayed the PREVIOUS
+    // month ("April 2026" for a May 1 date). Same fix as the legal pages:
+    // pin to noon UTC and format in UTC.
+    const d = iso.includes("T")
+      ? new Date(iso)
+      : new Date(iso + "T12:00:00Z");
+    return d.toLocaleDateString("en-US", {
       month: "long",
       year: "numeric",
+      timeZone: "UTC",
     });
   } catch {
     return "";
